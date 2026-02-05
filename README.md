@@ -13,9 +13,6 @@ Projects:
 Corteva Agriscience
 - Vendor Scorecard Dashboard (PDF)
 
-AnheuserBusch
-- Regional Performance Dashboard (PDF)
-
 Sample Dashboards
 - Sales Performance Analysis (PDF)
 
