@@ -1,10 +1,23 @@
 Power BI Portfolio – Guilbert Maglasang
 
-This repository contains Power BI dashboard examples in PDF format showcasing:
+This repository showcases Power BI dashboards and analytics projects demonstrating:
 
-• Data modeling and DAX calculations  
-• SQL-driven reporting and transformations  
-• Performance optimization  
-• Executive and operational dashboards  
+• Data modeling and advanced DAX
+• SQL-driven reporting and transformations
+• Performance optimization
+• Executive and operational dashboards
+• Automated reporting solutions
 
-Tools used: Power BI, SQL, Snowflake, Power Automate
+Projects:
+
+Corteva Agriscience
+- Vendor Scorecard Dashboard (PDF)
+
+AnheuserBusch
+- Regional Performance Dashboard (PDF)
+
+Sample Dashboards
+- Sales Performance Analysis (PDF)
+
+Tools Used:
+Power BI, SQL, Snowflake, Power Automate
