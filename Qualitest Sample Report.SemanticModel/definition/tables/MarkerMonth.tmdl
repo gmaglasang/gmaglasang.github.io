@@ -1,0 +1,46 @@
+table MarkerMonth
+	lineageTag: f7ed33eb-1de2-41e4-9643-36f323e6eace
+
+	column MonthNum
+		formatString: 0
+		lineageTag: e2ff2051-5672-4971-bc33-7604ee3d6f21
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: Calendar[MonthNum]
+
+		annotation SummarizationSetBy = Automatic
+
+	column MonthName
+		lineageTag: 644985d6-30ce-429a-9df1-7413a9c2db11
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: Calendar[MonthName]
+		sortByColumn: MonthNum
+
+		annotation SummarizationSetBy = Automatic
+
+	column MonthYear
+		lineageTag: 585f9486-cef7-4d0a-a57b-ecfb75f96156
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: Calendar[MonthYear]
+		sortByColumn: MonthNum
+
+		annotation SummarizationSetBy = Automatic
+
+	partition MarkerMonth = calculated
+		mode: import
+		source = ```
+				
+				SUMMARIZE(
+				    'Calendar',
+				    'Calendar'[MonthName],
+				    'Calendar'[MonthYear],
+				    'Calendar'[MonthNum]
+				)
+				
+				
+				```
+
+	annotation PBI_Id = 8abdfa78afa242ac83d1374ff8522f27
+

@@ -1,0 +1,93 @@
+table Calendar
+	lineageTag: 418320de-6264-46af-a41c-f6a99b645f50
+
+	column Date
+		formatString: General Date
+		lineageTag: 7c80d4da-87bc-423a-bb88-90dda979ee16
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Date]
+
+		annotation SummarizationSetBy = Automatic
+
+	column Year
+		formatString: 0
+		lineageTag: ef785eb0-f552-4087-983f-09c93830558d
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Year]
+
+		annotation SummarizationSetBy = Automatic
+
+	column Month
+		formatString: 0
+		lineageTag: 83c93c2e-0f6f-4cbf-ae92-0282a16023dd
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Month]
+
+		annotation SummarizationSetBy = Automatic
+
+	column Quarter
+		lineageTag: 8bf33807-3cdb-4fa8-9df2-7bbcdb889ebc
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Quarter]
+
+		annotation SummarizationSetBy = Automatic
+
+	column MonthName
+		lineageTag: 2d2485ef-cbc4-4d0e-92f4-066c4bbd57f9
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [MonthName]
+		sortByColumn: MonthNum
+
+		annotation SummarizationSetBy = Automatic
+
+	column MonthYear
+		lineageTag: cb868d7a-5009-475e-8aaf-eef05d8c0646
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [MonthYear]
+		sortByColumn: Month
+
+		annotation SummarizationSetBy = Automatic
+
+	column MonthNum
+		formatString: 0
+		lineageTag: 493fb8cb-ba29-4130-8cb9-6b2e755df98d
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [MonthNum]
+
+		annotation SummarizationSetBy = Automatic
+
+	column MonthStart
+		formatString: General Date
+		lineageTag: 26e1b4f7-6604-4e1a-817f-27cda1133fc3
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [MonthStart]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Calendar = calculated
+		mode: import
+		source = ```
+				
+				ADDCOLUMNS(
+				    CALENDARAUTO(),
+				    "Year", YEAR([Date]),
+				    "Month", MONTH([Date]),
+				    "Quarter", "Q" & QUARTER([Date]),
+				    "MonthName", FORMAT([Date], "MMM"),
+				    "MonthYear", FORMAT([Date], "MMM yyyy"),
+				    "MonthNum", YEAR([Date]) * 100 + MONTH([Date]),
+				    "MonthStart", DATE(YEAR([Date]), MONTH([Date]), 1)  
+				)
+				
+				```
+
+	annotation PBI_Id = 4d4a7d2ea2d84a8e89c416800f556419
+

@@ -1,0 +1,170 @@
+table QualitestData
+	lineageTag: 1a9fc569-cf13-495b-9032-61462d444123
+
+	column ProjectID
+		dataType: string
+		lineageTag: 901f631b-d0af-400e-b72f-d7bd986330b6
+		summarizeBy: none
+		sourceColumn: ProjectID
+
+		annotation SummarizationSetBy = Automatic
+
+	column ClientName
+		dataType: string
+		lineageTag: 3c87d947-51c7-4482-9f55-de4095587645
+		summarizeBy: none
+		sourceColumn: ClientName
+
+		annotation SummarizationSetBy = Automatic
+
+	column Industry
+		dataType: string
+		lineageTag: b636abd4-3eec-4cfb-a976-cd503e396963
+		summarizeBy: none
+		sourceColumn: Industry
+
+		annotation SummarizationSetBy = Automatic
+
+	column ServiceType
+		dataType: string
+		lineageTag: 2d42d755-473c-49a2-9906-c9f51cbde38b
+		summarizeBy: none
+		sourceColumn: ServiceType
+
+		annotation SummarizationSetBy = Automatic
+
+	column Region
+		dataType: string
+		lineageTag: 50dd5a40-a893-4088-b1ef-16d14a89d50e
+		summarizeBy: none
+		sourceColumn: Region
+
+		annotation SummarizationSetBy = Automatic
+
+	column StartDate
+		dataType: dateTime
+		formatString: Short Date
+		lineageTag: 340d1dc8-8f91-4ddb-bbbf-4b8086b4813f
+		summarizeBy: none
+		sourceColumn: StartDate
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column EndDate
+		dataType: dateTime
+		formatString: Short Date
+		lineageTag: 337b3868-5ea6-4c9a-98d6-3ac090298de2
+		summarizeBy: none
+		sourceColumn: EndDate
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column TotalTests
+		dataType: int64
+		formatString: 0
+		lineageTag: 4a852220-7fb8-4daa-84bb-3956f262ea74
+		summarizeBy: sum
+		sourceColumn: TotalTests
+
+		annotation SummarizationSetBy = Automatic
+
+	column PassedTests
+		dataType: int64
+		formatString: 0
+		lineageTag: 2417f6b7-ccb9-4d51-bffb-c6f18cef43fb
+		summarizeBy: sum
+		sourceColumn: PassedTests
+
+		annotation SummarizationSetBy = Automatic
+
+	column DefectsFound
+		dataType: int64
+		formatString: 0
+		lineageTag: 1910fedb-8845-4d16-bec5-b6970eac625e
+		summarizeBy: sum
+		sourceColumn: DefectsFound
+
+		annotation SummarizationSetBy = Automatic
+
+	column CriticalDefects
+		dataType: int64
+		formatString: 0
+		lineageTag: 1ac467f2-5d06-4e79-98e0-1988d91e9473
+		summarizeBy: sum
+		sourceColumn: CriticalDefects
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'AutomationRate (%)'
+		dataType: int64
+		lineageTag: b3e33ba3-6675-403c-9ba4-698a014f8439
+		summarizeBy: sum
+		sourceColumn: AutomationRate (%)
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column 'OnTimeDelivery (%)'
+		dataType: int64
+		formatString: 0
+		lineageTag: c361d615-b243-409b-b121-3022e3f207ba
+		summarizeBy: sum
+		sourceColumn: OnTimeDelivery (%)
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'CustomerSatisfaction (1–5)'
+		dataType: double
+		lineageTag: 10151a3b-7b68-4710-9b0f-73519a9967ce
+		summarizeBy: sum
+		sourceColumn: CustomerSatisfaction (1–5)
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column DefectsPer1000
+		dataType: double
+		lineageTag: 871184e0-2973-4764-96ee-fbaec243f729
+		summarizeBy: sum
+		sourceColumn: DefectsPer1000
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column EffectiveEndDate = ```
+			
+			IF(
+			    ISBLANK(QualitestData[EndDate]), 
+			    TODAY(), 
+			    QualitestData[EndDate]
+			)
+			```
+		formatString: Short Date
+		lineageTag: 34d6e049-bbce-4805-88c3-27e7b68f92dd
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	partition QualitestData = m
+		mode: import
+		source =
+				let
+				    Source = Excel.Workbook(File.Contents("C:\Users\khevin\Downloads\Qualitest_QA_SampleDataset_Corrected.xlsx"), null, true),
+				    Qualitest_QA_SampleDataset_Corr_Sheet = Source{[Item="Qualitest_QA_SampleDataset_Corr",Kind="Sheet"]}[Data],
+				    #"Promoted Headers" = Table.PromoteHeaders(Qualitest_QA_SampleDataset_Corr_Sheet, [PromoteAllScalars=true]),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"ProjectID", type text}, {"ClientName", type text}, {"Industry", type text}, {"ServiceType", type text}, {"Region", type text}, {"StartDate", type date}, {"EndDate", type date}, {"TotalTests", Int64.Type}, {"PassedTests", Int64.Type}, {"DefectsFound", Int64.Type}, {"CriticalDefects", Int64.Type}, {"AutomationRate (%)", Int64.Type}, {"OnTimeDelivery (%)", Int64.Type}, {"CustomerSatisfaction (1–5)", type number}, {"DefectsPer1000", type number}}),
+				    #"Filtered Rows" = Table.SelectRows(#"Changed Type", each true)
+				in
+				    #"Filtered Rows"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+
