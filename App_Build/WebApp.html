@@ -1,0 +1,224 @@
+from pathlib import Path
+import re
+
+base_path = Path("/mnt/data/mouth_trainer_open_events_per_minute.html")
+base = base_path.read_text(encoding="utf-8")
+
+txt = base
+
+# 1) Remove MediaPipe Hands script include
+txt = re.sub(r'\s*<script\s+src="https://cdn\.jsdelivr\.net/npm/@mediapipe/hands@[^"]+/hands\.js"></script>\s*', "\n", txt)
+
+# 2) Remove Face touches metric tile (right panel)
+txt = re.sub(
+    r'\s*<div class="metric"><div class="k">Face touches</div><div class="v" id="faceTouches">0</div></div>\s*',
+    "\n",
+    txt,
+)
+
+# 3) Remove countFaceTouches checkbox block in Settings modal (Alerts section)
+txt = re.sub(
+    r'\s*<div style="margin-top:10px;">\s*<label class="checkRow small" style="margin:0;">\s*<input type="checkbox" id="countFaceTouches"\s*/>\s*Count face touches \(hand-to-face\)\s*</label>\s*<div class="small warnText" style="margin-top:8px;">[\s\S]*?</div>\s*</div>\s*(?=<div class="row" style="margin-top:10px;">)',
+    "\n",
+    txt,
+)
+
+# 4) Rename headings/titles from open events per minute -> mouth-open starts per minute
+txt = txt.replace("Open events per minute", "Mouth-open starts per minute")
+txt = txt.replace("Open events per minute</h2>", "Mouth-open starts per minute</h2>")
+
+# Also update the card title in popup (if present)
+txt = txt.replace(">Open events per minute<", ">Mouth-open starts per minute<")
+
+# 5) Change "Open events" labels to "Open starts" (UI + modal + popup)
+txt = txt.replace(">Open events</div>", ">Open starts</div>")
+txt = txt.replace("Open events</div><div class=\"v\"", "Open starts</div><div class=\"v\"")
+txt = txt.replace("Open events</div><div class=\"v\" id=\"finishEvents\">", "Open starts</div><div class=\"v\" id=\"finishEvents\">")
+txt = txt.replace('["Open events",', '["Open starts",')
+
+# 6) JS: remove Hands constants/vars and all face-touch plumbing.
+# Remove HANDS_VERSION + HANDS_BASE lines
+txt = re.sub(r'\n\s*const HANDS_VERSION = "[^"]+";\n\s*const HANDS_BASE = `https://cdn\.jsdelivr\.net/npm/@mediapipe/hands@\$\{HANDS_VERSION\}/`;\n', "\n", txt)
+
+# Remove `let hands = null;`
+txt = re.sub(r'\n\s*let hands = null;\n', "\n", txt)
+
+# Remove Touch tracking state block (hand-to-face)
+txt = re.sub(r'\n\s*// Touch tracking \(hand-to-face\)[\s\S]*?\n\s*let lastFaceLandmarks = null;', "\n\n  let lastFaceLandmarks = null;", txt)
+
+# Remove lastHandsLandmarks declaration if present
+txt = re.sub(r'\n\s*let lastHandsLandmarks = \[\];\s*// Hands landmarks[^\n]*\n', "\n", txt)
+
+# Remove computeTouchingFace + updateFaceTouch functions
+txt = re.sub(r'\n\s*function computeTouchingFace\([\s\S]*?\n\s*\}\n', "\n", txt)
+txt = re.sub(r'\n\s*function updateFaceTouch\([\s\S]*?\n\s*\}\n', "\n", txt)
+
+# Remove initHands function
+txt = re.sub(r'\n\s*async function initHands\([\s\S]*?\n\s*\}\n', "\n", txt)
+
+# Remove updateFaceTouchSettingBestEffort function
+txt = re.sub(r'\n\s*async function updateFaceTouchSettingBestEffort\([\s\S]*?\n\s*\}\n', "\n", txt)
+
+# Remove DOM element refs for countFaceTouches and faceTouches
+txt = re.sub(r'\n\s*const countFaceTouchesEl = \$\("countFaceTouches"\);\n', "\n", txt)
+txt = re.sub(r'\n\s*const faceTouchesEl = \$\("faceTouches"\);\n', "\n", txt)
+
+# Remove defaults: countFaceTouches
+txt = re.sub(r'\n\s*countFaceTouches:\s*false,\n', "\n", txt)
+
+# Remove persistSettings: countFaceTouches
+txt = re.sub(r'\n\s*countFaceTouches:\s*!!countFaceTouchesEl\?\.checked,\n', "\n", txt)
+
+# Remove applySettings: checkbox + enabled assignment
+txt = re.sub(r'\n\s*if \(countFaceTouchesEl\)[\s\S]*?countFaceTouchesEnabled = !!s\.countFaceTouches;\n', "\n", txt)
+
+# Remove updateFaceTouchSettingBestEffort call from applySettingsForProfile (and change handler)
+txt = re.sub(r'\n\s*updateFaceTouchSettingBestEffort\(\)\.catch\(console\.warn\);\n', "\n", txt)
+
+# Remove countFaceTouchesEl from changeEls list
+txt = re.sub(r'\n\s*countFaceTouchesEl,\n', "\n", txt)
+
+# Remove any remaining uses of countFaceTouchesEnabled / faceTouches / isTouchingFace / touchStartTs / lastTouchEventTs
+# (best-effort cleanup: set any debug fields or session record fields)
+txt = re.sub(r'\n\s*faceTouches,\n', "\n", txt)
+txt = re.sub(r'\n\s*faceTouches,\s*', "\n", txt)
+txt = re.sub(r'\n\s*face_touches:\s*s\.faceTouches[^\n]*\n', "\n", txt)
+
+# Remove "Face touches" from popup stats array line if still present
+txt = re.sub(r'\n\s*\["Face touches",\s*String\(session\.faceTouches\s*\?\?\s*0\)\],\n', "\n", txt)
+
+# Remove "Face touches counted" tip line in finishFeedback if present
+txt = re.sub(r'\n\s*if \(countFaceTouchesEnabled\)[\s\S]*?;\n', "\n", txt)
+
+# Remove references to hands pipeline in sendToPipelines
+txt = re.sub(r'\n\s*if \(countFaceTouchesEnabled && hands\) tasks\.push\(hands\.send\(\{ image: inputCanvas \}\)\);\n', "\n", txt)
+
+# Remove initHands call in startTracking
+txt = re.sub(r'\n\s*if \(countFaceTouchesEnabled\) await initHands\(\);\n', "\n", txt)
+
+# Remove resets of touch state in startTracking/stopTracking/resetSessionData
+txt = re.sub(r'\n\s*isTouchingFace = false;\n\s*touchStartTs = null;\n', "\n", txt)
+txt = re.sub(r'\n\s*lastHandsLandmarks = \[\];\n', "\n", txt)
+
+# Remove updateFaceTouch(ts) call sites in faceMesh results
+txt = re.sub(r'\n\s*updateFaceTouch\(ts\);\n', "\n", txt)
+
+# Remove metrics update of faceTouches if present
+txt = re.sub(r'\n\s*if \(faceTouchesEl\) faceTouchesEl\.textContent = String\(faceTouches\);\n', "\n", txt)
+
+# Remove finish modal stats mentioning face touches (if any)
+txt = txt.replace("Face touches", "Face touches")  # no-op to keep safe
+
+# Remove debug panel loop fields (countFaceTouchesEnabled, faceTouches, isTouchingFace)
+txt = re.sub(r'\n\s*countFaceTouchesEnabled,\n', "\n", txt)
+txt = re.sub(r'\n\s*faceTouches,\n', "\n", txt)
+txt = re.sub(r'\n\s*isTouchingFace\n', "\n", txt)
+
+# 7) Open-starts logic:
+# Add `let openStartCounted = false;` near openStartTs declaration
+txt = re.sub(
+    r'(\n\s*let lastEventTs = -Infinity;\n\s*let openStartTs = null;\n)',
+    r'\1\n  let openStartCounted = false;\n',
+    txt,
+    count=1,
+)
+
+# Replace handleMouthStateChange to only set/reset openStartTs and not count on close.
+txt = re.sub(
+    r'function handleMouthStateChange\(nextOpen, ts\) \{[\s\S]*?\n\s*\}\n\n  // Detection loop',
+    r'''function handleMouthStateChange(nextOpen, ts) {
+    if (nextOpen === isMouthOpen) return;
+
+    const prev = isMouthOpen;
+    isMouthOpen = nextOpen;
+
+    if (!prev && nextOpen) {
+      if (sessionActive && !analysisPaused) {
+        openStartTs = ts;
+        openStartCounted = false;
+      } else {
+        openStartTs = null;
+        openStartCounted = false;
+      }
+      flashVignette();
+    } else if (prev && !nextOpen) {
+      openStartTs = null;
+      openStartCounted = false;
+    }
+  }
+
+  function maybeCountOpenStart(ts) {
+    if (!sessionActive || analysisPaused) return;
+    if (!hasFace) return;
+    if (!isMouthOpen) return;
+    if (openStartTs == null || openStartCounted) return;
+
+    const minOpenMs = Number(minOpenMsEl?.value ?? defaults.minOpenMs);
+    const cooldownMs = Number(cooldownMsEl?.value ?? defaults.cooldownMs);
+
+    if ((ts - openStartTs) < minOpenMs) return;
+    if ((ts - lastEventTs) < cooldownMs) return;
+
+    openEvents += 1;          // now represents "open starts"
+    lastEventTs = ts;
+    openStartCounted = true;
+
+    // bucket by the minute the OPEN started
+    recordOpenEventForMinute(openStartTs);
+  }
+
+  // Detection loop''',
+    txt,
+    count=1,
+)
+
+# In faceMesh.onResults, call maybeCountOpenStart(ts) after handleMouthStateChange(...)
+txt = re.sub(
+    r'(handleMouthStateChange\(stableOpen, ts\);\n)',
+    r'\1      maybeCountOpenStart(ts);\n',
+    txt,
+    count=1,
+)
+
+# Update minute chart dataset label (JS)
+txt = txt.replace('label: "Open events per minute"', 'label: "Mouth-open starts per minute"')
+
+# Store per-minute starts under minute.openStarts instead of minute.openEvents
+txt = txt.replace('minute: { labels: [...(minuteChart.data.labels || [])], openEvents: [...(minuteChart.data.datasets?.[0]?.data || [])] },',
+                  'minute: { labels: [...(minuteChart.data.labels || [])], openStarts: [...(minuteChart.data.datasets?.[0]?.data || [])] },')
+
+# Popup: support minute.openStarts first
+txt = re.sub(
+    r'const minute = session\.minute \|\| \{ labels: \[\], openEvents: \[\] \};',
+    'const minute = session.minute || { labels: [], openStarts: [] };',
+    txt
+)
+txt = re.sub(
+    r'const minData = \(minute\.openEvents && minute\.openEvents\.length\) \? minute\.openEvents\s*: \(minute\.openPct \|\| \[\]\);\n\s*const minLabel = \(minute\.openEvents && minute\.openEvents\.length\) \? "Open events per minute" : "Open % per minute";',
+    'const minData = (minute.openStarts && minute.openStarts.length) ? minute.openStarts\n      : ((minute.openEvents && minute.openEvents.length) ? minute.openEvents : (minute.openPct || []));\n    const minLabel = (minute.openStarts && minute.openStarts.length) ? "Mouth-open starts per minute"\n      : ((minute.openEvents && minute.openEvents.length) ? "Open events per minute" : "Open % per minute");',
+    txt
+)
+
+# Remove any lingering references to openEventsByMinute name? Keep as is.
+
+# 8) Final cleanup: ensure no hands/touch artifacts
+# Remove any remaining `countFaceTouches` text and IDs
+txt = txt.replace('id="countFaceTouches"', 'id="countFaceTouches_REMOVED"')
+
+# Write output
+out_path = Path("/mnt/data/mouth_trainer_open_starts_no_face_touch_FIXED.html")
+out_path.write_text(txt, encoding="utf-8")
+
+# Quick validation counts
+import re
+summary = {
+    "bytes": out_path.stat().st_size,
+    "lines": txt.count("\n") + 1,
+    "has_hands_script": "hands.js" in txt,
+    "has_countFaceTouches": "countFaceTouches" in txt,
+    "has_faceTouches": "faceTouches" in txt,
+    "has_openStartCounted": "openStartCounted" in txt,
+    "chartOrMock_calls": len(re.findall(r'chartOrMock\(\s*["\']', txt)),
+    "has_minute_chart_label": "Mouth-open starts per minute" in txt,
+}
+summary
