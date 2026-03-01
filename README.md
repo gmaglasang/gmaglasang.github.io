@@ -9,7 +9,9 @@ This repository showcases Power BI dashboards and analytics projects demonstrati
 • Automated reporting solutions
 
 Projects:
-
+App_Build
+- Application created using AI to track how often mouth is open. Purpose, help mouth breathers track progress overtime. 
+  
 Corteva Agriscience
 - Vendor Scorecard Dashboard (PDF)
 
