@@ -1,44 +1,31 @@
 # Guilbert Maglasang — Data & BI Portfolio
 
-Welcome! This repository highlights analytics and reporting work focused on decision-ready dashboards, metric design, and business storytelling.
+> **Updated recruiter-ready portfolio overview**
+
+This repository presents selected Business Intelligence and reporting work with a focus on practical KPI design, dashboard usability, and stakeholder-ready insights.
 
 ## Professional Snapshot
 
-- **Specialization:** Power BI development, KPI architecture, and analytics enablement
-- **Core strengths:** DAX modeling, SQL transformations, and executive dashboard design
-- **Industry focus:** Operations reporting, vendor performance, and sales visibility
+- **Specialization:** Power BI development, KPI architecture, analytics enablement
+- **Core strengths:** DAX modeling, SQL transformations, executive dashboard storytelling
+- **Tooling:** Power BI, SQL, Snowflake, Power Automate
 
-## Featured Portfolio Projects
+## Featured Projects
 
-### 1) App Build: Mouth-Breathing Tracker
-- **What it is:** A lightweight web application that tracks mouth-open frequency over time.
-- **Goal:** Help users monitor breathing habits and progress.
-- **Folder:** [`App_Build`](./App_Build)
+### App Build: Mouth-Breathing Tracker
+- **Summary:** Lightweight web app that tracks mouth-open frequency over time.
+- **Project Link:** [`App_Build/WebApp.html`](./App_Build/WebApp.html)
 
-### 2) Corteva Agriscience — Vendor Scorecard Dashboard
-- **What it is:** A scorecard-style analytics report for vendor performance review.
-- **Deliverable:** [`Scorecard_Analysis_PDF.pdf`](./Corteva_Projects/Scorecard_Analysis_PDF.pdf)
-- **Folder:** [`Corteva_Projects`](./Corteva_Projects)
+### Corteva Agriscience — Vendor Scorecard Dashboard
+- **Summary:** KPI-based vendor performance scorecard for business review.
+- **Deliverable:** [`Corteva_Projects/Scorecard_Analysis_PDF.pdf`](./Corteva_Projects/Scorecard_Analysis_PDF.pdf)
 
-### 3) KPI Summary Reporting Sample
-- **What it is:** A polished KPI dashboard sample designed for leadership reporting.
-- **Deliverable:** [`KPI Summary Report.pdf`](./Power_BI_Projects/KPI%20Summary%20Report.pdf)
-- **Folder:** [`Power_BI_Projects`](./Power_BI_Projects)
+### KPI Summary Reporting Sample
+- **Summary:** Executive-style KPI summary report focused on clarity and actionability.
+- **Deliverable:** [`Power_BI_Projects/KPI Summary Report.pdf`](./Power_BI_Projects/KPI%20Summary%20Report.pdf)
 
-## Tools & Technologies
+## What Recruiters Can Quickly Assess Here
 
-- **BI & Visualization:** Power BI
-- **Data Querying:** SQL
-- **Data Platform:** Snowflake
-- **Automation:** Power Automate
-
-## What Recruiters Can Expect
-
-This portfolio emphasizes:
-- Clear business context for each deliverable
-- Practical KPI design and performance tracking
-- Reusable dashboard patterns for operational and executive audiences
-
----
-
-If you'd like, I can also add a one-page resume-style summary and project impact metrics (time saved, decision speed improvements, etc.) directly into this repository for quicker recruiter review.
+- How metrics are framed for business decisions
+- How reports are organized for leadership consumption
+- How dashboards balance detail with clarity
