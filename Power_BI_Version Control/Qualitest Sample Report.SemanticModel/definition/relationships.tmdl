@@ -1,0 +1,9 @@
+relationship 4f6b6806-65dc-75dc-4bae-a55bcf45511a
+	isActive: false
+	fromColumn: QualitestData.EndDate
+	toColumn: Calendar.Date
+
+relationship a9828f18-31f5-6a63-c23f-2f94d6355dd8
+	fromColumn: QualitestData.StartDate
+	toColumn: Calendar.Date
+

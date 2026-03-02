@@ -1,0 +1,48 @@
+table Parameter
+	lineageTag: 4daf39fa-f276-4b2f-8b75-1442c312e812
+
+	column Parameter
+		lineageTag: d4133c9d-6d0c-4b92-a49b-38af33fcb66a
+		summarizeBy: none
+		sourceColumn: [Value1]
+		sortByColumn: 'Parameter Order'
+
+		relatedColumnDetails
+			groupByColumn: 'Parameter Fields'
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Parameter Fields'
+		isHidden
+		lineageTag: 98345623-a5fe-4193-a0fa-e89298c8b455
+		summarizeBy: none
+		sourceColumn: [Value2]
+		sortByColumn: 'Parameter Order'
+
+		extendedProperty ParameterMetadata =
+				{
+				  "version": 3,
+				  "kind": 2
+				}
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Parameter Order'
+		isHidden
+		formatString: 0
+		lineageTag: 431c8094-593b-4339-b30f-e3322fe19191
+		summarizeBy: sum
+		sourceColumn: [Value3]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Parameter = calculated
+		mode: import
+		source =
+				{
+				    ("Total Projects", NAMEOF('Measure Table'[Total Projects]), 0),
+				    ("Total Tests", NAMEOF('Measure Table'[Total Tests]), 1)
+				}
+
+	annotation PBI_Id = ecfed02dace741609c12d3e049604d26
+
