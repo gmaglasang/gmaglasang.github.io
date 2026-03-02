@@ -1213,6 +1213,10 @@ updated_html = r"""<!doctype html>
   let marHistory = [];
   let marSmoothed = 0;
 
+  // when set to true we detected rapid mouth opening/closing (talking) and
+  // we temporarily suppress open state so the counts/visuals ignore it.
+  let talkDetected = false;
+
   let lastTickTs = 0;
   let sessionStartTs = 0;
   let sessionStartIso = "";
@@ -1617,10 +1621,17 @@ updated_html = r"""<!doctype html>
     }
 
     const thr = Number(thresholdEl?.value ?? defaults.threshold);
-    if (stateTagEl) stateTagEl.textContent = `State: ${isMouthOpen ? "OPEN" : "CLOSED"}`;
+
+    // if talking is detected, override state display
+    if (stateTagEl) {
+      if (talkDetected) stateTagEl.textContent = "State: TALKING";
+      else stateTagEl.textContent = `State: ${isMouthOpen ? "OPEN" : "CLOSED"}`;
+    }
     if (scoreTagEl) scoreTagEl.textContent = `MAR: ${marSmoothed.toFixed(3)} (thr ${thr.toFixed(2)})`;
 
-    if (isMouthOpen) {
+    if (talkDetected) {
+      if (mouthStatusEl) { mouthStatusEl.textContent = "Mouth: TALKING"; mouthStatusEl.className = "pill warnText"; }
+    } else if (isMouthOpen) {
       if (mouthStatusEl) { mouthStatusEl.textContent = "Mouth: OPEN"; mouthStatusEl.className = "pill bad"; }
     } else {
       if (mouthStatusEl) { mouthStatusEl.textContent = "Mouth: CLOSED"; mouthStatusEl.className = "pill good"; }
@@ -2464,6 +2475,24 @@ updated_html = r"""<!doctype html>
     return vertical / width;
   }
 
+  // simple heuristic to detect when the mouth is being rapidly opened/closed
+  // which often corresponds to talking.  When true we treat the mouth as
+  // "closed" so audio movement does not count as open events or time.
+  function detectTalking(history, threshold) {
+    if (!history || history.length < 6) return false;
+    let flips = 0;
+    let prevAbove = history[0] >= threshold;
+    for (let i = 1; i < history.length; i++) {
+      const curAbove = history[i] >= threshold;
+      if (curAbove !== prevAbove) {
+        flips++;
+        prevAbove = curAbove;
+      }
+    }
+    // if we flipped state several times recently, assume talking
+    return flips >= 4;
+  }
+
   function faceWidthPx(landmarks, vw, vh) {
     try {
       const a = landmarks[234];
@@ -2598,9 +2627,15 @@ updated_html = r"""<!doctype html>
 
       const thr = Number(thresholdEl?.value ?? defaults.threshold);
       const hysteresis = 0.015;
-      const stableOpen = isMouthOpen
+      let stableOpen = isMouthOpen
         ? (marSmoothed >= (thr - hysteresis))
         : (marSmoothed >= (thr + hysteresis));
+
+      // detect talking and suppress opens while it's happening
+      talkDetected = detectTalking(marHistory, thr);
+      if (talkDetected && stableOpen) {
+        stableOpen = false;
+      }
 
       if (calibrating) maybeCollectCalibration(rawMar);
 
