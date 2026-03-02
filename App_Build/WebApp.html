@@ -1,224 +1,3359 @@
-from pathlib import Path
-import re
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Mouth-Closed Trainer</title>
 
-base_path = Path("/mnt/data/mouth_trainer_open_events_per_minute.html")
-base = base_path.read_text(encoding="utf-8")
+  <style>
+    :root {
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      --warnScale: 1;
+    }
 
-txt = base
+    body { margin: 0; background: #0b0f17; color: #e9eefc; }
+    header {
+      padding: 16px 18px;
+      border-bottom: 1px solid #1d2740;
+      display:flex; gap:12px; align-items:center; justify-content:space-between;
+    }
+    header h1 { margin:0; font-size: 16px; font-weight: 900; letter-spacing: .3px; }
+    header .status { font-size: 13px; opacity:.9; display:flex; gap:10px; align-items:center; flex-wrap: wrap; }
+    .pill { padding: 6px 10px; border-radius: 999px; background:#111a2e; border:1px solid #1d2740; }
 
-# 1) Remove MediaPipe Hands script include
-txt = re.sub(r'\s*<script\s+src="https://cdn\.jsdelivr\.net/npm/@mediapipe/hands@[^"]+/hands\.js"></script>\s*', "\n", txt)
+    .iconBtn {
+      width: 38px; height: 38px;
+      display:inline-flex; align-items:center; justify-content:center;
+      border-radius: 12px;
+      border: 1px solid #263356;
+      background: #122041;
+      color:#e9eefc;
+      cursor:pointer;
+      font-weight: 900;
+      user-select: none;
+    }
+    .iconBtn:hover { filter: brightness(1.08); }
 
-# 2) Remove Face touches metric tile (right panel)
-txt = re.sub(
-    r'\s*<div class="metric"><div class="k">Face touches</div><div class="v" id="faceTouches">0</div></div>\s*',
-    "\n",
-    txt,
-)
+    main { display:grid; grid-template-columns: 420px 1fr; gap: 14px; padding: 14px; }
+    @media (max-width: 980px) { main { grid-template-columns: 1fr; } }
 
-# 3) Remove countFaceTouches checkbox block in Settings modal (Alerts section)
-txt = re.sub(
-    r'\s*<div style="margin-top:10px;">\s*<label class="checkRow small" style="margin:0;">\s*<input type="checkbox" id="countFaceTouches"\s*/>\s*Count face touches \(hand-to-face\)\s*</label>\s*<div class="small warnText" style="margin-top:8px;">[\s\S]*?</div>\s*</div>\s*(?=<div class="row" style="margin-top:10px;">)',
-    "\n",
-    txt,
-)
+    .card {
+      background: #0f172a;
+      border: 1px solid #1d2740;
+      border-radius: 14px;
+      padding: 14px;
+      box-shadow: 0 8px 22px rgba(0,0,0,.25);
+    }
+    .card h2 { margin: 0 0 10px 0; font-size: 14px; opacity: .95; }
+    .row { display:flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+    .row.space { justify-content: space-between; }
+    label { font-size: 12px; opacity: .9; display:block; margin-bottom: 6px; }
 
-# 4) Rename headings/titles from open events per minute -> mouth-open starts per minute
-txt = txt.replace("Open events per minute", "Mouth-open starts per minute")
-txt = txt.replace("Open events per minute</h2>", "Mouth-open starts per minute</h2>")
+    input[type="number"], input[type="range"], input[type="text"], select {
+      width: 100%;
+      padding: 10px 10px;
+      border-radius: 10px;
+      border: 1px solid #263356;
+      background: #0b1222;
+      color: #e9eefc;
+      outline: none;
+      box-sizing: border-box;
+    }
+    input[type="range"] { padding: 0; }
+    input[type="checkbox"] { accent-color: #7aa7ff; }
 
-# Also update the card title in popup (if present)
-txt = txt.replace(">Open events per minute<", ">Mouth-open starts per minute<")
+    button {
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid #263356;
+      background: #122041;
+      color:#e9eefc;
+      cursor:pointer;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+    button:hover { filter: brightness(1.08); }
+    button.primary { background: #2a52ff1c; border-color:#2a52ff66; }
+    button.danger { background: #ff2a2a1a; border-color:#ff2a2a66; }
+    button.warn { background: #ffd1661a; border-color:#ffd16666; color:#ffd166; }
+    button:disabled { opacity: .55; cursor: not-allowed; filter: none; }
 
-# 5) Change "Open events" labels to "Open starts" (UI + modal + popup)
-txt = txt.replace(">Open events</div>", ">Open starts</div>")
-txt = txt.replace("Open events</div><div class=\"v\"", "Open starts</div><div class=\"v\"")
-txt = txt.replace("Open events</div><div class=\"v\" id=\"finishEvents\">", "Open starts</div><div class=\"v\" id=\"finishEvents\">")
-txt = txt.replace('["Open events",', '["Open starts",')
+    .grid2 { display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
+    .grid3 { display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px; }
+    .metric { background:#0b1222; border:1px solid #263356; border-radius: 12px; padding: 10px; }
+    .metric .k { font-size: 12px; opacity:.8; }
+    .metric .v { font-size: 18px; font-weight: 900; margin-top: 2px; }
+    .small { font-size: 12px; opacity:.85; }
+    .warnText { color:#ffd166; }
+    .good { color:#7CFFB2; }
+    .bad { color:#ff6b6b; }
 
-# 6) JS: remove Hands constants/vars and all face-touch plumbing.
-# Remove HANDS_VERSION + HANDS_BASE lines
-txt = re.sub(r'\n\s*const HANDS_VERSION = "[^"]+";\n\s*const HANDS_BASE = `https://cdn\.jsdelivr\.net/npm/@mediapipe/hands@\$\{HANDS_VERSION\}/`;\n', "\n", txt)
+    .chartWrap { height: 240px; }
+    canvas { width:100% !important; height:100% !important; }
 
-# Remove `let hands = null;`
-txt = re.sub(r'\n\s*let hands = null;\n', "\n", txt)
+    .leftPanel {
+      position: sticky;
+      top: 14px;
+      align-self: start;
+      height: calc(100vh - 28px);
+      overflow: auto;
+      overscroll-behavior: contain;
+    }
+    @media (max-width: 980px) {
+      .leftPanel { position: static; height: auto; overflow: visible; }
+    }
 
-# Remove Touch tracking state block (hand-to-face)
-txt = re.sub(r'\n\s*// Touch tracking \(hand-to-face\)[\s\S]*?\n\s*let lastFaceLandmarks = null;', "\n\n  let lastFaceLandmarks = null;", txt)
+    .stickyHeader {
+      position: sticky;
+      top: 0;
+      z-index: 6;
+      background: #0f172a;
+      padding-bottom: 10px;
+      margin-bottom: 10px;
+      border-bottom: 1px solid rgba(29,39,64,.55);
+    }
+    @media (max-width: 980px) { .stickyHeader { position: static; } }
 
-# Remove lastHandsLandmarks declaration if present
-txt = re.sub(r'\n\s*let lastHandsLandmarks = \[\];\s*// Hands landmarks[^\n]*\n', "\n", txt)
+    .videoWrap { position: relative; border-radius: 12px; overflow:hidden; border:1px solid #263356; background:#000; }
+    video#webcamVideo { width: 100%; display:block; transform: scaleX(-1); }
 
-# Remove computeTouchingFace + updateFaceTouch functions
-txt = re.sub(r'\n\s*function computeTouchingFace\([\s\S]*?\n\s*\}\n', "\n", txt)
-txt = re.sub(r'\n\s*function updateFaceTouch\([\s\S]*?\n\s*\}\n', "\n", txt)
+    .overlay {
+      position:absolute; inset:0; pointer-events:none;
+      display:flex; justify-content:space-between;
+      padding: 10px; gap: 10px;
+      align-items: flex-start;
+    }
+    .overlay.bottom { align-items: flex-end; }
+    .overlay .col { display:flex; gap:8px; flex-wrap:wrap; }
+    .overlay .tag {
+      padding: 6px 10px; border-radius:999px;
+      background: rgba(15,23,42,.72);
+      border:1px solid rgba(38,51,86,.85);
+      font-size: 12px;
+      backdrop-filter: blur(8px);
+      white-space: nowrap;
+    }
 
-# Remove initHands function
-txt = re.sub(r'\n\s*async function initHands\([\s\S]*?\n\s*\}\n', "\n", txt)
+    details.section {
+      border: 1px solid #263356;
+      background: #0b1222;
+      border-radius: 12px;
+      padding: 10px;
+      margin-top: 10px;
+    }
+    details.section summary {
+      cursor: pointer;
+      font-weight: 900;
+      list-style: none;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      user-select: none;
+    }
+    details.section summary::-webkit-details-marker { display:none; }
+    details.section summary .chev { opacity:.8; font-size: 12px; transition: transform .12s ease; }
+    details.section[open] summary .chev { transform: rotate(180deg); }
+    details.section .content { margin-top: 10px; }
 
-# Remove updateFaceTouchSettingBestEffort function
-txt = re.sub(r'\n\s*async function updateFaceTouchSettingBestEffort\([\s\S]*?\n\s*\}\n', "\n", txt)
+    .checkRow { display:flex; gap:10px; align-items:center; }
+    .checkRow input { width: auto; }
 
-# Remove DOM element refs for countFaceTouches and faceTouches
-txt = re.sub(r'\n\s*const countFaceTouchesEl = \$\("countFaceTouches"\);\n', "\n", txt)
-txt = re.sub(r'\n\s*const faceTouchesEl = \$\("faceTouches"\);\n', "\n", txt)
+    .list { border:1px solid #263356; border-radius: 12px; overflow:hidden; }
+    .listHeader, .listRow {
+      display:grid;
+      grid-template-columns: 34px 1.35fr .7fr .9fr .8fr 1fr;
+      gap: 8px;
+      padding: 10px;
+      align-items:center;
+      background:#0b1222;
+      border-bottom:1px solid #263356;
+      font-size: 12px;
+    }
+    .listHeader { opacity:.9; font-weight: 900; }
+    .listRow { background:#0b1222; opacity: .95; }
+    .listRow:nth-child(even) { background:#0c1427; }
+    .listRow:last-child { border-bottom:none; }
+    .listRow .actions { display:flex; gap:8px; justify-content:flex-end; flex-wrap: wrap; }
+    .miniBtn { padding: 6px 10px; border-radius: 10px; font-size: 12px; }
 
-# Remove defaults: countFaceTouches
-txt = re.sub(r'\n\s*countFaceTouches:\s*false,\n', "\n", txt)
+    .openPill {
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-weight: 900;
+      border: 1px solid rgba(255,255,255,.12);
+      min-width: 68px;
+    }
 
-# Remove persistSettings: countFaceTouches
-txt = re.sub(r'\n\s*countFaceTouches:\s*!!countFaceTouchesEl\?\.checked,\n', "\n", txt)
+    .timerBoxRow { display:flex; gap: 12px; align-items: center; }
+    .timerRing { width: 74px; flex: 0 0 74px; display:flex; flex-direction:column; align-items:center; gap: 6px; }
+    .timerRing .ringSvg { width: 74px; height: 74px; position: relative; }
+    .timerRing svg { width: 100%; height: 100%; display:block; }
+    .timerRing .txt {
+      position:absolute; inset:0;
+      display:flex; align-items:center; justify-content:center;
+      font-weight: 900;
+      font-size: 12px;
+      opacity: .95;
+      pointer-events:none;
+    }
+    .timerRing .subtxt {
+      position: static;
+      text-align:center;
+      font-size: 11px;
+      opacity:.7;
+      line-height: 1;
+    }
+    .timerPulse circle.pulse { animation: pulseRed 900ms ease-in-out infinite; }
+    @keyframes pulseRed {
+      0% { filter: drop-shadow(0 0 0 rgba(255,60,60,.0)); opacity: 1; }
+      50% { filter: drop-shadow(0 0 10px rgba(255,60,60,.55)); opacity: .9; }
+      100% { filter: drop-shadow(0 0 0 rgba(255,60,60,.0)); opacity: 1; }
+    }
 
-# Remove applySettings: checkbox + enabled assignment
-txt = re.sub(r'\n\s*if \(countFaceTouchesEl\)[\s\S]*?countFaceTouchesEnabled = !!s\.countFaceTouches;\n', "\n", txt)
+    .modalBackdrop {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.55);
+      display:none;
+      align-items: center;
+      justify-content: center;
+      z-index: 999998;
+    }
+    .modalBackdrop.open { display:flex; }
+    .modal {
+      width: min(920px, calc(100vw - 28px));
+      background:#0b1222;
+      border:1px solid #263356;
+      border-radius: 14px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.45);
+      padding: 14px;
+    }
+    .modal h3 { margin: 0 0 8px 0; }
+    .modal .sub { font-size: 12px; opacity:.85; margin-bottom: 10px; }
+    .modal .grid { display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px; margin: 10px 0; }
+    @media (max-width: 720px) { .modal .grid { grid-template-columns: 1fr 1fr; } }
+    .modal .box { background:#0f172a; border:1px solid #1d2740; border-radius: 12px; padding: 10px; }
+    .modal .box .k { font-size: 12px; opacity: .8; }
+    .modal .box .v { font-size: 18px; font-weight: 900; margin-top: 2px; }
+    .modalScroll { max-height: min(78vh, 860px); overflow:auto; padding-right: 4px; }
 
-# Remove updateFaceTouchSettingBestEffort call from applySettingsForProfile (and change handler)
-txt = re.sub(r'\n\s*updateFaceTouchSettingBestEffort\(\)\.catch\(console\.warn\);\n', "\n", txt)
+    .debugBtn { position: fixed; right: 14px; bottom: 14px; z-index: 50; }
+    .debugPanel {
+      position: fixed; right: 14px; bottom: 64px; z-index: 50;
+      width: min(560px, calc(100vw - 28px));
+      max-height: min(75vh, 780px);
+      overflow:auto;
+      background:#0b1222;
+      border:1px solid #263356;
+      border-radius: 14px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.35);
+      padding: 12px;
+      display:none;
+    }
+    .debugPanel.open { display:block; }
+    .debugGrid { display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
+    .kv { background:#0f172a; border:1px solid #1d2740; border-radius: 12px; padding: 10px; }
+    .kv .k { font-size:12px; opacity:.75; }
+    .kv .v { font-size:13px; margin-top:4px; word-break: break-word; }
+    pre { margin:0; white-space: pre-wrap; word-break: break-word; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
 
-# Remove countFaceTouchesEl from changeEls list
-txt = re.sub(r'\n\s*countFaceTouchesEl,\n', "\n", txt)
+    body.mouth-open::before{
+      content:"";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 999999;
+      background:
+        radial-gradient(ellipse at center,
+          rgb(255 0 0 / 0) 36%,
+          rgb(180 0 0 / calc(0.16 * var(--warnScale))) 52%,
+          rgb(120 0 0 / calc(0.48 * var(--warnScale))) 68%,
+          rgb(80 0 0 / calc(0.86 * var(--warnScale))) 90%,
+          rgb(60 0 0 / calc(0.98 * var(--warnScale))) 100%);
+      box-shadow:
+        inset 0 0 0 40px rgb(80 0 0 / calc(0.90 * var(--warnScale))),
+        inset 0 0 160px rgb(80 0 0 / calc(0.70 * var(--warnScale)));
+    }
+    body.mouth-open-flash::after{
+      content:"";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 1000000;
+      background:
+        radial-gradient(ellipse at center,
+          rgb(255 50 50 / 0) 26%,
+          rgb(255 50 50 / calc(0.16 * var(--warnScale))) 48%,
+          rgb(255 20 20 / calc(0.50 * var(--warnScale))) 68%,
+          rgb(120 0 0 / calc(0.78 * var(--warnScale))) 100%);
+      animation: damageFlash 520ms ease-out 1;
+    }
+    @keyframes damageFlash {
+      0% { opacity: 0.0; }
+      12% { opacity: 1.0; }
+      100% { opacity: 0.0; }
+    }
+  </style>
 
-# Remove any remaining uses of countFaceTouchesEnabled / faceTouches / isTouchingFace / touchStartTs / lastTouchEventTs
-# (best-effort cleanup: set any debug fields or session record fields)
-txt = re.sub(r'\n\s*faceTouches,\n', "\n", txt)
-txt = re.sub(r'\n\s*faceTouches,\s*', "\n", txt)
-txt = re.sub(r'\n\s*face_touches:\s*s\.faceTouches[^\n]*\n', "\n", txt)
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh@0.4.1633559619/face_mesh.js"></script>
+</head>
 
-# Remove "Face touches" from popup stats array line if still present
-txt = re.sub(r'\n\s*\["Face touches",\s*String\(session\.faceTouches\s*\?\?\s*0\)\],\n', "\n", txt)
+<body>
+<header>
+  <h1>Mouth-Closed Trainer</h1>
+  <div class="status">
+    <div class="pill" id="hdrProfile">Profile: —</div>
+    <div class="pill" id="camStatus">Camera: idle</div>
+    <div class="pill" id="mouthStatus">Mouth: —</div>
+    <div class="pill" id="hdrSessions">Sessions: 0</div>
+    <button class="iconBtn" id="btnOpenSettings" aria-label="Open Settings" title="Settings">⚙️</button>
+  </div>
+</header>
 
-# Remove "Face touches counted" tip line in finishFeedback if present
-txt = re.sub(r'\n\s*if \(countFaceTouchesEnabled\)[\s\S]*?;\n', "\n", txt)
+<main>
+  <!-- LEFT -->
+  <section class="card leftPanel">
+    <div class="stickyHeader">
+      <h2 style="margin:10px 0;">Camera & Session</h2>
 
-# Remove references to hands pipeline in sendToPipelines
-txt = re.sub(r'\n\s*if \(countFaceTouchesEnabled && hands\) tasks\.push\(hands\.send\(\{ image: inputCanvas \}\)\);\n', "\n", txt)
+      <div class="videoWrap">
+        <video id="webcamVideo" playsinline webkit-playsinline autoplay muted></video>
+        <div class="overlay" id="overlay">
+          <div class="col">
+            <div class="tag" id="sessionTag">Session: —</div>
+            <div class="tag" id="trackerTag">Tracker: OFF</div>
+            <div class="tag" id="faceTag">Face: —</div>
+            <div class="tag" id="stateTag">State: —</div>
+          </div>
+          <div class="col" style="justify-content:flex-end;">
+            <div class="tag" id="scoreTag">MAR: —</div>
+            <div class="tag" id="modeTag">Mode: —</div>
+          </div>
+        </div>
+      </div>
 
-# Remove initHands call in startTracking
-txt = re.sub(r'\n\s*if \(countFaceTouchesEnabled\) await initHands\(\);\n', "\n", txt)
+      <div class="row" style="margin-top:10px;">
+        <button class="primary" id="btnStartCam">Start Camera</button>
+        <button id="btnStopCam">Stop Camera</button>
+        <button id="btnPiP">PiP</button>
+      </div>
 
-# Remove resets of touch state in startTracking/stopTracking/resetSessionData
-txt = re.sub(r'\n\s*isTouchingFace = false;\n\s*touchStartTs = null;\n', "\n", txt)
-txt = re.sub(r'\n\s*lastHandsLandmarks = \[\];\n', "\n", txt)
+      <div class="row" style="margin-top:10px;">
+        <button class="primary" id="btnStartSession" disabled>Start Session</button>
+        <button id="btnPauseTimer" disabled>Pause</button>
+        <button class="warn" id="btnEndSession" disabled>End</button>
+        <button class="danger" id="btnReset">Reset</button>
+      </div>
+    </div>
 
-# Remove updateFaceTouch(ts) call sites in faceMesh results
-txt = re.sub(r'\n\s*updateFaceTouch\(ts\);\n', "\n", txt)
+    <!-- Timer (optional) -->
+    <div class="metric" style="margin-top:10px;">
+      <div class="timerBoxRow">
+        <div class="timerRing" id="timerRingWrap" aria-label="Timer progress">
+          <div class="ringSvg">
+            <svg viewBox="0 0 120 120" aria-hidden="true">
+              <circle cx="60" cy="60" r="48" stroke="rgba(255,255,255,.10)" stroke-width="12" fill="none"></circle>
+              <circle id="timerRingArc" class="pulse" cx="60" cy="60" r="48" stroke="rgba(120,170,255,.95)" stroke-width="12"
+                      stroke-linecap="round" fill="none" transform="rotate(-90 60 60)"></circle>
+            </svg>
+            <div class="txt" id="timerRingPct">—</div>
+          </div>
+          <div class="subtxt" id="timerRingState">off</div>
+        </div>
 
-# Remove metrics update of faceTouches if present
-txt = re.sub(r'\n\s*if \(faceTouchesEl\) faceTouchesEl\.textContent = String\(faceTouches\);\n', "\n", txt)
+        <div style="min-width: 0; flex: 1;">
+          <div class="k">Timer remaining</div>
+          <div class="v" id="timerRemaining">—</div>
+          <div class="small" id="timerHint"></div>
+        </div>
+      </div>
 
-# Remove finish modal stats mentioning face touches (if any)
-txt = txt.replace("Face touches", "Face touches")  # no-op to keep safe
+      <div class="row" style="margin-top:10px;">
+        <label class="checkRow small" style="margin:0;">
+          <input type="checkbox" id="mainUseTimer" />
+          Use timer
+        </label>
+      </div>
 
-# Remove debug panel loop fields (countFaceTouchesEnabled, faceTouches, isTouchingFace)
-txt = re.sub(r'\n\s*countFaceTouchesEnabled,\n', "\n", txt)
-txt = re.sub(r'\n\s*faceTouches,\n', "\n", txt)
-txt = re.sub(r'\n\s*isTouchingFace\n', "\n", txt)
+      <div class="grid2" style="margin-top:10px;">
+        <div>
+          <label>Mode</label>
+          <select id="mainMode">
+            <option value="normal">Normal countdown</option>
+            <option value="closedOnly">Closed-only countdown</option>
+          </select>
+          <div class="small">Closed-only runs only while mouth is closed.</div>
+        </div>
 
-# 7) Open-starts logic:
-# Add `let openStartCounted = false;` near openStartTs declaration
-txt = re.sub(
-    r'(\n\s*let lastEventTs = -Infinity;\n\s*let openStartTs = null;\n)',
-    r'\1\n  let openStartCounted = false;\n',
-    txt,
-    count=1,
-)
+        <div class="grid2">
+          <div>
+            <label>Minutes</label>
+            <input id="mainTimerMinutes" type="number" min="0" max="240" step="1" />
+          </div>
+          <div>
+            <label>Seconds</label>
+            <input id="mainTimerSeconds" type="number" min="0" max="59" step="1" />
+          </div>
+        </div>
+      </div>
 
-# Replace handleMouthStateChange to only set/reset openStartTs and not count on close.
-txt = re.sub(
-    r'function handleMouthStateChange\(nextOpen, ts\) \{[\s\S]*?\n\s*\}\n\n  // Detection loop',
-    r'''function handleMouthStateChange(nextOpen, ts) {
+      <div class="row" style="margin-top:10px;">
+        <button id="btnStopTimer">Stop Timer</button>
+      </div>
+    </div>
+
+    <!-- Detection & Calibration -->
+    <div class="metric" style="margin-top:10px;">
+      <div class="row" style="margin-bottom:10px;">
+        <button class="primary" id="btnCalibrate">Auto-Calibrate (keep mouth closed)</button>
+        <div class="small" id="calibStatus" style="opacity:.9;"></div>
+      </div>
+
+      <div class="grid2">
+        <div>
+          <label>Mouth open threshold (MAR)</label>
+          <input id="threshold" type="range" min="0.10" max="0.80" step="0.01" />
+          <div class="small">Current: <span id="thresholdVal"></span></div>
+        </div>
+        <div>
+          <label>Smoothing (frames)</label>
+          <input id="smooth" type="number" min="1" max="30" step="1" />
+          <div class="small">Higher = less jitter</div>
+        </div>
+      </div>
+
+      <div style="margin-top:12px;">
+        <label>What counts as an “open event”?</label>
+        <div class="grid2">
+          <div>
+            <input id="minOpenMs" type="number" min="0" step="50" />
+            <div class="small">Min open duration (ms)</div>
+          </div>
+          <div>
+            <input id="cooldownMs" type="number" min="0" step="50" />
+            <div class="small">Cooldown between events (ms)</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="small warnText" style="margin-top:10px;">
+        Tracking starts only when a session starts (or during calibration).
+      </div>
+    </div>
+
+    <!-- Saving -->
+    <div class="metric" style="margin-top:10px;">
+      <div class="row" style="margin-bottom:8px;">
+        <button class="primary" id="btnSaveSession" disabled>Save Session</button>
+      </div>
+      <div class="small" id="saveHint"></div>
+    </div>
+  </section>
+
+  <!-- RIGHT -->
+  <section class="card" id="historySection">
+    <div class="row space" style="margin-bottom:10px;">
+      <h2 style="margin:0;">Session Progress</h2>
+      <div class="row">
+        <div class="pill" id="historySessionsCount">Sessions: 0</div>
+        <div class="pill" id="historyAvgScore">Avg open%: —</div>
+        <div class="pill" id="historyBestScore">Best open%: —</div>
+      </div>
+    </div>
+
+    <div class="grid2" style="margin-bottom:10px;">
+      <div class="metric"><div class="k">Open time</div><div class="v" id="openTime">0:00</div></div>
+      <div class="metric"><div class="k">Closed time</div><div class="v" id="closedTime">0:00</div></div>
+      <div class="metric"><div class="k">Open events</div><div class="v" id="openEvents">0</div></div>
+      <div class="metric">
+        <div class="k">Open %</div>
+        <div class="v"><span id="openPct" class="openPill">0%</span></div>
+      </div>
+    </div>
+
+    <div class="card" style="padding:12px; margin-bottom:12px;">
+      <h2 style="margin-bottom:8px;">Live mouth open/closed (1=open, 0=closed)</h2>
+      <div class="chartWrap"><canvas id="timelineChart"></canvas></div>
+      <div class="small" style="margin-top:8px;">
+        If you switch tabs, some browsers stop camera frames. Use <b>PiP</b> for best chance.
+      </div>
+    </div>
+
+    <div class="card" style="padding:12px; margin-bottom:12px;">
+      <h2 style="margin-bottom:8px;">Open % per minute</h2>
+      <div class="chartWrap"><canvas id="minuteChart"></canvas></div>
+      <div class="small" style="margin-top:8px;">Freezes when session is paused or ended.</div>
+    </div>
+
+    <div class="card" style="padding:12px; margin-bottom:12px;">
+      <div class="row space" style="margin-bottom:10px;">
+        <h2 style="margin:0;">Past Sessions (current profile)</h2>
+        <div class="row">
+          <div class="pill" id="selCountPill">Selected: 0</div>
+          <button class="danger" id="btnDeleteSelected" disabled>Delete Selected</button>
+          <button id="btnExportJson">Export JSON</button>
+          <button id="btnExportCsv">Export CSV</button>
+          <button id="btnExportXlsx" class="primary">Export XLSX</button>
+          <button class="danger" id="btnClearSessions">Clear All</button>
+        </div>
+      </div>
+
+      <div class="metric" style="margin-bottom:10px;">
+        <div class="k">Trend: Open % and events/min</div>
+        <div class="chartWrap" style="height:180px;"><canvas id="trendChart"></canvas></div>
+      </div>
+
+      <div class="list" style="margin-bottom:10px;">
+        <div class="listHeader">
+          <div style="display:flex;align-items:center;justify-content:center;">
+            <input type="checkbox" id="cbSelectAllSessions" title="Select all sessions" />
+          </div>
+          <div>Date</div><div>Dur</div><div>Open%</div><div>EPM</div><div style="text-align:right;">Actions</div>
+        </div>
+        <div id="sessionsList"></div>
+      </div>
+
+      <div class="row" style="margin-top:10px; justify-content:flex-end;">
+        <button id="btnExportSelectedCsv">Export selected CSV</button>
+        <button id="btnExportSelectedXlsx" class="primary">Export selected XLSX</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- Settings Modal -->
+<div class="modalBackdrop" id="settingsBackdrop">
+  <div class="modal" role="dialog" aria-modal="true" aria-label="Settings">
+    <div class="row space">
+      <h3 style="margin:0;">Settings</h3>
+      <div class="row">
+        <button id="btnExpandAll">Expand all</button>
+        <button id="btnCollapseAll">Collapse all</button>
+        <button id="btnCloseSettings">Close</button>
+      </div>
+    </div>
+    <div class="sub">Settings are saved per profile on this device.</div>
+
+    <div class="modalScroll">
+      <details class="section" id="profileDetails" open style="margin-top:0;">
+        <summary>
+          <span id="profileSummaryTitle">Profile</span>
+          <span class="chev">▾</span>
+        </summary>
+        <div class="content">
+          <div class="grid2">
+            <div>
+              <label>Current profile</label>
+              <select id="profileSelect"></select>
+            </div>
+            <div class="row" style="align-items:end; justify-content:flex-end;">
+              <button id="btnAddProfile" class="primary">Add</button>
+              <button id="btnRenameProfile">Rename</button>
+              <button id="btnDeleteProfile" class="danger">Delete</button>
+            </div>
+          </div>
+
+          <div class="small" style="margin-top:8px; opacity:.85;">
+            Current: <span id="profileCurrentLabel" style="font-weight:900;"></span>
+          </div>
+        </div>
+      </details>
+
+      <details class="section" open>
+        <summary>Training Timer (mirrors main) <span class="chev">▾</span></summary>
+        <div class="content">
+          <label class="checkRow small" style="margin:0;">
+            <input type="checkbox" id="settingsUseTimer" />
+            Use timer
+          </label>
+
+          <div class="grid2" style="margin-top:10px;">
+            <div>
+              <label>Mode</label>
+              <select id="settingsMode">
+                <option value="normal">Normal countdown</option>
+                <option value="closedOnly">Closed-only countdown</option>
+              </select>
+            </div>
+
+            <div class="grid2">
+              <div>
+                <label>Minutes</label>
+                <input id="settingsTimerMinutes" type="number" min="0" max="240" step="1" />
+              </div>
+              <div>
+                <label>Seconds</label>
+                <input id="settingsTimerSeconds" type="number" min="0" max="59" step="1" />
+              </div>
+            </div>
+          </div>
+
+          <div class="small warnText" style="margin-top:10px;">
+            Best to change timer before starting a session.
+          </div>
+        </div>
+      </details>
+
+      <details class="section" open>
+        <summary>Session Saving <span class="chev">▾</span></summary>
+        <div class="content">
+          <label class="checkRow small" style="margin:0;">
+            <input type="checkbox" id="autoSaveOnEnd" />
+            Auto-save on end
+          </label>
+          <div class="small warnText" style="margin-top:8px;">
+            Auto-save is skipped if session duration is under 10 seconds.
+          </div>
+        </div>
+      </details>
+
+      <details class="section" open>
+        <summary>Background Tracking <span class="chev">▾</span></summary>
+        <div class="content">
+          <label class="checkRow small" style="margin:0;">
+            <input type="checkbox" id="attemptPiPOnHide" />
+            Attempt PiP when switching tabs (best-effort)
+          </label>
+          <div class="small warnText" style="margin-top:8px;">
+            On iPhone, background camera is often blocked. PiP improves the chance but may still be throttled.
+          </div>
+        </div>
+      </details>
+
+      <details class="section">
+        <summary>Overlay Controls <span class="chev">▾</span></summary>
+        <div class="content">
+          <div class="grid2">
+            <label class="checkRow small" style="margin:0;">
+              <input type="checkbox" id="showOverlay" />
+              Show overlay badges
+            </label>
+            <div>
+              <label>Overlay position</label>
+              <select id="overlayPos">
+                <option value="top">Top</option>
+                <option value="bottom">Bottom</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid3" style="margin-top:10px;">
+            <label class="checkRow small" style="margin:0;"><input type="checkbox" id="showTagSession" /> Session</label>
+            <label class="checkRow small" style="margin:0;"><input type="checkbox" id="showTagTracker" /> Tracker</label>
+            <label class="checkRow small" style="margin:0;"><input type="checkbox" id="showTagFace" /> Face</label>
+            <label class="checkRow small" style="margin:0;"><input type="checkbox" id="showTagState" /> State</label>
+            <label class="checkRow small" style="margin:0;"><input type="checkbox" id="showTagMar" /> MAR</label>
+            <label class="checkRow small" style="margin:0;"><input type="checkbox" id="showTagMode" /> Mode</label>
+          </div>
+        </div>
+      </details>
+
+      <details class="section">
+        <summary>Alerts & Visual Warning <span class="chev">▾</span></summary>
+        <div class="content">
+          <div class="grid2">
+            <label class="checkRow small" style="margin:0;">
+              <input type="checkbox" id="blinkTabOnFinish" />
+              Blink tab title when session ends
+            </label>
+            <label class="checkRow small" style="margin:0;">
+              <input type="checkbox" id="desktopNotifyOnFinish" />
+              Desktop notification on finish
+            </label>
+          </div>
+
+          <div class="row" style="margin-top:10px;">
+            <button id="btnEnableNotify">Enable Notifications</button>
+            <div class="small" id="notifyStatus"></div>
+          </div>
+
+          <div style="margin-top:12px;">
+            <label>Red warning intensity</label>
+            <input id="warnIntensity" type="range" min="0" max="100" step="5" />
+            <div class="small">0 = off, 100 = full.</div>
+          </div>
+
+          <div style="margin-top:8px;">
+            <label class="checkRow small" style="margin:0;">
+              <input type="checkbox" id="warnFlash" />
+              Flash when mouth opens
+            </label>
+          </div>
+        </div>
+      </details>
+    </div>
+  </div>
+</div>
+
+<!-- Finish Modal -->
+<div class="modalBackdrop" id="finishBackdrop">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="row space">
+      <h3 style="margin:0;">Session finished</h3>
+      <button id="btnCloseFinish">Close</button>
+    </div>
+    <div class="sub" id="finishSub">—</div>
+
+    <div class="grid">
+      <div class="box" id="finishOpenBox">
+        <div class="k">Open % (lower is better)</div>
+        <div class="v" id="finishOpenPct">—</div>
+      </div>
+      <div class="box"><div class="k">Duration</div><div class="v" id="finishDur">—</div></div>
+      <div class="box"><div class="k">Open events</div><div class="v" id="finishEvents">—</div></div>
+      <div class="box"><div class="k">Events / min</div><div class="v" id="finishEpm">—</div></div>
+      <div class="box"><div class="k">Face detect %</div><div class="v" id="finishFacePct">—</div></div>
+      <div class="box"><div class="k">Closed %</div><div class="v" id="finishClosedPct">—</div></div>
+    </div>
+
+    <div class="box" style="margin-top:10px;">
+      <div class="k">Feedback</div>
+      <div class="small" id="finishFeedback">—</div>
+    </div>
+
+    <div class="row" style="margin-top:10px;">
+      <button class="primary" id="btnSaveFromModal">Save session</button>
+      <button id="btnExportThisCsv">Export CSV</button>
+      <button class="primary" id="btnExportThisXlsx">Export XLSX</button>
+    </div>
+  </div>
+</div>
+
+<!-- Debug UI -->
+<button class="debugBtn" id="btnDebug">Show Debug</button>
+<section class="debugPanel" id="debugPanel">
+  <div class="row space" style="margin-bottom:10px;">
+    <div style="font-weight:900;">Debug Panel</div>
+    <div class="row">
+      <button id="btnAssetCheck">Asset Check</button>
+      <button id="btnCopyDebug">Copy Debug</button>
+      <button class="danger" id="btnClearLogs">Clear Logs</button>
+    </div>
+  </div>
+
+  <div class="debugGrid" style="margin-bottom:10px;">
+    <div class="kv"><div class="k">Environment</div><div class="v mono" id="dbgEnv">—</div></div>
+    <div class="kv"><div class="k">MediaPipe</div><div class="v mono" id="dbgMp">—</div></div>
+    <div class="kv"><div class="k">Video</div><div class="v mono" id="dbgVideo">—</div></div>
+    <div class="kv"><div class="k">Session / Loop</div><div class="v mono" id="dbgLoop">—</div></div>
+    <div class="kv" style="grid-column: 1 / -1;">
+      <div class="k">Asset Check</div>
+      <div class="v mono"><pre id="dbgAssets">—</pre></div>
+    </div>
+  </div>
+
+  <div class="kv">
+    <div class="k">Logs</div>
+    <div class="v"><pre class="mono" id="dbgLogs">—</pre></div>
+  </div>
+</section>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+  const on = (el, evt, fn) => { if (el) el.addEventListener(evt, fn); };
+
+  function chartOrMock(canvasId, config) {
+    const el = $(canvasId);
+    const hasChart = typeof window.Chart !== "undefined";
+    if (el && hasChart) return new Chart(el, config);
+    console.warn(`Chart disabled for #${canvasId} (missing canvas or Chart.js not loaded).`);
+    const deepClone = (obj) => JSON.parse(JSON.stringify(obj ?? {}));
+    return { data: deepClone(config.data), options: deepClone(config.options), update: () => {} };
+  }
+
+  const PROFILES_KEY = "mouth_trainer_profiles_v1";
+  const CURRENT_PROFILE_KEY = "mouth_trainer_current_profile_v1";
+  const SETTINGS_KEY_PREFIX = "mouth_trainer_settings_profile_";
+  const SESSIONS_KEY_PREFIX = "mouth_trainer_sessions_profile_";
+  const LEGACY_GLOBAL_SESSIONS_KEYS = ["mouth_trainer_sessions_v1", "mouth_trainer_sessions_v0", "mouth_trainer_sessions_v2", "mouth_trainer_sessions_v3"];
+
+  const logRing = [];
+  const LOG_MAX = 240;
+  function pushLog(level, args) {
+    const ts = new Date().toISOString().split("T")[1].replace("Z", "");
+    const msg = args.map(a => {
+      if (a instanceof Error) return `${a.name}: ${a.message}\n${a.stack || ""}`;
+      if (typeof a === "string") return a;
+      try { return JSON.stringify(a); } catch { return String(a); }
+    }).join(" ");
+    logRing.push(`[${ts}] ${level}: ${msg}`);
+    if (logRing.length > LOG_MAX) logRing.splice(0, logRing.length - LOG_MAX);
+  }
+  (function hookConsole(){
+    const orig = { log: console.log, warn: console.warn, error: console.error };
+    console.log = (...a) => { pushLog("log", a); orig.log(...a); };
+    console.warn = (...a) => { pushLog("warn", a); orig.warn(...a); };
+    console.error = (...a) => { pushLog("error", a); orig.error(...a); };
+  })();
+
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  const now = () => performance.now();
+
+  function fmtMs(ms) {
+    ms = Math.max(0, ms);
+    const totalSec = Math.floor(ms / 1000);
+    const m = Math.floor(totalSec / 60);
+    const s = totalSec % 60;
+    return `${m}:${String(s).padStart(2,"0")}`;
+  }
+
+  function shortDt(iso) {
+    try {
+      const d = new Date(iso);
+      const mm = String(d.getMonth() + 1).padStart(2,"0");
+      const dd = String(d.getDate()).padStart(2,"0");
+      const hh = String(d.getHours()).padStart(2,"0");
+      const mi = String(d.getMinutes()).padStart(2,"0");
+      return `${mm}/${dd} ${hh}:${mi}`;
+    } catch { return iso; }
+  }
+
+  function makeId() {
+    if (typeof crypto !== "undefined" && crypto.randomUUID) return crypto.randomUUID();
+    return `${Date.now()}_${Math.random().toString(16).slice(2)}`;
+  }
+
+  function median(xs) {
+    if (!xs.length) return 0;
+    const arr = [...xs].sort((a,b)=>a-b);
+    const mid = Math.floor(arr.length / 2);
+    return arr.length % 2 ? arr[mid] : (arr[mid-1] + arr[mid]) / 2;
+  }
+  function mean(xs) { return xs.length ? xs.reduce((a,b)=>a+b,0)/xs.length : 0; }
+  function stddev(xs) {
+    if (xs.length < 2) return 0;
+    const m = mean(xs);
+    const v = xs.reduce((a,x)=>a+(x-m)*(x-m),0)/xs.length;
+    return Math.sqrt(v);
+  }
+  function eventsPerMinute(openEvents, durationMs) {
+    const minutes = durationMs / 60000;
+    if (!minutes || minutes <= 0.0001) return 0;
+    return openEvents / minutes;
+  }
+
+  const OPEN_OK_PCT = 5;
+  const OPEN_RED_AT_PCT = 35;
+  function openPctToStyle(openPct) {
+    const pct = clamp(Number(openPct) || 0, 0, 100);
+    let hue = 120;
+    if (pct > OPEN_OK_PCT) {
+      const t = clamp((pct - OPEN_OK_PCT) / Math.max(1e-6, (OPEN_RED_AT_PCT - OPEN_OK_PCT)), 0, 1);
+      hue = 120 * (1 - t);
+    }
+    return {
+      bg: `hsla(${hue}, 90%, 35%, 0.28)`,
+      border: `hsla(${hue}, 90%, 55%, 0.55)`,
+      text: `hsla(${hue}, 90%, 90%, 1)`,
+      row: `linear-gradient(90deg, hsla(${hue},90%,45%,0.14), rgba(0,0,0,0))`
+    };
+  }
+  function applyOpenPillStyle(el, openPct) {
+    if (!el) return;
+    const st = openPctToStyle(openPct);
+    el.style.background = st.bg;
+    el.style.borderColor = st.border;
+    el.style.color = st.text;
+  }
+
+  let xlsxLoadPromise = null;
+  function loadScript(url) {
+    return new Promise((resolve, reject) => {
+      const s = document.createElement("script");
+      s.src = url;
+      s.async = true;
+      s.onload = () => resolve(true);
+      s.onerror = () => reject(new Error(`Failed to load ${url}`));
+      document.head.appendChild(s);
+    });
+  }
+  function ensureXlsxLoaded() {
+    if (typeof window.XLSX !== "undefined") return Promise.resolve(true);
+    if (xlsxLoadPromise) return xlsxLoadPromise;
+
+    const urls = [
+      "https://cdn.jsdelivr.net/npm/xlsx@0.19.3/dist/xlsx.full.min.js",
+      "https://unpkg.com/xlsx@0.19.3/dist/xlsx.full.min.js",
+      "https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.19.3/xlsx.full.min.js"
+    ];
+
+    xlsxLoadPromise = (async () => {
+      for (const u of urls) {
+        try {
+          await loadScript(u);
+          if (typeof window.XLSX !== "undefined") return true;
+        } catch (e) {
+          console.warn(e);
+        }
+      }
+      return false;
+    })();
+
+    return xlsxLoadPromise;
+  }
+
+  function loadJson(key, fallback) {
+    try { return JSON.parse(localStorage.getItem(key) || JSON.stringify(fallback)); }
+    catch { return fallback; }
+  }
+  function saveJson(key, value) { localStorage.setItem(key, JSON.stringify(value)); }
+
+  function loadProfiles() {
+    const profiles = loadJson(PROFILES_KEY, []);
+    if (Array.isArray(profiles) && profiles.length) return profiles;
+    const def = [{ id: makeId(), name: "Default", createdAt: new Date().toISOString() }];
+    saveJson(PROFILES_KEY, def);
+    saveJson(CURRENT_PROFILE_KEY, def[0].id);
+    return def;
+  }
+  function getCurrentProfileId(profiles) {
+    const id = localStorage.getItem(CURRENT_PROFILE_KEY);
+    if (id && profiles.some(p => p.id === id)) return id;
+    const fallback = profiles[0]?.id || "";
+    if (fallback) localStorage.setItem(CURRENT_PROFILE_KEY, fallback);
+    return fallback;
+  }
+  function setCurrentProfileId(id) { localStorage.setItem(CURRENT_PROFILE_KEY, id); }
+
+  function settingsKey(profileId) { return `${SETTINGS_KEY_PREFIX}${profileId}`; }
+  function sessionsKey(profileId) { return `${SESSIONS_KEY_PREFIX}${profileId}`; }
+
+  function loadSettings(profileId) { return loadJson(settingsKey(profileId), {}); }
+  function saveSettings(profileId, obj) { saveJson(settingsKey(profileId), obj); }
+
+  function loadSessions(profileId) {
+    const perProfile = loadJson(sessionsKey(profileId), []);
+    if (Array.isArray(perProfile) && perProfile.length) return perProfile;
+
+    const profiles = loadProfiles();
+    const defaultId = profiles[0]?.id;
+    if (!defaultId || profileId !== defaultId) return Array.isArray(perProfile) ? perProfile : [];
+
+    for (const k of LEGACY_GLOBAL_SESSIONS_KEYS) {
+      const legacy = loadJson(k, []);
+      if (Array.isArray(legacy) && legacy.length) {
+        const migrated = legacy.map(s => ({ ...s, profileId: defaultId, id: s.id || makeId() }));
+        saveJson(sessionsKey(defaultId), migrated);
+        return migrated;
+      }
+    }
+    return Array.isArray(perProfile) ? perProfile : [];
+  }
+  function saveSessions(profileId, arr) { saveJson(sessionsKey(profileId), arr); }
+
+  // DOM
+  const hdrProfile = $("hdrProfile");
+  const hdrSessions = $("hdrSessions");
+  const btnOpenSettings = $("btnOpenSettings");
+  const settingsBackdrop = $("settingsBackdrop");
+  const btnCloseSettings = $("btnCloseSettings");
+  const btnExpandAll = $("btnExpandAll");
+  const btnCollapseAll = $("btnCollapseAll");
+
+  const profileDetails = $("profileDetails");
+  const profileSummaryTitle = $("profileSummaryTitle");
+  const profileCurrentLabel = $("profileCurrentLabel");
+  const profileSelect = $("profileSelect");
+  const btnAddProfile = $("btnAddProfile");
+  const btnRenameProfile = $("btnRenameProfile");
+  const btnDeleteProfile = $("btnDeleteProfile");
+
+  const videoEl = $("webcamVideo");
+  const btnStartCam = $("btnStartCam");
+  const btnStopCam = $("btnStopCam");
+  const btnPiP = $("btnPiP");
+  const btnReset = $("btnReset");
+  const btnStartSession = $("btnStartSession");
+  const btnEndSession = $("btnEndSession");
+  const btnPauseTimer = $("btnPauseTimer");
+  const btnStopTimer = $("btnStopTimer");
+
+  const btnCalibrate = $("btnCalibrate");
+  const calibStatusEl = $("calibStatus");
+
+  const thresholdEl = $("threshold");
+  const thresholdValEl = $("thresholdVal");
+  const smoothEl = $("smooth");
+  const minOpenMsEl = $("minOpenMs");
+  const cooldownMsEl = $("cooldownMs");
+
+  const showOverlayEl = $("showOverlay");
+  const overlayPosEl = $("overlayPos");
+  const showTagSessionEl = $("showTagSession");
+  const showTagTrackerEl = $("showTagTracker");
+  const showTagFaceEl = $("showTagFace");
+  const showTagStateEl = $("showTagState");
+  const showTagMarEl = $("showTagMar");
+  const showTagModeEl = $("showTagMode");
+  const overlayEl = $("overlay");
+
+  const mainUseTimerEl = $("mainUseTimer");
+  const mainModeEl = $("mainMode");
+  const mainTimerMinutesEl = $("mainTimerMinutes");
+  const mainTimerSecondsEl = $("mainTimerSeconds");
+
+  const settingsUseTimerEl = $("settingsUseTimer");
+  const settingsModeEl = $("settingsMode");
+  const settingsTimerMinutesEl = $("settingsTimerMinutes");
+  const settingsTimerSecondsEl = $("settingsTimerSeconds");
+
+  const attemptPiPOnHideEl = $("attemptPiPOnHide");
+
+  const timerRingWrap = $("timerRingWrap");
+  const timerRingArc = $("timerRingArc");
+  const timerRingPct = $("timerRingPct");
+  const timerRingState = $("timerRingState");
+
+  const btnSaveSession = $("btnSaveSession");
+  const autoSaveOnEndEl = $("autoSaveOnEnd");
+  const saveHintEl = $("saveHint");
+
+  const blinkTabOnFinishEl = $("blinkTabOnFinish");
+  const desktopNotifyOnFinishEl = $("desktopNotifyOnFinish");
+  const btnEnableNotify = $("btnEnableNotify");
+  const notifyStatusEl = $("notifyStatus");
+
+  const warnIntensityEl = $("warnIntensity");
+  const warnFlashEl = $("warnFlash");
+
+  const camStatusEl = $("camStatus");
+  const mouthStatusEl = $("mouthStatus");
+  const sessionTagEl = $("sessionTag");
+  const trackerTagEl = $("trackerTag");
+  const faceTagEl = $("faceTag");
+  const stateTagEl = $("stateTag");
+  const scoreTagEl = $("scoreTag");
+  const modeTagEl = $("modeTag");
+
+  const openTimeEl = $("openTime");
+  const closedTimeEl = $("closedTime");
+  const openEventsEl = $("openEvents");
+  const openPctEl = $("openPct");
+
+  const timerRemainingEl = $("timerRemaining");
+  const timerHintEl = $("timerHint");
+
+  const historySessionsCount = $("historySessionsCount");
+  const historyAvgScore = $("historyAvgScore");
+  const historyBestScore = $("historyBestScore");
+
+  const selCountPill = $("selCountPill");
+  const cbSelectAllSessions = $("cbSelectAllSessions");
+  const btnDeleteSelected = $("btnDeleteSelected");
+  const sessionsListEl = $("sessionsList");
+  const btnExportJson = $("btnExportJson");
+  const btnExportCsv = $("btnExportCsv");
+  const btnExportXlsx = $("btnExportXlsx");
+  const btnClearSessions = $("btnClearSessions");
+
+  const btnExportSelectedCsv = $("btnExportSelectedCsv");
+  const btnExportSelectedXlsx = $("btnExportSelectedXlsx");
+
+  const finishBackdrop = $("finishBackdrop");
+  const btnCloseFinish = $("btnCloseFinish");
+  const btnSaveFromModal = $("btnSaveFromModal");
+  const btnExportThisCsv = $("btnExportThisCsv");
+  const btnExportThisXlsx = $("btnExportThisXlsx");
+  const finishSub = $("finishSub");
+  const finishOpenBox = $("finishOpenBox");
+  const finishOpenPct = $("finishOpenPct");
+  const finishDur = $("finishDur");
+  const finishEvents = $("finishEvents");
+  const finishEpm = $("finishEpm");
+  const finishFacePct = $("finishFacePct");
+  const finishClosedPct = $("finishClosedPct");
+  const finishFeedback = $("finishFeedback");
+
+  const btnDebug = $("btnDebug");
+  const debugPanel = $("debugPanel");
+  const btnAssetCheck = $("btnAssetCheck");
+  const btnCopyDebug = $("btnCopyDebug");
+  const btnClearLogs = $("btnClearLogs");
+  const dbgEnv = $("dbgEnv");
+  const dbgMp = $("dbgMp");
+  const dbgVideo = $("dbgVideo");
+  const dbgLoop = $("dbgLoop");
+  const dbgAssets = $("dbgAssets");
+  const dbgLogs = $("dbgLogs");
+
+  // Charts
+  const timelineWindowSec = 30;
+  const liveTimelineHzMs = 200;
+
+  const timelineChart = chartOrMock("timelineChart", {
+    type: "line",
+    data: { datasets: [{ label: "Mouth open (1=open, 0=closed)", data: [], borderWidth: 2, pointRadius: 0, tension: 0, stepped: true, spanGaps: false, parsing: false }] },
+    options: {
+      responsive: true, maintainAspectRatio: false, animation: false, normalized: true,
+      plugins: { decimation: { enabled: true, algorithm: "min-max", samples: 1200 } },
+      scales: { y: { min: 0, max: 1, ticks: { stepSize: 1 } }, x: { type: "linear", title: { display: true, text: "Seconds (last 30s)" } } }
+    }
+  });
+
+  const minuteChart = chartOrMock("minuteChart", {
+    type: "bar",
+    data: { labels: [], datasets: [{ label: "Open % per minute", data: [], borderWidth: 1 }] },
+    options: { responsive: true, maintainAspectRatio: false, animation: false, scales: { y: { min: 0, max: 100 } } }
+  });
+
+  const trendChart = chartOrMock("trendChart", {
+    type: "line",
+    data: {
+      labels: [],
+      datasets: [
+        { label: "Open %", data: [], borderWidth: 2, pointRadius: 2, tension: 0.25, yAxisID: "y" },
+        { label: "Events / min", data: [], borderWidth: 2, pointRadius: 2, tension: 0.25, yAxisID: "y1" }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, animation: false,
+      scales: {
+        y: { min: 0, max: 100, title: { display: true, text: "Open %" } },
+        y1: { min: 0, position: "right", title: { display: true, text: "Events / min" }, grid: { drawOnChartArea: false } }
+      }
+    }
+  });
+
+  // Defaults
+  const defaults = {
+    threshold: 0.30,
+    smooth: 8,
+    minOpenMs: 250,
+    cooldownMs: 800,
+
+    useTimer: true,
+    mode: "closedOnly",
+    timerMinutes: 1,
+    timerSeconds: 0,
+
+    overlayShow: true,
+    overlayPos: "top",
+    tagSession: true,
+    tagTracker: true,
+    tagFace: true,
+    tagState: true,
+    tagMar: true,
+    tagMode: true,
+
+    autoSaveOnEnd: false,
+    blinkTabOnFinish: true,
+    desktopNotifyOnFinish: false,
+
+    warnIntensity: 100,
+    warnFlash: true,
+
+    attemptPiPOnHide: false
+  };
+
+  // MediaPipe
+  const MP_VERSION = "0.4.1633559619";
+  const MP_BASE = `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh@${MP_VERSION}/`;
+  let faceMesh = null;
+
+  // App state
+  let profiles = loadProfiles();
+  let currentProfileId = getCurrentProfileId(profiles);
+
+  let stream = null;
+  let cameraRunning = false;
+
+  let trackingRunning = false;
+  let trackingReason = "off";
+
+  let sessionActive = false;
+  let sessionEnded = false;
+  let analysisPaused = false;
+
+  let timerEnabled = true;
+  let timerTotalMs = 0;
+  let timerRemainingMs = 0;
+  let timerRunning = false;
+  let timerPaused = false;
+
+  let hasFace = false;
+
+  // Raw from FaceMesh MAR threshold:
+  let isMouthOpenRaw = false;
+
+  // Effective state used everywhere (talking excluded):
+  let isMouthOpen = false;
+
+  let marHistory = [];
+  let marSmoothed = 0;
+
+  let lastTickTs = 0;
+  let sessionStartTs = 0;
+  let sessionStartIso = "";
+  let sessionEndIso = "";
+  let openMs = 0;
+  let closedMs = 0;
+
+  let openEvents = 0;
+  let lastEventTs = -Infinity;
+  let openStartTs = null;
+
+  let liveLastSampleTs = 0;
+  let minuteIndex = 0;
+  let openMsThisMinute = 0;
+
+  let save1HzLastSec = -1;
+  const saveTimeline = { t: [], v: [] };
+
+  let currentSessionId = "";
+  let currentSessionSaved = false;
+  let selectedSessionId = null;
+
+  let lastResultsTs = 0;
+  let lastSendError = "";
+
+  let calibrating = false;
+  let calibStartTs = 0;
+  let calibSamples = [];
+  const calibDurationMs = 4000;
+
+  const selectedSessionIds = new Set();
+
+  // Video processing
+  const inputCanvas = document.createElement("canvas");
+  const inputCtx = inputCanvas.getContext("2d", { alpha: false });
+
+  let isPageVisible = !document.hidden;
+  const MIN_AUTOSAVE_MS = 10_000;
+  const RESULTS_STALE_MS = 1500;
+
+  // ---------------------------
+  // Speech detection (VAD)
+  // When speaking, we treat "mouth open" as NOT open (ignored).
+  // ---------------------------
+  const SpeechAudioContext = window.AudioContext || window.webkitAudioContext;
+  const speechSupported = !!(SpeechAudioContext && navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+
+  let speechStream = null;
+  let speechCtx = null;
+  let speechAnalyser = null;
+  let speechBuf = null;
+
+  let speechReady = false;
+  let isSpeaking = false;
+  let speechNoiseRms = 0.010;
+  let speechSpeakingUntil = 0;
+  let speechLastRms = 0;
+
+  const SPEECH_SENSITIVITY = 1.9;
+  const SPEECH_MIN_RMS = 0.018;
+  const SPEECH_DELTA = 0.012;
+  const SPEECH_HOLD_MS = 350;
+
+  async function startSpeechDetection() {
+    if (!speechSupported) return;
+    if (speechReady) return;
+
+    try {
+      speechStream = await navigator.mediaDevices.getUserMedia({
+        audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
+        video: false
+      });
+
+      speechCtx = new SpeechAudioContext();
+      const src = speechCtx.createMediaStreamSource(speechStream);
+
+      speechAnalyser = speechCtx.createAnalyser();
+      speechAnalyser.fftSize = 1024;
+      speechAnalyser.smoothingTimeConstant = 0.8;
+
+      src.connect(speechAnalyser);
+      speechBuf = new Uint8Array(speechAnalyser.fftSize);
+
+      speechNoiseRms = 0.010;
+      speechSpeakingUntil = 0;
+      speechLastRms = 0;
+      isSpeaking = false;
+      speechReady = true;
+
+      try { await speechCtx.resume(); } catch {}
+      console.log("Speech detection ready (mic granted).");
+    } catch (e) {
+      console.warn("Speech detection unavailable (mic blocked/denied):", e?.message || e);
+      stopSpeechDetection();
+    }
+  }
+
+  function stopSpeechDetection() {
+    speechReady = false;
+    isSpeaking = false;
+    speechSpeakingUntil = 0;
+    speechLastRms = 0;
+
+    if (speechCtx) {
+      try { speechCtx.close(); } catch {}
+    }
+    speechCtx = null;
+    speechAnalyser = null;
+    speechBuf = null;
+
+    if (speechStream) {
+      try { speechStream.getTracks().forEach(t => t.stop()); } catch {}
+    }
+    speechStream = null;
+  }
+
+  function updateSpeechState(ts) {
+    if (!speechReady || !speechAnalyser || !speechBuf) {
+      isSpeaking = false;
+      return;
+    }
+
+    if (!sessionActive || analysisPaused) {
+      isSpeaking = false;
+      speechSpeakingUntil = 0;
+      return;
+    }
+
+    if (speechCtx && speechCtx.state === "suspended") {
+      speechCtx.resume().catch(() => {});
+    }
+
+    speechAnalyser.getByteTimeDomainData(speechBuf);
+
+    let sum = 0;
+    for (let i = 0; i < speechBuf.length; i++) {
+      const x = (speechBuf[i] - 128) / 128;
+      sum += x * x;
+    }
+    const rms = Math.sqrt(sum / speechBuf.length);
+    speechLastRms = rms;
+
+    const alpha = isSpeaking ? 0.002 : 0.02;
+    speechNoiseRms = (1 - alpha) * speechNoiseRms + alpha * rms;
+
+    const thr = Math.max(
+      SPEECH_MIN_RMS,
+      Math.max(speechNoiseRms * SPEECH_SENSITIVITY, speechNoiseRms + SPEECH_DELTA)
+    );
+
+    if (rms > thr) speechSpeakingUntil = ts + SPEECH_HOLD_MS;
+    isSpeaking = ts < speechSpeakingUntil;
+  }
+
+  // Timer ring
+  const ringR = 48;
+  const ringCirc = 2 * Math.PI * ringR;
+
+  function initRing(circleEl) {
+    if (!circleEl) return;
+    circleEl.setAttribute("stroke-dasharray", `${ringCirc} ${ringCirc}`);
+    circleEl.setAttribute("stroke-dashoffset", "0");
+  }
+  initRing(timerRingArc);
+
+  function setRing(circleEl, fractionRemaining) {
+    if (!circleEl) return;
+    const frac = clamp(fractionRemaining, 0, 1);
+    const offset = ringCirc * (1 - frac);
+    circleEl.setAttribute("stroke-dashoffset", String(offset));
+    const hue = frac * 120;
+    circleEl.setAttribute("stroke", `hsla(${hue}, 90%, 65%, 0.95)`);
+  }
+
+  function setTimerInputsDisabled(disabled) {
+    const els = [
+      mainUseTimerEl, mainModeEl, mainTimerMinutesEl, mainTimerSecondsEl,
+      settingsUseTimerEl, settingsModeEl, settingsTimerMinutesEl, settingsTimerSecondsEl
+    ];
+    for (const el of els) if (el) el.disabled = disabled;
+  }
+
+  function readTimerControls(sourceEl) {
+    const useMain = sourceEl === mainUseTimerEl || sourceEl === mainModeEl || sourceEl === mainTimerMinutesEl || sourceEl === mainTimerSecondsEl;
+    const useTimer = (useMain ? mainUseTimerEl?.checked : settingsUseTimerEl?.checked);
+    const mode = (useMain ? mainModeEl?.value : settingsModeEl?.value) ?? (mainModeEl?.value ?? settingsModeEl?.value ?? defaults.mode);
+
+    const minutes = Number((useMain ? mainTimerMinutesEl?.value : settingsTimerMinutesEl?.value) ?? (mainTimerMinutesEl?.value ?? settingsTimerMinutesEl?.value ?? defaults.timerMinutes));
+    const seconds = Number((useMain ? mainTimerSecondsEl?.value : settingsTimerSecondsEl?.value) ?? (mainTimerSecondsEl?.value ?? settingsTimerSecondsEl?.value ?? defaults.timerSeconds));
+
+    return {
+      useTimer: !!useTimer,
+      mode,
+      minutes: clamp(minutes || 0, 0, 240),
+      seconds: clamp(seconds || 0, 0, 59),
+    };
+  }
+
+  function syncTimerControls(v) {
+    timerEnabled = !!v.useTimer;
+    if (mainUseTimerEl) mainUseTimerEl.checked = v.useTimer;
+    if (settingsUseTimerEl) settingsUseTimerEl.checked = v.useTimer;
+
+    if (mainModeEl) mainModeEl.value = v.mode;
+    if (settingsModeEl) settingsModeEl.value = v.mode;
+
+    if (mainTimerMinutesEl) mainTimerMinutesEl.value = String(v.minutes);
+    if (settingsTimerMinutesEl) settingsTimerMinutesEl.value = String(v.minutes);
+
+    if (mainTimerSecondsEl) mainTimerSecondsEl.value = String(v.seconds);
+    if (settingsTimerSecondsEl) settingsTimerSecondsEl.value = String(v.seconds);
+
+    const disableFields = !v.useTimer;
+    for (const el of [mainModeEl, mainTimerMinutesEl, mainTimerSecondsEl, settingsModeEl, settingsTimerMinutesEl, settingsTimerSecondsEl]) {
+      if (el) el.disabled = disableFields || sessionActive;
+    }
+  }
+
+  function configureTimerFromControls(sourceEl) {
+    const v = readTimerControls(sourceEl);
+    syncTimerControls(v);
+
+    if (!v.useTimer) {
+      timerTotalMs = 0;
+      timerRemainingMs = 0;
+      if (!timerRunning) {
+        if (timerRemainingEl) timerRemainingEl.textContent = "—";
+        if (timerHintEl) timerHintEl.textContent = "Timer is off.";
+      }
+      updateTimerUI();
+      return;
+    }
+
+    const totalSec = Math.max(1, Math.floor(v.minutes * 60 + v.seconds));
+    timerTotalMs = totalSec * 1000;
+
+    if (!timerRunning) {
+      timerRemainingMs = timerTotalMs;
+      if (timerRemainingEl) timerRemainingEl.textContent = fmtMs(timerRemainingMs);
+      if (timerHintEl) timerHintEl.textContent = "Click Start Session to begin.";
+      updateTimerUI();
+    }
+  }
+
+  function updateTimerUI() {
+    if (!timerEnabled) {
+      if (timerRingPct) timerRingPct.textContent = "—";
+      if (timerRingState) timerRingState.textContent = "off";
+      setRing(timerRingArc, 1);
+      if (timerRingWrap) timerRingWrap.classList.remove("timerPulse");
+      return;
+    }
+
+    const frac = timerTotalMs > 0 ? (timerRemainingMs / timerTotalMs) : 0;
+
+    let state = "ready";
+    if (!cameraRunning) state = "idle";
+    else if (sessionActive && analysisPaused) state = "paused";
+    else if (sessionActive) state = (readTimerControls(mainModeEl).mode === "closedOnly" ? "running (closed-only)" : "running");
+    else if (sessionEnded) state = "ended";
+
+    setRing(timerRingArc, frac);
+    if (timerRingPct) timerRingPct.textContent = `${Math.round(frac * 100)}%`;
+    if (timerRingState) timerRingState.textContent = state;
+
+    const pulse = sessionActive && !analysisPaused && timerRunning && timerRemainingMs <= 10_000;
+    if (timerRingWrap) timerRingWrap.classList.toggle("timerPulse", pulse);
+  }
+
+  // Settings modal
+  function openSettings() { settingsBackdrop?.classList.add("open"); }
+  function closeSettings() { settingsBackdrop?.classList.remove("open"); }
+  on(btnOpenSettings, "click", openSettings);
+  on(btnCloseSettings, "click", closeSettings);
+  on(settingsBackdrop, "click", (e) => { if (e.target === settingsBackdrop) closeSettings(); });
+
+  function setAllDetails(open) {
+    const all = settingsBackdrop ? settingsBackdrop.querySelectorAll("details.section") : [];
+    for (const d of all) d.open = open;
+  }
+  on(btnExpandAll, "click", () => setAllDetails(true));
+  on(btnCollapseAll, "click", () => setAllDetails(false));
+
+  // Overlay / warning
+  function applyOverlaySettings() {
+    if (!overlayEl) return;
+    overlayEl.style.display = showOverlayEl?.checked ? "flex" : "none";
+    overlayEl.classList.toggle("bottom", overlayPosEl?.value === "bottom");
+
+    if (sessionTagEl) sessionTagEl.style.display = showTagSessionEl?.checked ? "" : "none";
+    if (trackerTagEl) trackerTagEl.style.display = showTagTrackerEl?.checked ? "" : "none";
+    if (faceTagEl) faceTagEl.style.display = showTagFaceEl?.checked ? "" : "none";
+    if (stateTagEl) stateTagEl.style.display = showTagStateEl?.checked ? "" : "none";
+    if (scoreTagEl) scoreTagEl.style.display = showTagMarEl?.checked ? "" : "none";
+    if (modeTagEl) modeTagEl.style.display = showTagModeEl?.checked ? "" : "none";
+  }
+
+  function getWarnScale() {
+    const raw = clamp(Number(warnIntensityEl?.value ?? defaults.warnIntensity), 0, 100);
+    return raw / 100;
+  }
+
+  function updateOpenVignette() {
+    const scale = getWarnScale();
+    document.body.style.setProperty("--warnScale", String(scale));
+
+    // NOTE: isMouthOpen is "effective open" (talking ignored), so warning doesn't show while speaking.
+    const show = scale > 0 && cameraRunning && trackingRunning && hasFace && isMouthOpen;
+    document.body.classList.toggle("mouth-open", show);
+  }
+
+  function flashVignette() {
+    const scale = getWarnScale();
+    if (scale <= 0) return;
+    if (!warnFlashEl?.checked) return;
+    document.body.classList.add("mouth-open-flash");
+    window.setTimeout(() => document.body.classList.remove("mouth-open-flash"), 560);
+  }
+
+  // PiP helpers
+  function pipSupported() {
+    return !!(document.pictureInPictureEnabled && videoEl && typeof videoEl.requestPictureInPicture === "function");
+  }
+  async function togglePiP() {
+    if (!pipSupported()) {
+      alert("Picture-in-Picture not supported on this browser/device.");
+      return;
+    }
+    try {
+      if (document.pictureInPictureElement) {
+        await document.exitPictureInPicture();
+      } else {
+        await videoEl.requestPictureInPicture();
+      }
+    } catch (e) {
+      console.warn(e);
+      alert("PiP failed. Some browsers require PiP to be triggered while the video is playing and visible.");
+    }
+  }
+  async function attemptPiPBestEffort() {
+    if (!pipSupported()) return;
+    if (document.pictureInPictureElement) return;
+    try {
+      await videoEl.requestPictureInPicture();
+    } catch (e) {
+      console.warn("Auto PiP blocked:", e?.message || e);
+    }
+  }
+  on(btnPiP, "click", () => togglePiP());
+
+  // Per-profile settings
+  function renderHeaderProfile() {
+    const pName = profiles.find(p => p.id === currentProfileId)?.name || "—";
+    if (hdrProfile) hdrProfile.textContent = `Profile: ${pName}`;
+    if (profileCurrentLabel) profileCurrentLabel.textContent = pName;
+    if (profileSummaryTitle) profileSummaryTitle.textContent = `Profile: ${pName}`;
+  }
+
+  function persistSettingsForProfile(sourceEl) {
+    const v = readTimerControls(sourceEl ?? mainUseTimerEl ?? settingsUseTimerEl ?? document.body);
+
+    saveSettings(currentProfileId, {
+      threshold: Number(thresholdEl?.value ?? defaults.threshold),
+      smooth: Number(smoothEl?.value ?? defaults.smooth),
+      minOpenMs: Number(minOpenMsEl?.value ?? defaults.minOpenMs),
+      cooldownMs: Number(cooldownMsEl?.value ?? defaults.cooldownMs),
+
+      useTimer: !!v.useTimer,
+      mode: v.mode,
+      timerMinutes: v.minutes,
+      timerSeconds: v.seconds,
+
+      overlayShow: !!showOverlayEl?.checked,
+      overlayPos: overlayPosEl?.value ?? defaults.overlayPos,
+      tagSession: !!showTagSessionEl?.checked,
+      tagTracker: !!showTagTrackerEl?.checked,
+      tagFace: !!showTagFaceEl?.checked,
+      tagState: !!showTagStateEl?.checked,
+      tagMar: !!showTagMarEl?.checked,
+      tagMode: !!showTagModeEl?.checked,
+
+      autoSaveOnEnd: !!autoSaveOnEndEl?.checked,
+      blinkTabOnFinish: !!blinkTabOnFinishEl?.checked,
+      desktopNotifyOnFinish: !!desktopNotifyOnFinishEl?.checked,
+
+      warnIntensity: Number(warnIntensityEl?.value ?? defaults.warnIntensity),
+      warnFlash: !!warnFlashEl?.checked,
+
+      attemptPiPOnHide: !!attemptPiPOnHideEl?.checked
+    });
+  }
+
+  function applySettingsForProfile() {
+    const s = { ...defaults, ...loadSettings(currentProfileId) };
+
+    if (thresholdEl) thresholdEl.value = s.threshold;
+    if (smoothEl) smoothEl.value = s.smooth;
+    if (minOpenMsEl) minOpenMsEl.value = s.minOpenMs;
+    if (cooldownMsEl) cooldownMsEl.value = s.cooldownMs;
+    if (thresholdValEl) thresholdValEl.textContent = Number(thresholdEl?.value ?? defaults.threshold).toFixed(2);
+
+    if (showOverlayEl) showOverlayEl.checked = !!s.overlayShow;
+    if (overlayPosEl) overlayPosEl.value = s.overlayPos;
+
+    if (showTagSessionEl) showTagSessionEl.checked = !!s.tagSession;
+    if (showTagTrackerEl) showTagTrackerEl.checked = !!s.tagTracker;
+    if (showTagFaceEl) showTagFaceEl.checked = !!s.tagFace;
+    if (showTagStateEl) showTagStateEl.checked = !!s.tagState;
+    if (showTagMarEl) showTagMarEl.checked = !!s.tagMar;
+    if (showTagModeEl) showTagModeEl.checked = !!s.tagMode;
+
+    if (autoSaveOnEndEl) autoSaveOnEndEl.checked = !!s.autoSaveOnEnd;
+    if (blinkTabOnFinishEl) blinkTabOnFinishEl.checked = !!s.blinkTabOnFinish;
+    if (desktopNotifyOnFinishEl) desktopNotifyOnFinishEl.checked = !!s.desktopNotifyOnFinish;
+
+    if (warnIntensityEl) warnIntensityEl.value = String(clamp(Number(s.warnIntensity ?? defaults.warnIntensity), 0, 100));
+    if (warnFlashEl) warnFlashEl.checked = !!s.warnFlash;
+
+    if (attemptPiPOnHideEl) attemptPiPOnHideEl.checked = !!s.attemptPiPOnHide;
+
+    const timerCfg = { useTimer: !!s.useTimer, mode: s.mode, minutes: s.timerMinutes, seconds: s.timerSeconds };
+    syncTimerControls(timerCfg);
+    configureTimerFromControls(mainUseTimerEl);
+
+    applyOverlaySettings();
+    updateNotifyStatus();
+    renderStatus();
+  }
+
+  function renderStatus() {
+    if (modeTagEl) modeTagEl.textContent = `Mode: ${mainModeEl?.value === "closedOnly" ? "Closed-only" : "Normal"}`;
+    renderHeaderProfile();
+    if (btnPauseTimer) btnPauseTimer.textContent = analysisPaused ? "Resume" : "Pause";
+
+    if (!cameraRunning) {
+      if (camStatusEl) { camStatusEl.textContent = "Camera: idle"; camStatusEl.className = "pill"; }
+      if (sessionTagEl) sessionTagEl.textContent = "Session: —";
+      if (trackerTagEl) trackerTagEl.textContent = "Tracker: OFF";
+      if (faceTagEl) faceTagEl.textContent = "Face: —";
+      if (stateTagEl) stateTagEl.textContent = "State: —";
+      if (scoreTagEl) scoreTagEl.textContent = "MAR: —";
+      if (mouthStatusEl) { mouthStatusEl.textContent = "Mouth: —"; mouthStatusEl.className = "pill"; }
+      updateOpenVignette();
+      updateTimerUI();
+      return;
+    }
+
+    const sessionLabel =
+      sessionActive ? (analysisPaused ? "PAUSED" : "ACTIVE") :
+      (sessionEnded ? "ENDED" : "READY");
+    if (sessionTagEl) sessionTagEl.textContent = `Session: ${sessionLabel}`;
+
+    if (!trackingRunning) {
+      if (trackerTagEl) trackerTagEl.textContent = "Tracker: OFF";
+      if (faceTagEl) faceTagEl.textContent = "Face: —";
+      if (stateTagEl) stateTagEl.textContent = "State: —";
+      if (scoreTagEl) scoreTagEl.textContent = "MAR: —";
+      if (mouthStatusEl) { mouthStatusEl.textContent = "Mouth: —"; mouthStatusEl.className = "pill"; }
+      if (camStatusEl) { camStatusEl.textContent = "Camera: preview"; camStatusEl.className = "pill"; }
+      updateOpenVignette();
+      updateTimerUI();
+      return;
+    }
+
+    const ts = now();
+    const msSinceResults = lastResultsTs ? (ts - lastResultsTs) : Infinity;
+    if (trackerTagEl) trackerTagEl.textContent = `Tracker: ${msSinceResults < RESULTS_STALE_MS ? "OK" : "WAIT"}`;
+
+    if (faceTagEl) faceTagEl.textContent = `Face: ${hasFace ? "YES" : "NO"}`;
+
+    if (!hasFace) {
+      if (stateTagEl) stateTagEl.textContent = "State: —";
+      if (scoreTagEl) scoreTagEl.textContent = "MAR: —";
+      if (mouthStatusEl) { mouthStatusEl.textContent = "Mouth: —"; mouthStatusEl.className = "pill warnText"; }
+      if (camStatusEl) { camStatusEl.textContent = msSinceResults >= RESULTS_STALE_MS ? "Camera: stalled (background?)" : "Camera: tracking"; camStatusEl.className = "pill"; }
+      updateOpenVignette();
+      updateTimerUI();
+      return;
+    }
+
+    const thr = Number(thresholdEl?.value ?? defaults.threshold);
+
+    // If mouth is open but we detect speaking, we show TALKING and treat it as closed for counting.
+    const talkingIgnored = sessionActive && isSpeaking && isMouthOpenRaw;
+
+    if (stateTagEl) stateTagEl.textContent = `State: ${talkingIgnored ? "TALKING" : (isMouthOpen ? "OPEN" : "CLOSED")}`;
+    if (scoreTagEl) scoreTagEl.textContent = `MAR: ${marSmoothed.toFixed(3)} (thr ${thr.toFixed(2)})`;
+
+    if (talkingIgnored) {
+      if (mouthStatusEl) { mouthStatusEl.textContent = "Mouth: TALKING"; mouthStatusEl.className = "pill warnText"; }
+    } else if (isMouthOpen) {
+      if (mouthStatusEl) { mouthStatusEl.textContent = "Mouth: OPEN"; mouthStatusEl.className = "pill bad"; }
+    } else {
+      if (mouthStatusEl) { mouthStatusEl.textContent = "Mouth: CLOSED"; mouthStatusEl.className = "pill good"; }
+    }
+
+    if (camStatusEl) { camStatusEl.textContent = "Camera: tracking"; camStatusEl.className = "pill"; }
+    updateOpenVignette();
+    updateTimerUI();
+  }
+
+  function updateMetrics() {
+    if (openTimeEl) openTimeEl.textContent = fmtMs(openMs);
+    if (closedTimeEl) closedTimeEl.textContent = fmtMs(closedMs);
+    if (openEventsEl) openEventsEl.textContent = String(openEvents);
+
+    const total = openMs + closedMs;
+    const pct = total > 0 ? (openMs / total) * 100 : 0;
+
+    if (openPctEl) {
+      openPctEl.textContent = `${pct.toFixed(1)}%`;
+      applyOpenPillStyle(openPctEl, pct);
+    }
+  }
+
+  // Visibility
+  async function handleVisibilityChange() {
+    isPageVisible = !document.hidden;
+
+    if (!isPageVisible && attemptPiPOnHideEl?.checked) {
+      await attemptPiPBestEffort();
+    }
+
+    if (!isPageVisible && sessionActive && timerHintEl) {
+      timerHintEl.textContent = "Running in background (camera may stall). Use PiP for best chance.";
+    }
+
+    renderStatus();
+  }
+  document.addEventListener("visibilitychange", () => { handleVisibilityChange().catch(console.warn); });
+
+  // Multi-select
+  function updateSelectionUI() {
+    const count = selectedSessionIds.size;
+    if (selCountPill) selCountPill.textContent = `Selected: ${count}`;
+    if (btnDeleteSelected) btnDeleteSelected.disabled = count === 0;
+
+    const sessions = loadSessions(currentProfileId);
+    const allSelected = sessions.length > 0 && count === sessions.length;
+    if (cbSelectAllSessions) cbSelectAllSessions.checked = allSelected;
+  }
+  function clearSelection() {
+    selectedSessionIds.clear();
+    updateSelectionUI();
+  }
+  function toggleSelectAll(checked) {
+    const sessions = loadSessions(currentProfileId);
+    selectedSessionIds.clear();
+    if (checked) for (const s of sessions) selectedSessionIds.add(s.id);
+    updateSelectionUI();
+    renderSessionsUI();
+  }
+  function deleteSelectedSessions() {
+    const ids = [...selectedSessionIds];
+    if (!ids.length) return;
+    if (!confirm(`Delete ${ids.length} selected session(s)?`)) return;
+
+    let sessions = loadSessions(currentProfileId);
+    const idSet = new Set(ids);
+    sessions = sessions.filter(s => !idSet.has(s.id));
+    saveSessions(currentProfileId, sessions);
+
+    if (selectedSessionId && idSet.has(selectedSessionId)) selectedSessionId = null;
+
+    clearSelection();
+    renderSessionsUI();
+  }
+
+  // History stats
+  function updateSessionCountUI(count) {
+    const pName = profiles.find(p => p.id === currentProfileId)?.name || "—";
+    if (hdrSessions) hdrSessions.textContent = `Sessions: ${count}`;
+    if (historySessionsCount) historySessionsCount.textContent = `Sessions: ${count}`;
+    if (profileSummaryTitle) profileSummaryTitle.textContent = `Profile: ${pName}`;
+  }
+  function updateAggregates(sessions) {
+    const count = sessions.length;
+    updateSessionCountUI(count);
+
+    if (!count) {
+      if (historyAvgScore) historyAvgScore.textContent = "Avg open%: —";
+      if (historyBestScore) historyBestScore.textContent = "Best open%: —";
+      return;
+    }
+
+    const openPcts = sessions.map(s => Number(s.openPct ?? 0)).filter(n => Number.isFinite(n));
+    const avg = openPcts.reduce((a,b)=>a+b,0) / Math.max(1, openPcts.length);
+    const best = Math.min(...openPcts);
+
+    if (historyAvgScore) historyAvgScore.textContent = `Avg open%: ${avg.toFixed(1)}%`;
+    if (historyBestScore) historyBestScore.textContent = `Best open%: ${best.toFixed(1)}%`;
+  }
+
+  // Popup viewer (DOM-built: avoids breaking the main page script)
+  const POP_NAME = "mouth_trainer_session_view";
+  let sessionViewWin = null;
+
+  function popupStylesText() {
+    return `
+      :root { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+      body { margin:0; background:#0b0f17; color:#e9eefc; }
+      header {
+        padding: 14px 16px;
+        border-bottom: 1px solid #1d2740;
+        display:flex; align-items:center; justify-content:space-between; gap:12px;
+        position: sticky; top:0; background:#0b0f17; z-index: 2;
+      }
+      .title { font-weight: 900; letter-spacing:.2px; }
+      .sub { font-size: 12px; opacity:.85; margin-top: 2px; }
+      button {
+        padding: 10px 12px;
+        border-radius: 12px;
+        border: 1px solid #263356;
+        background: #122041;
+        color:#e9eefc;
+        cursor:pointer;
+        font-weight: 800;
+        white-space: nowrap;
+      }
+      button:hover { filter: brightness(1.08); }
+      main { padding: 14px; display:grid; gap: 12px; }
+      .card {
+        background: #0f172a;
+        border: 1px solid #1d2740;
+        border-radius: 14px;
+        padding: 14px;
+        box-shadow: 0 8px 22px rgba(0,0,0,.25);
+      }
+      .grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:10px; }
+      .metric { background:#0b1222; border:1px solid #263356; border-radius: 12px; padding: 10px; }
+      .metric .k { font-size: 12px; opacity:.8; }
+      .metric .v { font-size: 18px; font-weight: 900; margin-top: 2px; }
+      .small { font-size: 12px; opacity: .85; }
+      .chartWrap { height: 280px; }
+      canvas { width:100% !important; height:100% !important; }
+      .row { display:flex; gap:10px; align-items:center; flex-wrap: wrap; justify-content: space-between; }
+      .pill { padding: 6px 10px; border-radius: 999px; background:#111a2e; border:1px solid #1d2740; font-size: 12px; opacity:.95; }
+      .err { padding: 10px; border-radius: 12px; border: 1px solid rgba(255,0,0,.35); background: rgba(255,0,0,.08); }
+    `;
+  }
+
+  function ensureSessionPopup() {
+    if (sessionViewWin && !sessionViewWin.closed) return sessionViewWin;
+
+    sessionViewWin = window.open("", POP_NAME, "popup=yes,width=980,height=720");
+    if (!sessionViewWin) return null;
+
+    const doc = sessionViewWin.document;
+    doc.title = "Session View";
+
+    doc.head.innerHTML = "";
+    const meta1 = doc.createElement("meta");
+    meta1.setAttribute("charset", "utf-8");
+    const meta2 = doc.createElement("meta");
+    meta2.name = "viewport";
+    meta2.content = "width=device-width,initial-scale=1";
+    const title = doc.createElement("title");
+    title.textContent = "Session View";
+    const style = doc.createElement("style");
+    style.textContent = popupStylesText();
+    doc.head.appendChild(meta1);
+    doc.head.appendChild(meta2);
+    doc.head.appendChild(title);
+    doc.head.appendChild(style);
+
+    doc.body.innerHTML = "";
+
+    const header = doc.createElement("header");
+
+    const left = doc.createElement("div");
+    const hdrTitle = doc.createElement("div");
+    hdrTitle.className = "title";
+    hdrTitle.id = "hdrTitle";
+    hdrTitle.textContent = "Session";
+    const hdrSub = doc.createElement("div");
+    hdrSub.className = "sub";
+    hdrSub.id = "hdrSub";
+    hdrSub.textContent = "—";
+    left.appendChild(hdrTitle);
+    left.appendChild(hdrSub);
+
+    const right = doc.createElement("div");
+    right.className = "row";
+    right.style.justifyContent = "flex-end";
+
+    const profilePill = doc.createElement("div");
+    profilePill.className = "pill";
+    profilePill.id = "hdrProfile";
+    profilePill.textContent = "—";
+
+    const btnClose = doc.createElement("button");
+    btnClose.id = "btnClose";
+    btnClose.textContent = "Close";
+    btnClose.addEventListener("click", () => sessionViewWin.close());
+
+    right.appendChild(profilePill);
+    right.appendChild(btnClose);
+
+    header.appendChild(left);
+    header.appendChild(right);
+
+    const main = doc.createElement("main");
+
+    const cardStats = doc.createElement("section");
+    cardStats.className = "card";
+    const statsHdr = doc.createElement("div");
+    statsHdr.className = "row";
+    statsHdr.style.marginBottom = "10px";
+    statsHdr.innerHTML = `<div style="font-weight:900;">Stats</div><div class="small">Timeline: 1=open, 0=closed, blank=no face</div>`;
+    const statsGrid = doc.createElement("div");
+    statsGrid.className = "grid";
+    statsGrid.id = "statsGrid";
+    const settingsLine = doc.createElement("div");
+    settingsLine.className = "small";
+    settingsLine.id = "settingsLine";
+    settingsLine.style.marginTop = "10px";
+    settingsLine.textContent = "—";
+    const chartErr = doc.createElement("div");
+    chartErr.className = "err small";
+    chartErr.id = "chartErr";
+    chartErr.style.display = "none";
+    chartErr.style.marginTop = "10px";
+    cardStats.appendChild(statsHdr);
+    cardStats.appendChild(statsGrid);
+    cardStats.appendChild(settingsLine);
+    cardStats.appendChild(chartErr);
+
+    const cardMin = doc.createElement("section");
+    cardMin.className = "card";
+    cardMin.innerHTML = `<div style="font-weight:900; margin-bottom:8px;">Open % per minute</div>`;
+    const wrapMin = doc.createElement("div");
+    wrapMin.className = "chartWrap";
+    const cMin = doc.createElement("canvas");
+    cMin.id = "minChart";
+    wrapMin.appendChild(cMin);
+    cardMin.appendChild(wrapMin);
+
+    const cardTl = doc.createElement("section");
+    cardTl.className = "card";
+    cardTl.innerHTML = `<div style="font-weight:900; margin-bottom:8px;">Timeline (1Hz)</div>`;
+    const wrapTl = doc.createElement("div");
+    wrapTl.className = "chartWrap";
+    const cTl = doc.createElement("canvas");
+    cTl.id = "tlChart";
+    wrapTl.appendChild(cTl);
+    cardTl.appendChild(wrapTl);
+
+    main.appendChild(cardStats);
+    main.appendChild(cardMin);
+    main.appendChild(cardTl);
+
+    doc.body.appendChild(header);
+    doc.body.appendChild(main);
+
+    const loadChart = () => new Promise((resolve) => {
+      if (sessionViewWin.Chart) return resolve(true);
+      const s = doc.createElement("script");
+      s.src = "https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js";
+      s.async = true;
+      s.onload = () => resolve(true);
+      s.onerror = () => resolve(false);
+      doc.head.appendChild(s);
+    });
+
+    sessionViewWin.__ensureChartLoaded = loadChart;
+
+    return sessionViewWin;
+  }
+
+  function renderSessionInPopup(pop, session) {
+    const doc = pop.document;
+
+    doc.getElementById("hdrTitle").textContent = `Session: ${shortDt(session.startedAt)}`;
+    doc.getElementById("hdrSub").textContent = `Duration ${fmtMs(session.durationMs || 0)} • Ended ${shortDt(session.endedAt)}`;
+    doc.getElementById("hdrProfile").textContent = `Profile: ${session.profileName || "—"}`;
+
+    const epm = Number(session.eventsPerMin ?? eventsPerMinute(session.openEvents || 0, session.durationMs || 0));
+    const openPct = Number(session.openPct ?? 0);
+
+    const stats = [
+      ["Open %", `${openPct.toFixed(1)}%`],
+      ["Duration", fmtMs(session.durationMs || 0)],
+      ["Open events", String(session.openEvents ?? 0)],
+      ["Events / min", epm.toFixed(2)],
+      ["Face detect %", `${Number(session.faceDetectPct ?? 0).toFixed(0)}%`],
+      ["No-face (sec)", String(session.noFaceSec ?? 0)],
+      ["Open (sec)", String(session.openSec ?? 0)],
+      ["Closed (sec)", String(session.closedSec ?? 0)],
+    ];
+
+    const grid = doc.getElementById("statsGrid");
+    grid.innerHTML = "";
+    for (const [k, v] of stats) {
+      const m = doc.createElement("div");
+      m.className = "metric";
+      m.innerHTML = `<div class="k">${k}</div><div class="v">${v}</div>`;
+      grid.appendChild(m);
+    }
+
+    const st = session.settings || {};
+    doc.getElementById("settingsLine").textContent =
+      `Settings: thr=${Number(st.threshold ?? 0).toFixed(2)} • smooth=${st.smooth ?? "—"} • mode=${st.mode ?? "—"} • timer=${fmtMs(st.timerTotalMs ?? 0)}`;
+
+    const errBox = doc.getElementById("chartErr");
+    errBox.style.display = "none";
+    errBox.textContent = "";
+
+    const clearExistingCharts = () => {
+      try {
+        if (pop.__minChartInst) { pop.__minChartInst.destroy(); pop.__minChartInst = null; }
+        if (pop.__tlChartInst) { pop.__tlChartInst.destroy(); pop.__tlChartInst = null; }
+      } catch {}
+    };
+    clearExistingCharts();
+
+    if (!pop.Chart) {
+      errBox.style.display = "block";
+      errBox.textContent = "Chart.js failed to load in the popup (offline/blocked). Stats still shown.";
+      return;
+    }
+
+    const minute = session.minute || { labels: [], openPct: [] };
+    const t = session.timeline1Hz?.t || [];
+    const v = session.timeline1Hz?.v || [];
+
+    pop.__minChartInst = new pop.Chart(doc.getElementById("minChart"), {
+      type: "bar",
+      data: { labels: minute.labels || [], datasets: [{ label: "Open % per minute", data: minute.openPct || [], borderWidth: 1 }] },
+      options: { responsive:true, maintainAspectRatio:false, animation:false, scales:{ y:{ min:0, max:100 } } }
+    });
+
+    pop.__tlChartInst = new pop.Chart(doc.getElementById("tlChart"), {
+      type: "line",
+      data: { datasets: [{ label: "Open (1) / Closed (0)", data: t.map((sec,i)=>({ x: sec, y: v[i] })), borderWidth: 2, pointRadius: 0, tension: 0, stepped: true, spanGaps: false, parsing: false }] },
+      options: { responsive:true, maintainAspectRatio:false, animation:false, normalized:true, scales:{ y:{ min:0, max:1, ticks:{ stepSize:1 } }, x:{ type:"linear", title:{ display:true, text:"Seconds" } } } }
+    });
+  }
+
+  async function openSessionPopup(sessionId) {
+    const sessions = loadSessions(currentProfileId);
+    const s = sessions.find(x => x.id === sessionId);
+    if (!s) return alert("Session not found.");
+
+    selectedSessionId = sessionId;
+
+    const pop = ensureSessionPopup();
+    if (!pop) return alert("Popup blocked. Allow popups for this site.");
+
+    try { pop.focus(); } catch {}
+
+    const ok = await pop.__ensureChartLoaded();
+    if (!ok) console.warn("Popup Chart.js load failed; showing stats only.");
+
+    renderSessionInPopup(pop, s);
+  }
+
+  // Sessions list UI
+  function renderSessionsUI() {
+    const sessions = loadSessions(currentProfileId);
+
+    const idSet = new Set(sessions.map(s => s.id));
+    for (const id of [...selectedSessionIds]) if (!idSet.has(id)) selectedSessionIds.delete(id);
+
+    updateAggregates(sessions);
+
+    const chron = sessions.slice().reverse();
+    trendChart.data.labels = chron.map(s => shortDt(s.startedAt));
+    trendChart.data.datasets[0].data = chron.map(s => s.openPct || 0);
+    trendChart.data.datasets[1].data = chron.map(s => s.eventsPerMin || eventsPerMinute(s.openEvents || 0, s.durationMs || 0));
+    trendChart.update("none");
+
+    if (!sessionsListEl) return;
+    sessionsListEl.innerHTML = "";
+
+    if (!sessions.length) {
+      selectedSessionId = null;
+      const empty = document.createElement("div");
+      empty.className = "listRow";
+      empty.innerHTML = `<div style="grid-column:1 / -1; opacity:.8;">No sessions saved yet for this profile.</div>`;
+      sessionsListEl.appendChild(empty);
+      updateSelectionUI();
+      return;
+    }
+
+    for (const s of sessions.slice(0, 200)) {
+      const row = document.createElement("div");
+      row.className = "listRow";
+      row.dataset.id = s.id;
+
+      const dur = fmtMs(s.durationMs || 0);
+      const openPct = Number(s.openPct ?? 0);
+      const epm = Number(s.eventsPerMin ?? eventsPerMinute(s.openEvents || 0, s.durationMs || 0));
+
+      const style = openPctToStyle(openPct);
+      row.style.backgroundImage = style.row;
+
+      const checked = selectedSessionIds.has(s.id) ? "checked" : "";
+
+      row.innerHTML = `
+        <div style="display:flex;align-items:center;justify-content:center;">
+          <input type="checkbox" class="rowSelect" data-id="${s.id}" ${checked} />
+        </div>
+        <div>${shortDt(s.startedAt)}</div>
+        <div>${dur}</div>
+        <div><span class="openPill">${openPct.toFixed(1)}%</span></div>
+        <div>${epm.toFixed(2)}</div>
+        <div class="actions">
+          <button class="miniBtn primary" data-act="view" data-id="${s.id}">View</button>
+          <button class="miniBtn danger" data-act="del" data-id="${s.id}">Delete</button>
+        </div>
+      `;
+      sessionsListEl.appendChild(row);
+
+      const pill = row.querySelector(".openPill");
+      applyOpenPillStyle(pill, openPct);
+    }
+
+    if (!selectedSessionId || !idSet.has(selectedSessionId)) selectedSessionId = sessions[0].id;
+    updateSelectionUI();
+  }
+
+  // Export helpers
+  function downloadBlob(name, mime, text) {
+    const blob = new Blob([text], { type: mime });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+  function toCsvCell(v) {
+    const s = (v === null || v === undefined) ? "" : String(v);
+    if (/[",\n]/.test(s)) return `"${s.replace(/"/g,'""')}"`;
+    return s;
+  }
+  function buildSessionsSummaryRows(sessions) {
+    return sessions.map(s => {
+      const st = s.settings || {};
+      return {
+        profile: s.profileName ?? "",
+        session_id: s.id,
+        started_at: s.startedAt,
+        ended_at: s.endedAt,
+        duration_sec: s.durationSec,
+        open_pct: s.openPct,
+        open_events: s.openEvents,
+        events_per_min: s.eventsPerMin,
+        open_sec: s.openSec,
+        no_face_sec: s.noFaceSec,
+        face_detect_pct: s.faceDetectPct,
+        threshold: st.threshold ?? "",
+        smooth: st.smooth ?? "",
+        mode: st.mode ?? "",
+        timer_total_ms: st.timerTotalMs ?? ""
+      };
+    });
+  }
+  function buildSessionsSummaryCsv(sessions) {
+    const rows = buildSessionsSummaryRows(sessions);
+    if (!rows.length) return "";
+    const headers = Object.keys(rows[0]);
+    const lines = [headers.join(",")];
+    for (const r of rows) lines.push(headers.map(h => toCsvCell(r[h])).join(","));
+    return lines.join("\n");
+  }
+  function buildSingleSessionDetailCsv(s) {
+    const headers = ["second","open_state","note"];
+    const lines = [headers.join(",")];
+    const t = s.timeline1Hz?.t || [];
+    const v = s.timeline1Hz?.v || [];
+    for (let i = 0; i < t.length; i++) {
+      const val = v[i];
+      const note = (val === null) ? "no_face" : (val === 1 ? "open" : "closed");
+      lines.push([t[i], (val === null ? "" : val), note].map(toCsvCell).join(","));
+    }
+    return lines.join("\n");
+  }
+
+  async function exportAllSessionsXlsx() {
+    const ok = await ensureXlsxLoaded();
+    if (!ok) { alert("Could not load XLSX library (blocked/offline). Exporting CSV instead."); exportAllSessionsCsv(); return; }
+    const sessions = loadSessions(currentProfileId);
+    const name = profiles.find(p => p.id === currentProfileId)?.name || "profile";
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(buildSessionsSummaryRows(sessions)), "Sessions");
+    XLSX.writeFile(wb, `mouth_trainer_${name}_sessions.xlsx`);
+  }
+
+  async function exportSingleSessionXlsx(sessionId) {
+    const ok = await ensureXlsxLoaded();
+    if (!ok) { alert("Could not load XLSX library (blocked/offline). Exporting CSV instead."); exportSingleSessionCsv(sessionId); return; }
+
+    const sessions = loadSessions(currentProfileId);
+    const s = sessions.find(x => x.id === sessionId);
+    if (!s) return;
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(buildSessionsSummaryRows([s])), "Session");
+    XLSX.writeFile(wb, `session_${sessionId}.xlsx`);
+  }
+
+  function exportAllSessionsJson() {
+    const sessions = loadSessions(currentProfileId);
+    const name = profiles.find(p => p.id === currentProfileId)?.name || "profile";
+    downloadBlob(`mouth_trainer_${name}_sessions.json`, "application/json;charset=utf-8", JSON.stringify(sessions, null, 2));
+  }
+  function exportAllSessionsCsv() {
+    const sessions = loadSessions(currentProfileId);
+    const name = profiles.find(p => p.id === currentProfileId)?.name || "profile";
+    downloadBlob(`mouth_trainer_${name}_sessions.csv`, "text/csv;charset=utf-8", buildSessionsSummaryCsv(sessions));
+  }
+  function exportSingleSessionCsv(sessionId) {
+    const sessions = loadSessions(currentProfileId);
+    const s = sessions.find(x => x.id === sessionId);
+    if (!s) return;
+    downloadBlob(`session_${sessionId}_summary.csv`, "text/csv;charset=utf-8", buildSessionsSummaryCsv([s]));
+    downloadBlob(`session_${sessionId}_timeline_1hz.csv`, "text/csv;charset=utf-8", buildSingleSessionDetailCsv(s));
+  }
+  function clearAllSessions() {
+    if (!confirm("Delete ALL sessions for this profile?")) return;
+    saveSessions(currentProfileId, []);
+    clearSelection();
+    renderSessionsUI();
+  }
+
+  // Session record + save
+  function buildSessionRecord() {
+    const activeMs = openMs + closedMs;
+    const openPct = activeMs > 0 ? (openMs / activeMs) * 100 : 0;
+    const epm = eventsPerMinute(openEvents, activeMs);
+
+    const values = saveTimeline.v;
+    const noFaceSec = values.filter(v => v === null).length;
+    const faceSec = values.filter(v => v === 0 || v === 1).length;
+    const faceDetectPct = (noFaceSec + faceSec) > 0 ? (faceSec / (noFaceSec + faceSec)) * 100 : 0;
+
+    const openSec = values.filter(v => v === 1).length;
+    const closedSec = values.filter(v => v === 0).length;
+
+    const pName = profiles.find(p => p.id === currentProfileId)?.name || "Unknown";
+
+    return {
+      id: currentSessionId || makeId(),
+      profileId: currentProfileId,
+      profileName: pName,
+      startedAt: sessionStartIso || new Date().toISOString(),
+      endedAt: sessionEndIso || new Date().toISOString(),
+      durationMs: activeMs,
+      durationSec: Math.round(activeMs / 1000),
+      openMs, openSec,
+      closedMs, closedSec,
+      openPct: Number(openPct.toFixed(3)),
+      openEvents,
+      eventsPerMin: Number(epm.toFixed(4)),
+      noFaceSec,
+      faceDetectPct: Number(faceDetectPct.toFixed(3)),
+      minute: { labels: [...(minuteChart.data.labels || [])], openPct: [...(minuteChart.data.datasets?.[0]?.data || [])] },
+      timeline1Hz: { t: [...saveTimeline.t], v: [...saveTimeline.v] },
+      settings: {
+        threshold: Number(thresholdEl?.value ?? defaults.threshold),
+        smooth: Number(smoothEl?.value ?? defaults.smooth),
+        minOpenMs: Number(minOpenMsEl?.value ?? defaults.minOpenMs),
+        cooldownMs: Number(cooldownMsEl?.value ?? defaults.cooldownMs),
+        useTimer: timerEnabled,
+        mode: mainModeEl?.value ?? defaults.mode,
+        timerTotalMs
+      }
+    };
+  }
+
+  function updateSaveUI() {
+    const canSave = cameraRunning && sessionEnded && !currentSessionSaved;
+    if (btnSaveSession) btnSaveSession.disabled = !canSave;
+
+    if (!cameraRunning) { if (saveHintEl) saveHintEl.textContent = ""; }
+    else if (sessionActive) { if (saveHintEl) saveHintEl.textContent = "End session to enable saving."; }
+    else if (sessionEnded && currentSessionSaved) { if (saveHintEl) saveHintEl.textContent = "Saved ✓"; }
+    else if (sessionEnded) { if (saveHintEl) saveHintEl.textContent = "Ready to save."; }
+    else { if (saveHintEl) saveHintEl.textContent = "Start Session to begin analysis."; }
+  }
+
+  function saveCurrentSession() {
+    if (!sessionEnded) { alert("End the session first."); return; }
+    if (currentSessionSaved) return;
+
+    const record = buildSessionRecord();
+    const sessions = loadSessions(currentProfileId);
+    sessions.unshift(record);
+    saveSessions(currentProfileId, sessions);
+
+    currentSessionSaved = true;
+    updateSaveUI();
+    renderSessionsUI();
+  }
+
+  function updateButtonsState() {
+    if (btnStartSession) btnStartSession.disabled = !cameraRunning || sessionActive;
+    if (btnEndSession) btnEndSession.disabled = !cameraRunning || (!sessionActive && !sessionEnded);
+    if (btnPauseTimer) btnPauseTimer.disabled = !sessionActive;
+    if (btnStopTimer) btnStopTimer.disabled = !cameraRunning;
+    if (btnPiP) btnPiP.disabled = !cameraRunning;
+    setTimerInputsDisabled(sessionActive);
+  }
+
+  function resetSessionData() {
+    openMs = 0; closedMs = 0;
+    openEvents = 0; lastEventTs = -Infinity; openStartTs = null;
+    liveLastSampleTs = 0;
+    minuteIndex = 0;
+    openMsThisMinute = 0;
+
+    timelineChart.data.datasets[0].data.length = 0;
+    timelineChart.update("none");
+
+    minuteChart.data.labels.length = 0;
+    minuteChart.data.datasets[0].data.length = 0;
+    minuteChart.update("none");
+
+    save1HzLastSec = -1;
+    saveTimeline.t.length = 0;
+    saveTimeline.v.length = 0;
+
+    currentSessionSaved = false;
+
+    updateMetrics();
+    updateSaveUI();
+    updateTimerUI();
+  }
+
+  function startSession() {
+    if (!cameraRunning) { alert("Start the camera first."); return; }
+    if (profileDetails) profileDetails.open = false;
+
+    // Start speech detection (mic prompt) on session start.
+    startSpeechDetection().catch(console.warn);
+
+    resetSessionData();
+    currentSessionId = makeId();
+    sessionStartTs = now();
+    sessionStartIso = new Date().toISOString();
+    sessionEndIso = "";
+
+    sessionActive = true;
+    sessionEnded = false;
+    analysisPaused = false;
+
+    timerRunning = timerEnabled;
+    timerPaused = false;
+
+    if (timerEnabled) {
+      configureTimerFromControls(mainUseTimerEl);
+      timerRemainingMs = timerTotalMs;
+      if (timerRemainingEl) timerRemainingEl.textContent = fmtMs(timerRemainingMs);
+      if (timerHintEl) timerHintEl.textContent = "Running…";
+    } else {
+      if (timerRemainingEl) timerRemainingEl.textContent = "—";
+      if (timerHintEl) timerHintEl.textContent = "Timer is off (session runs until you end it).";
+    }
+
+    startTracking("session");
+    renderStatus();
+    updateButtonsState();
+  }
+
+  function endSession(reason) {
+    if (!cameraRunning) return;
+
+    sessionActive = false;
+    sessionEnded = true;
+    analysisPaused = false;
+    sessionEndIso = new Date().toISOString();
+
+    timerRunning = false;
+    timerPaused = false;
+
+    // Stop mic when the session ends (privacy + no extra prompts).
+    stopSpeechDetection();
+
+    if (timerHintEl) timerHintEl.textContent = reason === "timer"
+      ? "Timer done ✅ (session ended; summary ready)."
+      : "Session ended ✅ (summary ready).";
+
+    stopTracking();
+
+    updateSaveUI();
+    renderStatus();
+    updateButtonsState();
+
+    const elapsedMs = now() - sessionStartTs;
+    if (autoSaveOnEndEl?.checked && elapsedMs >= MIN_AUTOSAVE_MS) saveCurrentSession();
+
+    const activeMs = openMs + closedMs;
+    const pct = activeMs > 0 ? (openMs / activeMs) * 100 : 0;
+    const closedPct = 100 - pct;
+    const epm = eventsPerMinute(openEvents, activeMs);
+
+    const values = saveTimeline.v;
+    const noFaceSec = values.filter(v => v === null).length;
+    const faceSec = values.filter(v => v === 0 || v === 1).length;
+    const faceDetectPct = (noFaceSec + faceSec) > 0 ? (faceSec / (noFaceSec + faceSec)) * 100 : 0;
+
+    if (finishSub) finishSub.textContent = reason === "timer"
+      ? "Timer completed. Session ended and summary is ready."
+      : "Session ended manually. Summary is ready.";
+
+    if (finishOpenPct) finishOpenPct.textContent = `${pct.toFixed(1)}%`;
+    if (finishDur) finishDur.textContent = fmtMs(activeMs);
+    if (finishEvents) finishEvents.textContent = String(openEvents);
+    if (finishEpm) finishEpm.textContent = epm.toFixed(2);
+    if (finishFacePct) finishFacePct.textContent = `${faceDetectPct.toFixed(0)}%`;
+    if (finishClosedPct) finishClosedPct.textContent = `${closedPct.toFixed(1)}%`;
+
+    const st = openPctToStyle(pct);
+    if (finishOpenBox) {
+      finishOpenBox.style.background = st.bg;
+      finishOpenBox.style.borderColor = st.border;
+    }
+    if (finishOpenPct) finishOpenPct.style.color = st.text;
+
+    if (finishFeedback) {
+      const tips = [];
+      if (!isPageVisible) tips.push("Tip: For background tab use, enable PiP and keep the video playing.");
+      if (faceDetectPct < 75) tips.push("Improve lighting and keep your face centered.");
+      tips.push("Habit: lips lightly together, tongue on palate, nasal breathing.");
+      finishFeedback.innerHTML = `<div>Open ${pct.toFixed(1)}% • Closed ${closedPct.toFixed(1)}% • EPM ${epm.toFixed(2)}</div>` +
+        `<ul style="margin:8px 0 0 18px; padding:0;">${tips.map(t => `<li style="margin:4px 0;">${t}</li>`).join("")}</ul>`;
+    }
+
+    if (btnSaveFromModal) btnSaveFromModal.disabled = currentSessionSaved;
+    finishBackdrop?.classList.add("open");
+
+    if (blinkTabOnFinishEl?.checked) startTitleBlink();
+    maybeNotifyFinish();
+  }
+
+  function togglePause() {
+    if (!sessionActive) return;
+    analysisPaused = !analysisPaused;
+    timerPaused = analysisPaused;
+
+    if (analysisPaused) {
+      if (timerHintEl) timerHintEl.textContent = "Paused (session frozen).";
+      stopTracking();
+      trackingReason = "session";
+    } else {
+      if (timerHintEl) timerHintEl.textContent = "Running…";
+      startTracking("session");
+    }
+    renderStatus();
+    updateButtonsState();
+  }
+
+  function stopTimerOnly() {
+    timerRunning = false;
+    timerPaused = false;
+    configureTimerFromControls(mainUseTimerEl);
+    if (timerHintEl) timerHintEl.textContent = "Timer stopped. (Session continues until End Session.)";
+    renderStatus();
+  }
+
+  // FaceMesh tracking
+  function dist(a, b) { const dx = a.x - b.x, dy = a.y - b.y; return Math.hypot(dx, dy); }
+  function computeMAR(landmarks) {
+    const upper = landmarks[13];
+    const lower = landmarks[14];
+    const left = landmarks[61];
+    const right = landmarks[291];
+    const vertical = dist(upper, lower);
+    const width = dist(left, right);
+    if (!width || width < 1e-6) return 0;
+    return vertical / width;
+  }
+
+  function handleMouthStateChange(nextOpen, ts, opts = {}) {
+    const { skipCloseEventCount = false } = opts;
     if (nextOpen === isMouthOpen) return;
 
     const prev = isMouthOpen;
     isMouthOpen = nextOpen;
 
     if (!prev && nextOpen) {
-      if (sessionActive && !analysisPaused) {
-        openStartTs = ts;
-        openStartCounted = false;
-      } else {
-        openStartTs = null;
-        openStartCounted = false;
-      }
+      openStartTs = ts;
       flashVignette();
     } else if (prev && !nextOpen) {
+      if (skipCloseEventCount) {
+        openStartTs = null;
+        return;
+      }
+      if (openStartTs != null) {
+        const openDuration = ts - openStartTs;
+        const minOpenMs = Number(minOpenMsEl?.value ?? defaults.minOpenMs);
+        const cooldownMs = Number(cooldownMsEl?.value ?? defaults.cooldownMs);
+
+        if (openDuration >= minOpenMs && (ts - lastEventTs) >= cooldownMs) {
+          openEvents += 1;
+          lastEventTs = ts;
+        }
+      }
       openStartTs = null;
-      openStartCounted = false;
     }
   }
 
-  function maybeCountOpenStart(ts) {
-    if (!sessionActive || analysisPaused) return;
-    if (!hasFace) return;
-    if (!isMouthOpen) return;
-    if (openStartTs == null || openStartCounted) return;
+  function updateEffectiveMouthState(ts) {
+    if (!hasFace) {
+      if (isMouthOpen) handleMouthStateChange(false, ts, { skipCloseEventCount: true });
+      else { isMouthOpen = false; openStartTs = null; }
+      return;
+    }
 
-    const minOpenMs = Number(minOpenMsEl?.value ?? defaults.minOpenMs);
-    const cooldownMs = Number(cooldownMsEl?.value ?? defaults.cooldownMs);
+    const blockedBySpeech = sessionActive && isSpeaking && isMouthOpenRaw;
+    const nextEffectiveOpen = isMouthOpenRaw && !blockedBySpeech;
 
-    if ((ts - openStartTs) < minOpenMs) return;
-    if ((ts - lastEventTs) < cooldownMs) return;
-
-    openEvents += 1;          // now represents "open starts"
-    lastEventTs = ts;
-    openStartCounted = true;
-
-    // bucket by the minute the OPEN started
-    recordOpenEventForMinute(openStartTs);
+    const closingDueToSpeech = isMouthOpen && !nextEffectiveOpen && blockedBySpeech;
+    handleMouthStateChange(nextEffectiveOpen, ts, { skipCloseEventCount: closingDueToSpeech });
   }
 
-  // Detection loop''',
-    txt,
-    count=1,
-)
+  async function initFaceMesh() {
+    if (faceMesh) return faceMesh;
 
-# In faceMesh.onResults, call maybeCountOpenStart(ts) after handleMouthStateChange(...)
-txt = re.sub(
-    r'(handleMouthStateChange\(stableOpen, ts\);\n)',
-    r'\1      maybeCountOpenStart(ts);\n',
-    txt,
-    count=1,
-)
+    const FaceMeshCtor = (window.FaceMesh && window.FaceMesh.FaceMesh) ? window.FaceMesh.FaceMesh : window.FaceMesh;
+    if (!FaceMeshCtor) throw new Error("MediaPipe FaceMesh not loaded (CDN blocked/offline).");
 
-# Update minute chart dataset label (JS)
-txt = txt.replace('label: "Open events per minute"', 'label: "Mouth-open starts per minute"')
+    faceMesh = new FaceMeshCtor({ locateFile: (file) => `${MP_BASE}${file}` });
+    faceMesh.setOptions({
+      selfieMode: true,
+      maxNumFaces: 1,
+      refineLandmarks: true,
+      minDetectionConfidence: 0.5,
+      minTrackingConfidence: 0.5
+    });
 
-# Store per-minute starts under minute.openStarts instead of minute.openEvents
-txt = txt.replace('minute: { labels: [...(minuteChart.data.labels || [])], openEvents: [...(minuteChart.data.datasets?.[0]?.data || [])] },',
-                  'minute: { labels: [...(minuteChart.data.labels || [])], openStarts: [...(minuteChart.data.datasets?.[0]?.data || [])] },')
+    faceMesh.onResults((results) => {
+      const ts = now();
+      lastResultsTs = ts;
 
-# Popup: support minute.openStarts first
-txt = re.sub(
-    r'const minute = session\.minute \|\| \{ labels: \[\], openEvents: \[\] \};',
-    'const minute = session.minute || { labels: [], openStarts: [] };',
-    txt
-)
-txt = re.sub(
-    r'const minData = \(minute\.openEvents && minute\.openEvents\.length\) \? minute\.openEvents\s*: \(minute\.openPct \|\| \[\]\);\n\s*const minLabel = \(minute\.openEvents && minute\.openEvents\.length\) \? "Open events per minute" : "Open % per minute";',
-    'const minData = (minute.openStarts && minute.openStarts.length) ? minute.openStarts\n      : ((minute.openEvents && minute.openEvents.length) ? minute.openEvents : (minute.openPct || []));\n    const minLabel = (minute.openStarts && minute.openStarts.length) ? "Mouth-open starts per minute"\n      : ((minute.openEvents && minute.openEvents.length) ? "Open events per minute" : "Open % per minute");',
-    txt
-)
+      const faces = results.multiFaceLandmarks || [];
+      if (!faces.length) {
+        hasFace = false;
+        isMouthOpenRaw = false;
+        updateEffectiveMouthState(ts);
+        renderStatus();
+        return;
+      }
 
-# Remove any lingering references to openEventsByMinute name? Keep as is.
+      hasFace = true;
 
-# 8) Final cleanup: ensure no hands/touch artifacts
-# Remove any remaining `countFaceTouches` text and IDs
-txt = txt.replace('id="countFaceTouches"', 'id="countFaceTouches_REMOVED"')
+      const rawMar = computeMAR(faces[0]);
+      const s = Number(smoothEl?.value ?? defaults.smooth);
+      marHistory.push(rawMar);
+      while (marHistory.length > s) marHistory.shift();
+      marSmoothed = marHistory.reduce((a,b)=>a+b,0) / marHistory.length;
 
-# Write output
-out_path = Path("/mnt/data/mouth_trainer_open_starts_no_face_touch_FIXED.html")
-out_path.write_text(txt, encoding="utf-8")
+      const thr = Number(thresholdEl?.value ?? defaults.threshold);
+      const hysteresis = 0.015;
+      const stableOpenRaw = isMouthOpenRaw
+        ? (marSmoothed >= (thr - hysteresis))
+        : (marSmoothed >= (thr + hysteresis));
 
-# Quick validation counts
-import re
-summary = {
-    "bytes": out_path.stat().st_size,
-    "lines": txt.count("\n") + 1,
-    "has_hands_script": "hands.js" in txt,
-    "has_countFaceTouches": "countFaceTouches" in txt,
-    "has_faceTouches": "faceTouches" in txt,
-    "has_openStartCounted": "openStartCounted" in txt,
-    "chartOrMock_calls": len(re.findall(r'chartOrMock\(\s*["\']', txt)),
-    "has_minute_chart_label": "Mouth-open starts per minute" in txt,
-}
-summary
+      isMouthOpenRaw = stableOpenRaw;
+
+      if (calibrating) maybeCollectCalibration(rawMar);
+
+      // Effective open is updated continuously (speech can flip it even if raw stays open).
+      updateEffectiveMouthState(ts);
+
+      renderStatus();
+    });
+
+    if (typeof faceMesh.initialize === "function") await faceMesh.initialize();
+    return faceMesh;
+  }
+
+  function ensureInputCanvasSized() {
+    const vw = videoEl?.videoWidth || 0;
+    const vh = videoEl?.videoHeight || 0;
+    if (!vw || !vh) return false;
+    if (inputCanvas.width !== vw || inputCanvas.height !== vh) {
+      inputCanvas.width = vw;
+      inputCanvas.height = vh;
+    }
+    return true;
+  }
+
+  // Detection loop
+  let sendInFlight = false;
+  let videoFrameCbId = 0;
+  let detectTimerId = 0;
+
+  function usingRVFC() {
+    return !!(videoEl && typeof videoEl.requestVideoFrameCallback === "function");
+  }
+
+  function stopDetectionLoop() {
+    if (detectTimerId) window.clearTimeout(detectTimerId);
+    detectTimerId = 0;
+    sendInFlight = false;
+
+    if (videoFrameCbId && videoEl && typeof videoEl.cancelVideoFrameCallback === "function") {
+      try { videoEl.cancelVideoFrameCallback(videoFrameCbId); } catch {}
+    }
+    videoFrameCbId = 0;
+  }
+
+  function startDetectionLoop() {
+    stopDetectionLoop();
+
+    if (!usingRVFC()) {
+      const loop = () => {
+        if (!cameraRunning || !trackingRunning) return;
+        const delayMs = isPageVisible ? 0 : 250;
+
+        if (!videoEl || videoEl.readyState < 2) {
+          detectTimerId = window.setTimeout(loop, delayMs);
+          return;
+        }
+        if (!ensureInputCanvasSized()) {
+          detectTimerId = window.setTimeout(loop, delayMs);
+          return;
+        }
+        if (sendInFlight) {
+          detectTimerId = window.setTimeout(loop, delayMs);
+          return;
+        }
+
+        inputCtx.drawImage(videoEl, 0, 0, inputCanvas.width, inputCanvas.height);
+
+        sendInFlight = true;
+        faceMesh.send({ image: inputCanvas })
+          .catch((err) => {
+            lastSendError = err?.message || String(err);
+            console.error("FaceMesh send error:", err);
+          })
+          .finally(() => {
+            sendInFlight = false;
+            detectTimerId = window.setTimeout(loop, delayMs);
+          });
+      };
+
+      detectTimerId = window.setTimeout(loop, 0);
+      return;
+    }
+
+    const onFrame = () => {
+      if (!cameraRunning || !trackingRunning) return;
+
+      videoFrameCbId = videoEl.requestVideoFrameCallback(async () => {
+        if (!cameraRunning || !trackingRunning) return;
+
+        if (!ensureInputCanvasSized() || videoEl.readyState < 2) {
+          onFrame();
+          return;
+        }
+
+        if (sendInFlight) {
+          onFrame();
+          return;
+        }
+
+        inputCtx.drawImage(videoEl, 0, 0, inputCanvas.width, inputCanvas.height);
+
+        sendInFlight = true;
+        try {
+          await faceMesh.send({ image: inputCanvas });
+        } catch (err) {
+          lastSendError = err?.message || String(err);
+          console.error("FaceMesh send error:", err);
+        } finally {
+          sendInFlight = false;
+          onFrame();
+        }
+      });
+    };
+
+    onFrame();
+  }
+
+  async function startTracking(reason) {
+    if (!cameraRunning) return;
+    if (trackingRunning) return;
+
+    try {
+      await initFaceMesh();
+    } catch (e) {
+      console.error(e);
+      alert(String(e.message || e));
+      return;
+    }
+
+    trackingRunning = true;
+    trackingReason = reason;
+
+    hasFace = false;
+    isMouthOpenRaw = false;
+    isMouthOpen = false;
+    marHistory = [];
+    marSmoothed = 0;
+
+    lastResultsTs = 0;
+    lastSendError = "";
+
+    startDetectionLoop();
+    renderStatus();
+  }
+
+  function stopTracking() {
+    trackingRunning = false;
+    trackingReason = "off";
+    stopDetectionLoop();
+
+    hasFace = false;
+    isMouthOpenRaw = false;
+    isMouthOpen = false;
+    marHistory = [];
+    marSmoothed = 0;
+    openStartTs = null;
+
+    updateOpenVignette();
+    renderStatus();
+  }
+
+  // Sampling + tick
+  function sampleLiveCharts(ts) {
+    if (!sessionActive || analysisPaused) return;
+
+    if (liveLastSampleTs && (ts - liveLastSampleTs) < liveTimelineHzMs) return;
+    liveLastSampleTs = ts;
+
+    const elapsedSec = (ts - sessionStartTs) / 1000;
+    const y = hasFace ? (isMouthOpen ? 1 : 0) : null;
+
+    const data = timelineChart.data.datasets[0].data;
+    data.push({ x: elapsedSec, y });
+
+    const keepPoints = Math.ceil((timelineWindowSec * 1000) / liveTimelineHzMs) * 3;
+    if (data.length > keepPoints) data.splice(0, data.length - keepPoints);
+
+    timelineChart.options.scales.x.min = Math.max(0, elapsedSec - timelineWindowSec);
+    timelineChart.options.scales.x.max = elapsedSec;
+    timelineChart.update("none");
+  }
+
+  function sampleSave1Hz(ts) {
+    if (!sessionActive || analysisPaused) return;
+
+    const elapsedSec = Math.floor((ts - sessionStartTs) / 1000);
+    if (elapsedSec === save1HzLastSec) return;
+
+    save1HzLastSec = elapsedSec;
+    saveTimeline.t.push(elapsedSec);
+    saveTimeline.v.push(hasFace ? (isMouthOpen ? 1 : 0) : null);
+  }
+
+  function updatePerMinute(ts) {
+    if (!sessionActive || analysisPaused) return;
+
+    const elapsedMs = ts - sessionStartTs;
+    const currentMinute = Math.floor(elapsedMs / 60_000);
+
+    if (currentMinute > minuteIndex) {
+      const pct = clamp((openMsThisMinute / 60_000) * 100, 0, 100);
+      minuteChart.data.labels.push(`M${minuteIndex + 1}`);
+      minuteChart.data.datasets[0].data.push(pct);
+      minuteChart.update("none");
+      minuteIndex = currentMinute;
+      openMsThisMinute = 0;
+    }
+  }
+
+  let tickIntervalId = 0;
+
+  function startTickLoop() {
+    stopTickLoop();
+    lastTickTs = now();
+    tickIntervalId = window.setInterval(() => tick(now()), 60);
+  }
+
+  function stopTickLoop() {
+    if (tickIntervalId) window.clearInterval(tickIntervalId);
+    tickIntervalId = 0;
+  }
+
+  function tick(ts) {
+    if (!cameraRunning) return;
+
+    const dt = ts - lastTickTs;
+    lastTickTs = ts;
+
+    // Update speech first so effective mouth state can react even when raw stays open.
+    updateSpeechState(ts);
+
+    if (trackingRunning) {
+      const stale = !lastResultsTs || (ts - lastResultsTs) > RESULTS_STALE_MS;
+      if (stale) hasFace = false;
+    }
+
+    // Recompute effective mouth state every tick (speech can change it).
+    updateEffectiveMouthState(ts);
+
+    if (sessionActive && !analysisPaused && trackingRunning && hasFace) {
+      if (isMouthOpen) { openMs += dt; openMsThisMinute += dt; }
+      else { closedMs += dt; }
+    }
+
+    if (timerEnabled && timerRunning && !timerPaused) {
+      const mode = mainModeEl?.value ?? defaults.mode;
+      const shouldRun =
+        (mode === "normal") ? true :
+        (!hasFace ? true : (!isMouthOpen));
+
+      if (shouldRun) timerRemainingMs -= dt;
+
+      timerRemainingMs = Math.max(0, timerRemainingMs);
+      if (timerRemainingEl) timerRemainingEl.textContent = fmtMs(timerRemainingMs);
+      updateTimerUI();
+
+      if (timerRemainingMs <= 0) endSession("timer");
+    } else {
+      updateTimerUI();
+    }
+
+    if (sessionActive && !analysisPaused) {
+      sampleLiveCharts(ts);
+      sampleSave1Hz(ts);
+      updatePerMinute(ts);
+      updateMetrics();
+    }
+
+    renderStatus();
+    updateSaveUI();
+    updateButtonsState();
+    updateDebugPanel();
+  }
+
+  // Camera
+  async function startCamera() {
+    if (cameraRunning) return;
+
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      alert("Camera API not available. Use Chrome/Edge and run from https:// or localhost.");
+      return;
+    }
+
+    stream = await navigator.mediaDevices.getUserMedia({
+      audio: false,
+      video: { facingMode: "user", width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30, max: 30 } }
+    });
+
+    if (videoEl) {
+      videoEl.srcObject = stream;
+      await videoEl.play();
+    }
+
+    cameraRunning = true;
+
+    stopTracking();
+    sessionActive = false;
+    sessionEnded = false;
+    analysisPaused = false;
+
+    timerRunning = false;
+    timerPaused = false;
+
+    configureTimerFromControls(mainUseTimerEl);
+
+    currentSessionId = "";
+    currentSessionSaved = false;
+
+    if (timerHintEl) timerHintEl.textContent = timerEnabled ? "Click Start Session to begin." : "Timer is off (optional).";
+    startTickLoop();
+
+    renderStatus();
+    updateButtonsState();
+  }
+
+  async function stopCamera() {
+    if (sessionActive) endSession("manual");
+
+    stopSpeechDetection();
+    stopTracking();
+    stopTickLoop();
+
+    cameraRunning = false;
+    updateOpenVignette();
+    stopTitleBlink();
+
+    if (stream) {
+      stream.getTracks().forEach(t => t.stop());
+      stream = null;
+    }
+    try { videoEl?.pause(); } catch {}
+    if (videoEl) videoEl.srcObject = null;
+
+    renderStatus();
+    updateButtonsState();
+  }
+
+  function resetAppStateKeepCamera() {
+    if (sessionActive) { endSession("manual"); return; }
+
+    stopSpeechDetection();
+    stopTracking();
+    sessionActive = false;
+    sessionEnded = false;
+    analysisPaused = false;
+
+    timerRunning = false;
+    timerPaused = false;
+    configureTimerFromControls(mainUseTimerEl);
+
+    resetSessionData();
+    if (timerHintEl) timerHintEl.textContent = timerEnabled ? "Click Start Session to begin." : "Timer is off (optional).";
+    renderStatus();
+    updateButtonsState();
+  }
+
+  // Calibration
+  function startCalibration() {
+    if (!cameraRunning) { alert("Start the camera first."); return; }
+    calibrating = true;
+    calibStartTs = now();
+    calibSamples = [];
+    if (calibStatusEl) calibStatusEl.textContent = "Calibrating… keep mouth CLOSED.";
+    if (!trackingRunning) startTracking("calibration");
+  }
+
+  function maybeCollectCalibration(rawMar) {
+    const t = now();
+    const p = clamp((t - calibStartTs) / calibDurationMs, 0, 1);
+
+    calibSamples.push(rawMar);
+    if (calibStatusEl) calibStatusEl.textContent = `Calibrating ${(p * 100).toFixed(0)}% — keep mouth CLOSED`;
+
+    if (p < 1) return;
+
+    calibrating = false;
+    if (calibSamples.length < 20) {
+      if (calibStatusEl) calibStatusEl.textContent = "Calibration failed (not enough samples). Try again with better lighting.";
+      if (!sessionActive) stopTracking();
+      return;
+    }
+
+    const med = median(calibSamples);
+    const sd = stddev(calibSamples);
+    const margin = Math.max(0.05, sd * 3);
+    const newThr = clamp(med + margin, 0.10, 0.80);
+
+    if (thresholdEl) thresholdEl.value = newThr.toFixed(2);
+    if (thresholdValEl) thresholdValEl.textContent = Number(thresholdEl?.value ?? newThr).toFixed(2);
+    persistSettingsForProfile(thresholdEl);
+
+    if (calibStatusEl) calibStatusEl.textContent = `Calibrated ✓ Threshold set to ${Number(thresholdEl?.value ?? newThr).toFixed(2)}`;
+    if (!sessionActive) stopTracking();
+  }
+
+  // Notifications
+  function updateNotifyStatus() {
+    if (!("Notification" in window)) {
+      if (notifyStatusEl) notifyStatusEl.textContent = "Notifications not supported.";
+      if (btnEnableNotify) btnEnableNotify.disabled = true;
+      return;
+    }
+    if (btnEnableNotify) btnEnableNotify.disabled = false;
+    if (notifyStatusEl) notifyStatusEl.textContent = `Permission: ${Notification.permission}`;
+  }
+  async function enableNotifications() {
+    if (!("Notification" in window)) return;
+    try {
+      const perm = await Notification.requestPermission();
+      if (notifyStatusEl) notifyStatusEl.textContent = `Permission: ${perm}`;
+    } catch (e) {
+      console.warn(e);
+      if (notifyStatusEl) notifyStatusEl.textContent = "Permission request failed.";
+    }
+  }
+
+  const baseTitle = document.title;
+  let titleBlinkTimer = 0;
+  function stopTitleBlink() {
+    if (titleBlinkTimer) clearInterval(titleBlinkTimer);
+    titleBlinkTimer = 0;
+    document.title = baseTitle;
+  }
+  function startTitleBlink() {
+    if (titleBlinkTimer) return;
+    let flip = false;
+    titleBlinkTimer = setInterval(() => {
+      flip = !flip;
+      document.title = flip ? "✅ SESSION FINISHED" : baseTitle;
+    }, 900);
+  }
+  window.addEventListener("focus", stopTitleBlink);
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) stopTitleBlink(); });
+
+  async function maybeNotifyFinish() {
+    if (!desktopNotifyOnFinishEl?.checked) return;
+    if (!("Notification" in window)) return;
+    if (Notification.permission !== "granted") return;
+
+    try {
+      const total = openMs + closedMs;
+      const pct = total > 0 ? (openMs / total) * 100 : 0;
+      new Notification("Mouth Trainer: Session finished", {
+        body: `Duration ${fmtMs(total)} • Open ${pct.toFixed(1)}% • Events ${openEvents}`,
+        silent: false
+      });
+    } catch (e) {
+      console.warn("Notification failed:", e);
+    }
+  }
+
+  // Debug
+  function safeStr(v){ return (v === null || v === undefined) ? "—" : String(v); }
+  function getTrackInfo() {
+    const tracks = stream ? stream.getVideoTracks() : [];
+    if (!tracks.length) return "tracks=0";
+    const t = tracks[0];
+    const s = t.getSettings ? t.getSettings() : {};
+    return `tracks=${tracks.length} enabled=${safeStr(t.enabled)} ready=${safeStr(t.readyState)} w=${safeStr(s.width)} h=${safeStr(s.height)} fps=${safeStr(s.frameRate)}`;
+  }
+
+  function updateDebugPanel() {
+    if (!debugPanel?.classList.contains("open")) return;
+
+    const env = { secure: window.isSecureContext, protocol: location.protocol, host: location.host, ua: navigator.userAgent };
+    const mp = { version: MP_VERSION, base: MP_BASE, lastError: lastSendError || "—" };
+    const vid = {
+      readyState: videoEl?.readyState,
+      videoW: videoEl?.videoWidth,
+      videoH: videoEl?.videoHeight,
+      stream: stream ? "attached" : "none",
+      track: getTrackInfo(),
+      canvasW: inputCanvas.width,
+      canvasH: inputCanvas.height,
+      rvfc: usingRVFC()
+    };
+
+    const t = now();
+    const loop = {
+      profile: profiles.find(p => p.id === currentProfileId)?.name || "—",
+      isPageVisible,
+      cameraRunning, trackingRunning, trackingReason,
+      sessionActive, sessionEnded, analysisPaused,
+      timerEnabled, timerRunning, timerPaused,
+      timerRemainingMs: Math.round(timerRemainingMs),
+      sendInFlight,
+      msSinceResults: lastResultsTs ? Math.round(t - lastResultsTs) : "—",
+      hasFace,
+      isMouthOpenRaw,
+      isMouthOpen,
+      speech: { supported: speechSupported, ready: speechReady, isSpeaking, rms: Number(speechLastRms.toFixed(4)), noise: Number(speechNoiseRms.toFixed(4)) }
+    };
+
+    if (dbgEnv) dbgEnv.textContent = JSON.stringify(env, null, 2);
+    if (dbgMp) dbgMp.textContent = JSON.stringify(mp, null, 2);
+    if (dbgVideo) dbgVideo.textContent = JSON.stringify(vid, null, 2);
+    if (dbgLoop) dbgLoop.textContent = JSON.stringify(loop, null, 2);
+    if (dbgLogs) dbgLogs.textContent = logRing.length ? logRing.slice(-120).join("\n") : "—";
+  }
+
+  async function tinyFetch(url) {
+    try {
+      const r = await fetch(url, { method: "HEAD", cache: "no-store" });
+      return `${r.status} ${r.ok ? "OK" : r.statusText}`;
+    } catch {
+      try {
+        const r = await fetch(url, { method: "GET", headers: { Range: "bytes=0-0" }, cache: "no-store" });
+        return `${r.status} ${r.ok ? "OK" : r.statusText}`;
+      } catch (e) {
+        return `ERR ${(e && e.message) ? e.message : String(e)}`;
+      }
+    }
+  }
+
+  async function assetCheck() {
+    const files = [
+      "face_mesh.js",
+      "face_mesh_solution_packed_assets.data",
+      "face_mesh_solution_simd_wasm_bin.wasm",
+      "face_mesh_solution_simd_wasm_bin.js",
+      "face_mesh_solution_wasm_bin.wasm",
+      "face_mesh_solution_wasm_bin.js"
+    ];
+    if (dbgAssets) dbgAssets.textContent = "Checking…";
+    const out = [];
+    for (const f of files) out.push(`${f}: ${await tinyFetch(`${MP_BASE}${f}`)}`);
+    if (dbgAssets) dbgAssets.textContent = out.join("\n");
+  }
+
+  function getDebugSnapshot() {
+    return {
+      ts: new Date().toISOString(),
+      profile: profiles.find(p => p.id === currentProfileId)?.name || "—",
+      env: { secure: window.isSecureContext, protocol: location.protocol, host: location.host, ua: navigator.userAgent },
+      mediapipe: { version: MP_VERSION, base: MP_BASE, lastSendError },
+      video: {
+        readyState: videoEl?.readyState,
+        videoW: videoEl?.videoWidth,
+        videoH: videoEl?.videoHeight,
+        stream: !!stream,
+        track: getTrackInfo(),
+        canvasW: inputCanvas.width,
+        canvasH: inputCanvas.height,
+        rvfc: usingRVFC(),
+        pipSupported: pipSupported(),
+        pipActive: !!document.pictureInPictureElement
+      },
+      speech: { supported: speechSupported, ready: speechReady, isSpeaking, rms: speechLastRms, noise: speechNoiseRms },
+      loop: {
+        isPageVisible,
+        cameraRunning, trackingRunning, trackingReason,
+        sessionActive, sessionEnded, analysisPaused,
+        timerEnabled, timerRunning, timerPaused, timerTotalMs, timerRemainingMs,
+        openMs, closedMs, openEvents,
+        hasFace, isMouthOpenRaw, isMouthOpen,
+        lastResultsTs
+      },
+      logs: logRing.slice(-200)
+    };
+  }
+
+  // Profiles
+  function refreshProfileSelect() {
+    if (!profileSelect) return;
+    profileSelect.innerHTML = "";
+    for (const p of profiles) {
+      const opt = document.createElement("option");
+      opt.value = p.id;
+      opt.textContent = p.name;
+      profileSelect.appendChild(opt);
+    }
+    profileSelect.value = currentProfileId;
+    if (btnDeleteProfile) btnDeleteProfile.disabled = profiles.length <= 1;
+    renderHeaderProfile();
+  }
+
+  async function switchProfile(newId) {
+    if (newId === currentProfileId) return;
+
+    if (sessionActive) endSession("manual");
+    stopSpeechDetection();
+    stopTracking();
+
+    currentProfileId = newId;
+    setCurrentProfileId(newId);
+
+    clearSelection();
+    applySettingsForProfile();
+    renderSessionsUI();
+    renderStatus();
+    updateButtonsState();
+
+    if (profileDetails) profileDetails.open = false;
+  }
+
+  // Wire-up: inputs
+  on(thresholdEl, "input", () => {
+    if (thresholdValEl && thresholdEl) thresholdValEl.textContent = Number(thresholdEl.value).toFixed(2);
+    persistSettingsForProfile(thresholdEl);
+  });
+
+  const timerChangeEls = [
+    mainUseTimerEl, mainModeEl, mainTimerMinutesEl, mainTimerSecondsEl,
+    settingsUseTimerEl, settingsModeEl, settingsTimerMinutesEl, settingsTimerSecondsEl
+  ].filter(Boolean);
+
+  for (const el of timerChangeEls) {
+    on(el, "change", () => {
+      if (sessionActive) return;
+      configureTimerFromControls(el);
+      persistSettingsForProfile(el);
+      renderStatus();
+    });
+  }
+
+  const changeEls = [
+    smoothEl, minOpenMsEl, cooldownMsEl,
+    autoSaveOnEndEl,
+    showOverlayEl, overlayPosEl,
+    showTagSessionEl, showTagTrackerEl, showTagFaceEl, showTagStateEl, showTagMarEl, showTagModeEl,
+    blinkTabOnFinishEl, desktopNotifyOnFinishEl,
+    warnIntensityEl, warnFlashEl,
+    attemptPiPOnHideEl
+  ].filter(Boolean);
+
+  for (const el of changeEls) {
+    on(el, "change", () => {
+      applyOverlaySettings();
+      persistSettingsForProfile(el);
+      renderStatus();
+      updateNotifyStatus();
+    });
+  }
+
+  // Wire-up: buttons
+  on(btnStartCam, "click", () => startCamera().catch(err => {
+    console.error(err);
+    alert("Camera failed to start. Use https:// or http://localhost.\n\n" + (err?.message || String(err)));
+  }));
+  on(btnStopCam, "click", () => stopCamera());
+  on(btnReset, "click", () => resetAppStateKeepCamera());
+
+  on(btnStartSession, "click", () => startSession());
+  on(btnEndSession, "click", () => endSession("manual"));
+
+  on(btnPauseTimer, "click", () => togglePause());
+  on(btnStopTimer, "click", () => stopTimerOnly());
+
+  on(btnCalibrate, "click", () => startCalibration());
+
+  on(btnSaveSession, "click", () => saveCurrentSession());
+
+  on(btnExportJson, "click", () => exportAllSessionsJson());
+  on(btnExportCsv, "click", () => exportAllSessionsCsv());
+  on(btnExportXlsx, "click", () => exportAllSessionsXlsx());
+  on(btnClearSessions, "click", () => clearAllSessions());
+
+  on(btnExportSelectedCsv, "click", () => {
+    if (!selectedSessionId) return alert("Click View on a session first.");
+    exportSingleSessionCsv(selectedSessionId);
+  });
+  on(btnExportSelectedXlsx, "click", async () => {
+    if (!selectedSessionId) return alert("Click View on a session first.");
+    await exportSingleSessionXlsx(selectedSessionId);
+  });
+
+  on(btnEnableNotify, "click", () => enableNotifications());
+
+  on(btnCloseFinish, "click", () => finishBackdrop?.classList.remove("open"));
+  on(btnSaveFromModal, "click", () => saveCurrentSession());
+  on(btnExportThisCsv, "click", () => {
+    if (!sessionEnded) return;
+    if (currentSessionSaved) exportSingleSessionCsv(currentSessionId);
+    else {
+      const tmp = buildSessionRecord();
+      downloadBlob(`session_${tmp.id}_summary.csv`, "text/csv;charset=utf-8", buildSessionsSummaryCsv([tmp]));
+      downloadBlob(`session_${tmp.id}_timeline_1hz.csv`, "text/csv;charset=utf-8", buildSingleSessionDetailCsv(tmp));
+    }
+  });
+  on(btnExportThisXlsx, "click", async () => {
+    if (!sessionEnded) return;
+    if (currentSessionSaved) await exportSingleSessionXlsx(currentSessionId);
+    else alert("Save the session first to export XLSX (or enable auto-save).");
+  });
+  on(finishBackdrop, "click", (e) => { if (e.target === finishBackdrop) finishBackdrop.classList.remove("open"); });
+
+  on(btnDeleteSelected, "click", deleteSelectedSessions);
+  on(cbSelectAllSessions, "change", () => toggleSelectAll(cbSelectAllSessions.checked));
+
+  on(sessionsListEl, "click", (e) => {
+    const cb = e.target.closest("input.rowSelect");
+    if (cb) {
+      const id = cb.dataset.id;
+      if (!id) return;
+      if (cb.checked) selectedSessionIds.add(id);
+      else selectedSessionIds.delete(id);
+      updateSelectionUI();
+      return;
+    }
+
+    const btn = e.target.closest("button");
+    if (!btn) return;
+
+    const act = btn.dataset.act;
+    const id = btn.dataset.id;
+    if (!id) return;
+
+    if (act === "view") {
+      openSessionPopup(id).catch(console.warn);
+      return;
+    }
+
+    if (act === "del") {
+      if (!confirm("Delete this saved session?")) return;
+      let sessions = loadSessions(currentProfileId);
+      sessions = sessions.filter(s => s.id !== id);
+      saveSessions(currentProfileId, sessions);
+
+      selectedSessionIds.delete(id);
+      if (selectedSessionId === id) selectedSessionId = null;
+
+      renderSessionsUI();
+    }
+  });
+
+  on(btnDebug, "click", () => {
+    debugPanel?.classList.toggle("open");
+    if (btnDebug) btnDebug.textContent = debugPanel?.classList.contains("open") ? "Hide Debug" : "Show Debug";
+    updateDebugPanel();
+  });
+  on(btnAssetCheck, "click", () => assetCheck().catch(console.error));
+  on(btnCopyDebug, "click", async () => {
+    try {
+      await navigator.clipboard.writeText(JSON.stringify(getDebugSnapshot(), null, 2));
+      console.log("Copied debug snapshot to clipboard");
+      updateDebugPanel();
+    } catch (e) {
+      console.error(e);
+      alert("Clipboard copy failed. Check browser permissions.");
+    }
+  });
+  on(btnClearLogs, "click", () => { logRing.length = 0; if (dbgLogs) dbgLogs.textContent = "—"; });
+
+  on(profileSelect, "change", async () => { await switchProfile(profileSelect.value); });
+
+  on(btnAddProfile, "click", async () => {
+    const name = prompt("New profile name:");
+    if (!name) return;
+
+    const p = { id: makeId(), name: name.trim().slice(0, 60) || "Profile", createdAt: new Date().toISOString() };
+    profiles = [...profiles, p];
+    saveJson(PROFILES_KEY, profiles);
+    await switchProfile(p.id);
+    refreshProfileSelect();
+  });
+
+  on(btnRenameProfile, "click", async () => {
+    const p = profiles.find(x => x.id === currentProfileId);
+    if (!p) return;
+    const name = prompt("Rename profile:", p.name);
+    if (!name) return;
+
+    p.name = name.trim().slice(0, 60) || p.name;
+    saveJson(PROFILES_KEY, profiles);
+
+    const sessions = loadSessions(currentProfileId).map(s => ({ ...s, profileName: p.name }));
+    saveSessions(currentProfileId, sessions);
+
+    refreshProfileSelect();
+    renderSessionsUI();
+    renderStatus();
+  });
+
+  on(btnDeleteProfile, "click", async () => {
+    if (profiles.length <= 1) return;
+    const p = profiles.find(x => x.id === currentProfileId);
+    if (!p) return;
+
+    if (!confirm(`Delete profile "${p.name}" and all its sessions?`)) return;
+
+    if (sessionActive) endSession("manual");
+    stopSpeechDetection();
+    stopTracking();
+
+    localStorage.removeItem(settingsKey(currentProfileId));
+    localStorage.removeItem(sessionsKey(currentProfileId));
+
+    profiles = profiles.filter(x => x.id !== currentProfileId);
+    saveJson(PROFILES_KEY, profiles);
+
+    const nextId = profiles[0].id;
+    await switchProfile(nextId);
+    refreshProfileSelect();
+  });
+
+  // Init
+  refreshProfileSelect();
+  applySettingsForProfile();
+  renderSessionsUI();
+
+  updateMetrics();
+  renderStatus();
+  updateButtonsState();
+  updateNotifyStatus();
+  ensureXlsxLoaded().then(ok => console.log("XLSX ready:", ok));
+</script>
+</body>
+</html>
