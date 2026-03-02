@@ -2,18 +2,177 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta http-equiv="refresh" content="0; url=https://github.com/gmaglasang/Portfolio" />
-    <link rel="canonical" href="https://github.com/gmaglasang/Portfolio" />
-    <title>Redirecting…</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Guilbert Maglasang | BI Portfolio</title>
+    <meta
+      name="description"
+      content="Portfolio of Guilbert Maglasang featuring Power BI dashboards, scorecards, and analytics reporting projects."
+    />
+    <style>
+      :root {
+        --bg: #0b1220;
+        --panel: #121b2e;
+        --text: #e9eefc;
+        --muted: #b2bdd6;
+        --accent: #5ea1ff;
+        --accent-2: #65d6ad;
+        --border: #27314a;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: Inter, Segoe UI, Roboto, Arial, sans-serif;
+        background: linear-gradient(180deg, #0b1220 0%, #0d1629 100%);
+        color: var(--text);
+        line-height: 1.6;
+      }
+
+      .container {
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 2.5rem 1.25rem 3rem;
+      }
+
+      .hero {
+        background: radial-gradient(circle at top right, #20355f, #121b2e 60%);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 2rem;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+      }
+
+      .subtitle {
+        margin-top: 0.5rem;
+        color: var(--muted);
+        max-width: 70ch;
+      }
+
+      .pill-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-top: 1rem;
+      }
+
+      .pill {
+        padding: 0.35rem 0.7rem;
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        color: #dbe7ff;
+        background: #15203a;
+        font-size: 0.9rem;
+      }
+
+      .section-title {
+        margin: 2rem 0 0.75rem;
+        font-size: 1.35rem;
+      }
+
+      .grid {
+        display: grid;
+        gap: 1rem;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      }
+
+      .card {
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        background: var(--panel);
+        padding: 1rem;
+      }
+
+      .card h3 {
+        margin-top: 0;
+      }
+
+      .card p {
+        color: var(--muted);
+        margin-bottom: 0.75rem;
+      }
+
+      a {
+        color: var(--accent);
+        text-decoration: none;
+      }
+
+      a:hover {
+        text-decoration: underline;
+      }
+
+      .cta {
+        margin-top: 2rem;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 1rem;
+        background: linear-gradient(90deg, #131d34, #10273d);
+      }
+
+      .cta strong {
+        color: var(--accent-2);
+      }
+    </style>
   </head>
   <body>
-    <p>
-      Redirecting to portfolio…
-      <a href="https://github.com/gmaglasang/Portfolio">Click here if not redirected</a>.
-    </p>
-    <script>
-      window.location.replace("https://github.com/gmaglasang/Portfolio");
-    </script>
+    <main class="container">
+      <section class="hero">
+        <h1>Guilbert Maglasang</h1>
+        <p class="subtitle">
+          Business Intelligence & Reporting Portfolio focused on translating data into actionable decisions through
+          Power BI dashboards, scorecards, and KPI frameworks.
+        </p>
+        <div class="pill-row" aria-label="Core skills">
+          <span class="pill">Power BI</span>
+          <span class="pill">DAX</span>
+          <span class="pill">SQL</span>
+          <span class="pill">Snowflake</span>
+          <span class="pill">Power Automate</span>
+        </div>
+      </section>
+
+      <h2 class="section-title">Featured Work</h2>
+      <section class="grid">
+        <article class="card">
+          <h3>App Build: Mouth-Breathing Tracker</h3>
+          <p>
+            A lightweight application built to track mouth-open frequency over time and support habit improvement.
+          </p>
+          <a href="./App_Build/WebApp.html">View App Prototype</a>
+        </article>
+
+        <article class="card">
+          <h3>Corteva Vendor Scorecard Dashboard</h3>
+          <p>
+            A vendor-performance scorecard designed to support business reviews with KPI-driven insights.
+          </p>
+          <a href="./Corteva_Projects/Scorecard_Analysis_PDF.pdf">Open Dashboard PDF</a>
+        </article>
+
+        <article class="card">
+          <h3>KPI Summary Reporting Sample</h3>
+          <p>
+            A concise executive-style KPI reporting sample focused on clarity, consistency, and actionability.
+          </p>
+          <a href="./Power_BI_Projects/KPI%20Summary%20Report.pdf">Open KPI Summary PDF</a>
+        </article>
+      </section>
+
+      <section class="cta">
+        <p>
+          <strong>Recruiter quick view:</strong> This portfolio demonstrates dashboard storytelling, metric design,
+          and end-to-end reporting delivery for stakeholder decision-making.
+        </p>
+        <p>
+          For repository details, see the <a href="./README.md">README</a>.
+        </p>
+      </section>
+    </main>
   </body>
 </html>
- 
