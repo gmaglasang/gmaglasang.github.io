@@ -518,8 +518,6 @@
         <div id="sessionsList"></div>
       </div>
 
-      <!-- Removed bottom "Selected session" + graphs. View now opens a popup. -->
-
       <div class="row" style="margin-top:10px; justify-content:flex-end;">
         <button id="btnExportSelectedCsv">Export selected CSV</button>
         <button id="btnExportSelectedXlsx" class="primary">Export selected XLSX</button>
@@ -1178,7 +1176,13 @@
   let timerPaused = false;
 
   let hasFace = false;
+
+  // Raw from FaceMesh MAR threshold:
+  let isMouthOpenRaw = false;
+
+  // Effective state used everywhere (talking excluded):
   let isMouthOpen = false;
+
   let marHistory = [];
   let marSmoothed = 0;
 
@@ -1221,6 +1225,120 @@
   let isPageVisible = !document.hidden;
   const MIN_AUTOSAVE_MS = 10_000;
   const RESULTS_STALE_MS = 1500;
+
+  // ---------------------------
+  // Speech detection (VAD)
+  // When speaking, we treat "mouth open" as NOT open (ignored).
+  // ---------------------------
+  const SpeechAudioContext = window.AudioContext || window.webkitAudioContext;
+  const speechSupported = !!(SpeechAudioContext && navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+
+  let speechStream = null;
+  let speechCtx = null;
+  let speechAnalyser = null;
+  let speechBuf = null;
+
+  let speechReady = false;
+  let isSpeaking = false;
+  let speechNoiseRms = 0.010;
+  let speechSpeakingUntil = 0;
+  let speechLastRms = 0;
+
+  const SPEECH_SENSITIVITY = 1.9;
+  const SPEECH_MIN_RMS = 0.018;
+  const SPEECH_DELTA = 0.012;
+  const SPEECH_HOLD_MS = 350;
+
+  async function startSpeechDetection() {
+    if (!speechSupported) return;
+    if (speechReady) return;
+
+    try {
+      speechStream = await navigator.mediaDevices.getUserMedia({
+        audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
+        video: false
+      });
+
+      speechCtx = new SpeechAudioContext();
+      const src = speechCtx.createMediaStreamSource(speechStream);
+
+      speechAnalyser = speechCtx.createAnalyser();
+      speechAnalyser.fftSize = 1024;
+      speechAnalyser.smoothingTimeConstant = 0.8;
+
+      src.connect(speechAnalyser);
+      speechBuf = new Uint8Array(speechAnalyser.fftSize);
+
+      speechNoiseRms = 0.010;
+      speechSpeakingUntil = 0;
+      speechLastRms = 0;
+      isSpeaking = false;
+      speechReady = true;
+
+      try { await speechCtx.resume(); } catch {}
+      console.log("Speech detection ready (mic granted).");
+    } catch (e) {
+      console.warn("Speech detection unavailable (mic blocked/denied):", e?.message || e);
+      stopSpeechDetection();
+    }
+  }
+
+  function stopSpeechDetection() {
+    speechReady = false;
+    isSpeaking = false;
+    speechSpeakingUntil = 0;
+    speechLastRms = 0;
+
+    if (speechCtx) {
+      try { speechCtx.close(); } catch {}
+    }
+    speechCtx = null;
+    speechAnalyser = null;
+    speechBuf = null;
+
+    if (speechStream) {
+      try { speechStream.getTracks().forEach(t => t.stop()); } catch {}
+    }
+    speechStream = null;
+  }
+
+  function updateSpeechState(ts) {
+    if (!speechReady || !speechAnalyser || !speechBuf) {
+      isSpeaking = false;
+      return;
+    }
+
+    if (!sessionActive || analysisPaused) {
+      isSpeaking = false;
+      speechSpeakingUntil = 0;
+      return;
+    }
+
+    if (speechCtx && speechCtx.state === "suspended") {
+      speechCtx.resume().catch(() => {});
+    }
+
+    speechAnalyser.getByteTimeDomainData(speechBuf);
+
+    let sum = 0;
+    for (let i = 0; i < speechBuf.length; i++) {
+      const x = (speechBuf[i] - 128) / 128;
+      sum += x * x;
+    }
+    const rms = Math.sqrt(sum / speechBuf.length);
+    speechLastRms = rms;
+
+    const alpha = isSpeaking ? 0.002 : 0.02;
+    speechNoiseRms = (1 - alpha) * speechNoiseRms + alpha * rms;
+
+    const thr = Math.max(
+      SPEECH_MIN_RMS,
+      Math.max(speechNoiseRms * SPEECH_SENSITIVITY, speechNoiseRms + SPEECH_DELTA)
+    );
+
+    if (rms > thr) speechSpeakingUntil = ts + SPEECH_HOLD_MS;
+    isSpeaking = ts < speechSpeakingUntil;
+  }
 
   // Timer ring
   const ringR = 48;
@@ -1373,6 +1491,8 @@
   function updateOpenVignette() {
     const scale = getWarnScale();
     document.body.style.setProperty("--warnScale", String(scale));
+
+    // NOTE: isMouthOpen is "effective open" (talking ignored), so warning doesn't show while speaking.
     const show = scale > 0 && cameraRunning && trackingRunning && hasFace && isMouthOpen;
     document.body.classList.toggle("mouth-open", show);
   }
@@ -1547,10 +1667,16 @@
     }
 
     const thr = Number(thresholdEl?.value ?? defaults.threshold);
-    if (stateTagEl) stateTagEl.textContent = `State: ${isMouthOpen ? "OPEN" : "CLOSED"}`;
+
+    // If mouth is open but we detect speaking, we show TALKING and treat it as closed for counting.
+    const talkingIgnored = sessionActive && isSpeaking && isMouthOpenRaw;
+
+    if (stateTagEl) stateTagEl.textContent = `State: ${talkingIgnored ? "TALKING" : (isMouthOpen ? "OPEN" : "CLOSED")}`;
     if (scoreTagEl) scoreTagEl.textContent = `MAR: ${marSmoothed.toFixed(3)} (thr ${thr.toFixed(2)})`;
 
-    if (isMouthOpen) {
+    if (talkingIgnored) {
+      if (mouthStatusEl) { mouthStatusEl.textContent = "Mouth: TALKING"; mouthStatusEl.className = "pill warnText"; }
+    } else if (isMouthOpen) {
       if (mouthStatusEl) { mouthStatusEl.textContent = "Mouth: OPEN"; mouthStatusEl.className = "pill bad"; }
     } else {
       if (mouthStatusEl) { mouthStatusEl.textContent = "Mouth: CLOSED"; mouthStatusEl.className = "pill good"; }
@@ -2197,6 +2323,9 @@
     if (!cameraRunning) { alert("Start the camera first."); return; }
     if (profileDetails) profileDetails.open = false;
 
+    // Start speech detection (mic prompt) on session start.
+    startSpeechDetection().catch(console.warn);
+
     resetSessionData();
     currentSessionId = makeId();
     sessionStartTs = now();
@@ -2235,6 +2364,9 @@
 
     timerRunning = false;
     timerPaused = false;
+
+    // Stop mic when the session ends (privacy + no extra prompts).
+    stopSpeechDetection();
 
     if (timerHintEl) timerHintEl.textContent = reason === "timer"
       ? "Timer done ✅ (session ended; summary ready)."
@@ -2331,6 +2463,49 @@
     return vertical / width;
   }
 
+  function handleMouthStateChange(nextOpen, ts, opts = {}) {
+    const { skipCloseEventCount = false } = opts;
+    if (nextOpen === isMouthOpen) return;
+
+    const prev = isMouthOpen;
+    isMouthOpen = nextOpen;
+
+    if (!prev && nextOpen) {
+      openStartTs = ts;
+      flashVignette();
+    } else if (prev && !nextOpen) {
+      if (skipCloseEventCount) {
+        openStartTs = null;
+        return;
+      }
+      if (openStartTs != null) {
+        const openDuration = ts - openStartTs;
+        const minOpenMs = Number(minOpenMsEl?.value ?? defaults.minOpenMs);
+        const cooldownMs = Number(cooldownMsEl?.value ?? defaults.cooldownMs);
+
+        if (openDuration >= minOpenMs && (ts - lastEventTs) >= cooldownMs) {
+          openEvents += 1;
+          lastEventTs = ts;
+        }
+      }
+      openStartTs = null;
+    }
+  }
+
+  function updateEffectiveMouthState(ts) {
+    if (!hasFace) {
+      if (isMouthOpen) handleMouthStateChange(false, ts, { skipCloseEventCount: true });
+      else { isMouthOpen = false; openStartTs = null; }
+      return;
+    }
+
+    const blockedBySpeech = sessionActive && isSpeaking && isMouthOpenRaw;
+    const nextEffectiveOpen = isMouthOpenRaw && !blockedBySpeech;
+
+    const closingDueToSpeech = isMouthOpen && !nextEffectiveOpen && blockedBySpeech;
+    handleMouthStateChange(nextEffectiveOpen, ts, { skipCloseEventCount: closingDueToSpeech });
+  }
+
   async function initFaceMesh() {
     if (faceMesh) return faceMesh;
 
@@ -2353,6 +2528,8 @@
       const faces = results.multiFaceLandmarks || [];
       if (!faces.length) {
         hasFace = false;
+        isMouthOpenRaw = false;
+        updateEffectiveMouthState(ts);
         renderStatus();
         return;
       }
@@ -2367,13 +2544,17 @@
 
       const thr = Number(thresholdEl?.value ?? defaults.threshold);
       const hysteresis = 0.015;
-      const stableOpen = isMouthOpen
+      const stableOpenRaw = isMouthOpenRaw
         ? (marSmoothed >= (thr - hysteresis))
         : (marSmoothed >= (thr + hysteresis));
 
+      isMouthOpenRaw = stableOpenRaw;
+
       if (calibrating) maybeCollectCalibration(rawMar);
 
-      handleMouthStateChange(stableOpen, ts);
+      // Effective open is updated continuously (speech can flip it even if raw stays open).
+      updateEffectiveMouthState(ts);
+
       renderStatus();
     });
 
@@ -2390,30 +2571,6 @@
       inputCanvas.height = vh;
     }
     return true;
-  }
-
-  function handleMouthStateChange(nextOpen, ts) {
-    if (nextOpen === isMouthOpen) return;
-
-    const prev = isMouthOpen;
-    isMouthOpen = nextOpen;
-
-    if (!prev && nextOpen) {
-      openStartTs = ts;
-      flashVignette();
-    } else if (prev && !nextOpen) {
-      if (openStartTs != null) {
-        const openDuration = ts - openStartTs;
-        const minOpenMs = Number(minOpenMsEl?.value ?? defaults.minOpenMs);
-        const cooldownMs = Number(cooldownMsEl?.value ?? defaults.cooldownMs);
-
-        if (openDuration >= minOpenMs && (ts - lastEventTs) >= cooldownMs) {
-          openEvents += 1;
-          lastEventTs = ts;
-        }
-      }
-      openStartTs = null;
-    }
   }
 
   // Detection loop
@@ -2525,6 +2682,7 @@
     trackingReason = reason;
 
     hasFace = false;
+    isMouthOpenRaw = false;
     isMouthOpen = false;
     marHistory = [];
     marSmoothed = 0;
@@ -2542,9 +2700,11 @@
     stopDetectionLoop();
 
     hasFace = false;
+    isMouthOpenRaw = false;
     isMouthOpen = false;
     marHistory = [];
     marSmoothed = 0;
+    openStartTs = null;
 
     updateOpenVignette();
     renderStatus();
@@ -2617,10 +2777,16 @@
     const dt = ts - lastTickTs;
     lastTickTs = ts;
 
+    // Update speech first so effective mouth state can react even when raw stays open.
+    updateSpeechState(ts);
+
     if (trackingRunning) {
       const stale = !lastResultsTs || (ts - lastResultsTs) > RESULTS_STALE_MS;
       if (stale) hasFace = false;
     }
+
+    // Recompute effective mouth state every tick (speech can change it).
+    updateEffectiveMouthState(ts);
 
     if (sessionActive && !analysisPaused && trackingRunning && hasFace) {
       if (isMouthOpen) { openMs += dt; openMsThisMinute += dt; }
@@ -2701,6 +2867,7 @@
   async function stopCamera() {
     if (sessionActive) endSession("manual");
 
+    stopSpeechDetection();
     stopTracking();
     stopTickLoop();
 
@@ -2722,6 +2889,7 @@
   function resetAppStateKeepCamera() {
     if (sessionActive) { endSession("manual"); return; }
 
+    stopSpeechDetection();
     stopTracking();
     sessionActive = false;
     sessionEnded = false;
@@ -2868,7 +3036,10 @@
       timerRemainingMs: Math.round(timerRemainingMs),
       sendInFlight,
       msSinceResults: lastResultsTs ? Math.round(t - lastResultsTs) : "—",
-      hasFace, isMouthOpen
+      hasFace,
+      isMouthOpenRaw,
+      isMouthOpen,
+      speech: { supported: speechSupported, ready: speechReady, isSpeaking, rms: Number(speechLastRms.toFixed(4)), noise: Number(speechNoiseRms.toFixed(4)) }
     };
 
     if (dbgEnv) dbgEnv.textContent = JSON.stringify(env, null, 2);
@@ -2925,13 +3096,14 @@
         pipSupported: pipSupported(),
         pipActive: !!document.pictureInPictureElement
       },
+      speech: { supported: speechSupported, ready: speechReady, isSpeaking, rms: speechLastRms, noise: speechNoiseRms },
       loop: {
         isPageVisible,
         cameraRunning, trackingRunning, trackingReason,
         sessionActive, sessionEnded, analysisPaused,
         timerEnabled, timerRunning, timerPaused, timerTotalMs, timerRemainingMs,
         openMs, closedMs, openEvents,
-        hasFace, isMouthOpen,
+        hasFace, isMouthOpenRaw, isMouthOpen,
         lastResultsTs
       },
       logs: logRing.slice(-200)
@@ -2957,6 +3129,7 @@
     if (newId === currentProfileId) return;
 
     if (sessionActive) endSession("manual");
+    stopSpeechDetection();
     stopTracking();
 
     currentProfileId = newId;
@@ -3157,6 +3330,7 @@
     if (!confirm(`Delete profile "${p.name}" and all its sessions?`)) return;
 
     if (sessionActive) endSession("manual");
+    stopSpeechDetection();
     stopTracking();
 
     localStorage.removeItem(settingsKey(currentProfileId));
