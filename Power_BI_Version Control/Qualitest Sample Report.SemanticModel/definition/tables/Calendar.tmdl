@@ -72,6 +72,25 @@ table Calendar
 
 		annotation SummarizationSetBy = Automatic
 
+	/// Standard drill-down hierarchy for date-based visuals. Drill from Year → Quarter → Month → Date.
+	hierarchy 'Date Hierarchy'
+
+		/// Calendar year (e.g. 2025)
+		level Year
+			column: Year
+
+		/// Calendar quarter (e.g. Q1 2025)
+		level Quarter
+			column: Quarter
+
+		/// Month and year label (e.g. Jan 2025)
+		level Month
+			column: MonthYear
+
+		/// Individual calendar date
+		level Date
+			column: Date
+
 	partition Calendar = calculated
 		mode: import
 		source = ```
