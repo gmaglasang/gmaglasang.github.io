@@ -28,6 +28,15 @@ table MarkerMonth
 
 		annotation SummarizationSetBy = Automatic
 
+	column Year
+		formatString: 0
+		lineageTag: eff9b82f-33ac-48cd-8dd3-ee7a30a88f5d
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: Calendar[Year]
+
+		annotation SummarizationSetBy = Automatic
+
 	partition MarkerMonth = calculated
 		mode: import
 		source = ```
@@ -36,7 +45,8 @@ table MarkerMonth
 				    'Calendar',
 				    'Calendar'[MonthName],
 				    'Calendar'[MonthYear],
-				    'Calendar'[MonthNum]
+				    'Calendar'[MonthNum],
+				    'Calendar'[Year]
 				)
 				
 				

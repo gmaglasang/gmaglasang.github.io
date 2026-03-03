@@ -1,12 +1,12 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.5.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.6.0/schema.json",
   "name": "7bd913cfa7cd7c6d9f0d",
   "position": {
-    "x": 329.746835443038,
-    "y": 59.493670886075947,
+    "x": 329.26829268292687,
+    "y": 59.707317073170735,
     "z": 12000,
-    "height": 122.78481012658227,
-    "width": 146.83544303797467,
+    "height": 122.92682926829269,
+    "width": 146.63414634146343,
     "tabOrder": 5000
   },
   "visual": {
@@ -515,5 +515,23 @@
       ]
     },
     "drillFilterOtherVisuals": true
+  },
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "71c2db4097a7d52bb379",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Measure Table"
+              }
+            },
+            "Property": "Pass Rate"
+          }
+        },
+        "type": "Advanced"
+      }
+    ]
   }
 }

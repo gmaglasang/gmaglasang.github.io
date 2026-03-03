@@ -1,5 +1,5 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.5.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.6.0/schema.json",
   "name": "2916f8e7f710d3711aaf",
   "position": {
     "x": 171.01549053356283,
@@ -27,7 +27,7 @@
                 }
               },
               "queryRef": "MarkerMonth.MonthYear",
-              "nativeQueryRef": "MonthYear",
+              "nativeQueryRef": "MonthYear1",
               "active": true
             }
           ]
@@ -200,5 +200,51 @@
       ]
     },
     "drillFilterOtherVisuals": true
+  },
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "d413de465488cac166b0",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Measure Table"
+              }
+            },
+            "Property": "Total Projects for Line Chart"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "63a64c3409d69e962e8c",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Measure Table"
+              }
+            },
+            "Property": "Current Month Highlight"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "33f1db01377c76d856c9",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "MarkerMonth"
+              }
+            },
+            "Property": "MonthYear"
+          }
+        },
+        "type": "Categorical"
+      }
+    ]
   }
 }

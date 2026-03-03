@@ -1,9 +1,9 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.5.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.6.0/schema.json",
   "name": "6810e2c1da6b32695e75",
   "position": {
     "x": 171.21951219512195,
-    "y": 59.707317073170735,
+    "y": 56.195121951219512,
     "z": 11000,
     "height": 123.80487804878049,
     "width": 144,
@@ -530,5 +530,23 @@
       ]
     },
     "drillFilterOtherVisuals": true
+  },
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "72a26b6a1b40b7aa08d3",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Measure Table"
+              }
+            },
+            "Property": "Projects This Month"
+          }
+        },
+        "type": "Advanced"
+      }
+    ]
   }
 }

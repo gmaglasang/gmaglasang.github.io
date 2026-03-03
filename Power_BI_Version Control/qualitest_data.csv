@@ -1,0 +1,166 @@
+ProjectID,ClientName,Industry,ServiceType,Region,StartDate,EndDate,TotalTests,PassedTests,DefectsFound,CriticalDefects,AutomationRate (%),OnTimeDelivery (%),CustomerSatisfaction (1–5),DefectsPer1000,EffectiveEndDate
+P001,BankOne,Banking,Functional Testing,North America,1/5/2023,3/16/2023,4430,3857,169,13,32,90,4.3,31.65,3/16/2023
+P002,MediCare+,Healthcare,Automation Testing,Europe,2/1/2023,4/3/2023,7459,6704,117,6,57,82,4.5,13.57,4/3/2023
+P003,ShopEZ,Retail & E-Comm,Performance Testing,India,1/20/2023,3/2/2023,2644,2327,158,27,48,80,3.7,55.62,3/2/2023
+P004,FinCore,Banking,Security Testing,Middle East,3/1/2023,4/25/2023,6500,5852,116,20,54,85,4.2,18.7,4/25/2023
+P005,GreenEnergy,Energy,Managed Testing Service,LATAM,2/15/2023,5/10/2023,7199,6502,210,27,56,88,4.1,31.47,5/10/2023
+P006,Client6,Retail & E-Comm,Security Testing,LATAM,2/10/2023,8/8/2023,4424,3858,175,24,48,85,4.4,31.37,8/8/2023
+P007,Client7,Technology,Performance Testing,North America,5/20/2023,11/1/2023,10522,9340,58,49,29,84,4.2,5.77,11/1/2023
+P008,Client8,Technology,Automation Testing,Middle East,2/10/2023,7/26/2023,12304,11092,361,5,53,72,3.9,27.54,7/26/2023
+P009,Client9,Technology,Automation Testing,India,6/1/2023,9/26/2023,6076,5484,128,14,44,86,3.4,18.89,9/26/2023
+P010,Client10,Public Sector,Security Testing,LATAM,4/3/2023,7/28/2023,7106,6355,291,20,39,73,3.4,42.3,7/28/2023
+P011,Client11,Healthcare,Managed Testing Service,Middle East,6/27/2023,8/9/2023,4219,3626,369,8,29,76,4.1,83.06,8/9/2023
+P012,Client12,Energy,Performance Testing,LATAM,5/4/2023,12/28/2023,5205,4573,315,10,29,84,3.7,50,12/28/2023
+P013,Client13,Technology,Automation Testing,Europe,4/2/2023,7/6/2023,5562,4887,307,36,51,86,3.5,68.7,7/6/2023
+P014,Client14,Healthcare,Automation Testing,North America,5/1/2023,10/28/2023,7798,6812,165,32,53,88,4.4,20.3,10/28/2023
+P015,Client15,Energy,Performance Testing,LATAM,5/4/2023,9/12/2023,11201,10142,290,29,75,82,3.2,33.93,9/12/2023
+P016,Client16,Banking,Managed Testing Service,Europe,3/14/2023,11/23/2023,10172,9354,70,37,32,77,4,5.5,11/23/2023
+P017,Client17,Retail & E-Comm,Managed Testing Service,North America,6/20/2023,8/4/2023,6884,6027,336,6,71,73,4,47.4,8/4/2023
+P018,Client18,Banking,Automation Testing,Middle East,6/21/2023,10/22/2023,8487,7353,350,7,67,88,4.5,33.44,10/22/2023
+P019,Client19,Public Sector,Functional Testing,North America,6/26/2023,9/28/2023,6548,5839,303,5,40,86,3.4,43.38,9/28/2023
+P020,Client20,Technology,Security Testing,Europe,1/23/2023,11/7/2023,5773,5144,246,36,59,72,3.9,42.08,11/7/2023
+P021,Client21,Retail & E-Comm,Performance Testing,India,2/13/2023,7/29/2023,2145,1778,254,35,67,81,4.4,125.12,7/29/2023
+P022,Client22,Technology,Managed Testing Service,North America,4/10/2023,7/3/2023,2086,1663,249,41,71,86,3.4,130.04,7/3/2023
+P023,Client23,Healthcare,Performance Testing,North America,5/19/2023,11/3/2023,12514,11443,295,20,82,90,3.4,24.52,11/3/2023
+P024,Client24,Energy,Functional Testing,Europe,2/14/2023,7/29/2023,9649,8976,83,18,63,87,4.6,8.33,7/29/2023
+P025,Client25,Technology,Automation Testing,India,1/9/2023,8/7/2023,12620,11092,171,44,26,78,4.1,16.51,8/7/2023
+P026,Client26,Energy,Automation Testing,India,5/3/2023,10/20/2023,10044,9115,278,26,51,77,3.8,27.32,10/20/2023
+P027,Client27,Technology,Managed Testing Service,India,5/12/2023,9/11/2023,8446,7781,115,14,65,90,4.6,12.58,9/11/2023
+P028,Client28,Technology,Automation Testing,Europe,2/23/2023,10/1/2023,8359,7545,225,34,33,88,4.2,23.02,10/1/2023
+P029,Client29,Banking,Security Testing,Middle East,2/8/2023,10/29/2023,7825,7115,290,30,55,73,3.6,37.15,10/29/2023
+P030,Client30,Retail & E-Comm,Security Testing,North America,3/27/2023,8/29/2023,8811,7668,221,38,81,91,3.4,27.89,8/29/2023
+P031,Client31,Banking,Security Testing,LATAM,3/19/2023,12/28/2023,4528,4104,71,26,27,86,4,15.88,12/28/2023
+P032,Client32,Technology,Managed Testing Service,North America,4/26/2023,10/19/2023,4046,3501,128,14,52,79,3.4,39,10/19/2023
+P033,Client33,Retail & E-Comm,Functional Testing,North America,5/26/2023,7/19/2023,10636,9318,97,19,51,85,3.8,8.89,7/19/2023
+P034,Client34,Energy,Automation Testing,LATAM,6/28/2023,12/3/2023,2320,2008,192,47,41,86,4.1,74.89,12/3/2023
+P035,Client35,Energy,Functional Testing,North America,1/14/2023,8/27/2023,7932,7052,352,34,44,79,3.8,42.41,8/27/2023
+P036,Client36,Energy,Managed Testing Service,North America,1/25/2023,11/17/2023,10168,9268,70,9,49,89,3.5,6.69,11/17/2023
+P037,Client37,Public Sector,Managed Testing Service,LATAM,6/18/2023,8/27/2023,4681,4026,243,13,72,85,4.1,49.5,8/27/2023
+P038,Client38,Technology,Performance Testing,Europe,4/5/2023,11/26/2023,4279,3696,302,22,53,80,4.5,86.18,11/26/2023
+P039,Client39,Technology,Automation Testing,LATAM,6/20/2023,11/23/2023,5551,4830,254,20,46,79,4.1,37.99,11/23/2023
+P040,Client40,Retail & E-Comm,Automation Testing,Europe,5/13/2023,11/2/2023,10351,8985,249,7,53,75,4.5,24.9,11/2/2023
+P041,Client41,Energy,Performance Testing,Europe,1/18/2023,9/14/2023,5249,4593,252,36,56,75,4,53.19,9/14/2023
+P042,Client42,Technology,Managed Testing Service,LATAM,2/23/2023,9/19/2023,8981,8105,208,41,28,87,3.8,25.1,9/19/2023
+P043,Client43,Healthcare,Security Testing,LATAM,6/26/2023,7/25/2023,5666,5037,199,40,49,89,3.7,39.44,7/25/2023
+P044,Client44,Energy,Managed Testing Service,India,5/2/2023,10/6/2023,9274,8367,175,14,30,84,4.1,19.63,10/6/2023
+P045,Client45,Healthcare,Automation Testing,Middle East,5/14/2023,8/16/2023,9621,8714,158,29,51,79,3.2,17.11,8/16/2023
+P046,Client46,Healthcare,Security Testing,Europe,4/19/2023,9/24/2023,5567,4953,155,9,63,88,3.3,27.51,9/24/2023
+P047,Client47,Energy,Automation Testing,North America,3/11/2023,11/1/2023,2353,1925,248,9,59,85,4.1,102.13,11/1/2023
+P048,Client48,Technology,Security Testing,LATAM,1/8/2023,12/6/2023,6411,5597,185,15,56,78,4.1,27.07,12/6/2023
+P049,Client49,Banking,Functional Testing,Middle East,2/9/2023,11/24/2023,4692,4151,143,31,47,81,3.9,34.9,11/24/2023
+P050,Client50,Retail & E-Comm,Security Testing,North America,2/9/2023,9/27/2023,8683,8062,63,43,39,81,3.6,7.94,9/27/2023
+P051,Client51,Technology,Functional Testing,Middle East,4/9/2023,8/13/2023,3597,3122,179,25,47,85,4.1,51.65,8/13/2023
+P052,Client52,Technology,Functional Testing,Middle East,3/17/2023,11/8/2023,8880,7926,75,12,72,77,3.3,6.93,11/8/2023
+P053,Client53,Healthcare,Managed Testing Service,India,6/12/2023,9/21/2023,1850,1476,285,19,37,79,3.3,146.75,9/21/2023
+P054,Client54,Banking,Automation Testing,North America,3/24/2023,11/16/2023,9027,8225,150,27,56,74,4.4,17.77,11/16/2023
+P055,Client55,Banking,Functional Testing,India,5/25/2023,10/10/2023,8053,7251,111,43,41,86,3.7,13.7,10/10/2023
+P056,BankOne,Banking,Functional Testing,North America,1/5/2024,3/16/2024,4885,4457,162,9,36,88,4.5,31.42,3/16/2024
+P057,MediCare+,Healthcare,Automation Testing,Europe,2/1/2024,4/2/2024,8274,7672,112,5,69,85,4.6,12.91,4/2/2024
+P058,ShopEZ,Retail & E-Comm,Performance Testing,India,1/20/2024,2/27/2024,3181,2958,155,22,48,81,3.8,58.85,2/27/2024
+P059,FinCore,Banking,Security Testing,Middle East,3/1/2024,5/1/2024,6404,6100,99,14,58,91,4.2,16.6,5/1/2024
+P060,GreenEnergy,Energy,Managed Testing Service,LATAM,2/15/2024,5/6/2024,7107,6515,197,28,62,92,4.4,32.09,5/6/2024
+P061,Client6,Retail & E-Comm,Security Testing,LATAM,2/10/2024,8/30/2024,5438,4951,156,27,47,88,4.8,29.98,8/30/2024
+P062,Client7,Technology,Performance Testing,North America,5/20/2024,10/14/2024,10723,10322,58,40,28,93,4.6,4.83,10/14/2024
+P063,Client8,Technology,Automation Testing,Middle East,2/10/2024,7/29/2024,10952,10202,284,6,60,79,4.1,28.95,7/29/2024
+P064,Client9,Technology,Automation Testing,India,6/1/2024,9/28/2024,6565,6315,124,16,52,85,3.6,17.66,9/28/2024
+P065,Client10,Public Sector,Security Testing,LATAM,4/3/2024,8/3/2024,6937,6368,321,20,45,76,3.5,39.32,8/3/2024
+P066,Client11,Healthcare,Managed Testing Service,Middle East,6/27/2024,8/10/2024,4059,3640,333,5,31,79,4.5,72.41,8/10/2024
+P067,Client12,Energy,Performance Testing,LATAM,5/4/2024,12/15/2024,6435,5957,296,7,30,83,4.1,52.66,12/15/2024
+P068,Client13,Technology,Automation Testing,Europe,4/2/2024,7/11/2024,5245,4796,286,27,58,92,3.6,61.8,7/11/2024
+P069,Client14,Healthcare,Automation Testing,North America,5/1/2024,10/26/2024,7551,7120,151,31,54,94,4.4,20.02,10/26/2024
+P070,Client15,Energy,Performance Testing,LATAM,5/4/2024,9/15/2024,9406,8584,307,22,77,89,3.3,28.88,9/15/2024
+P071,Client16,Banking,Managed Testing Service,Europe,3/14/2024,12/18/2024,11412,10758,61,30,30,81,4.1,4.85,12/18/2024
+P072,Client17,Retail & E-Comm,Managed Testing Service,North America,6/20/2024,8/2/2024,8237,7615,321,5,77,75,4.4,46.01,8/2/2024
+P073,Client18,Banking,Automation Testing,Middle East,6/21/2024,10/21/2024,9203,8391,290,8,69,95,4.8,33.36,10/21/2024
+P074,Client19,Public Sector,Functional Testing,North America,6/26/2024,10/6/2024,5328,4803,265,4,48,90,3.6,45.87,10/6/2024
+P075,Client20,Technology,Security Testing,Europe,1/23/2024,11/18/2024,5429,5024,236,39,60,77,4.4,38.21,11/18/2024
+P076,Client21,Retail & E-Comm,Performance Testing,India,2/13/2024,7/24/2024,2178,1901,231,26,75,82,4.8,114.58,7/24/2024
+P077,Client22,Technology,Managed Testing Service,North America,4/10/2024,6/25/2024,2100,1800,264,36,79,84,3.6,118.69,6/25/2024
+P078,Client23,Healthcare,Performance Testing,North America,5/19/2024,10/31/2024,12381,11704,303,18,85,95,3.6,24.92,10/31/2024
+P079,Client24,Energy,Functional Testing,Europe,2/14/2024,8/24/2024,8915,8331,73,16,69,90,4.8,6.57,8/24/2024
+P080,Client25,Technology,Automation Testing,India,1/9/2024,8/12/2024,13266,12561,166,39,30,75,4,14.12,8/12/2024
+P081,Client26,Energy,Automation Testing,India,5/3/2024,10/4/2024,11150,10665,227,27,61,81,4.3,23.79,10/4/2024
+P082,Client27,Technology,Managed Testing Service,India,5/12/2024,9/24/2024,9228,8843,98,13,81,90,4.7,11.49,9/24/2024
+P083,Client28,Technology,Automation Testing,Europe,2/23/2024,9/6/2024,8638,8203,212,31,41,91,4.4,24.21,9/6/2024
+P084,Client29,Banking,Security Testing,Middle East,2/8/2024,11/24/2024,7819,7202,259,29,52,84,3.8,34.92,11/24/2024
+P085,Client30,Retail & E-Comm,Security Testing,North America,3/27/2024,8/20/2024,8906,8192,231,33,81,95,3.6,23.68,8/20/2024
+P086,Client31,Banking,Security Testing,LATAM,3/19/2024,12/28/2024,4687,4490,70,25,25,97,4.4,13.62,12/28/2024
+P087,Client32,Technology,Managed Testing Service,North America,4/26/2024,10/17/2024,3470,3320,136,13,60,85,3.4,33.93,10/17/2024
+P088,Client33,Retail & E-Comm,Functional Testing,North America,5/26/2024,7/20/2024,10627,10327,92,15,59,86,4.1,8.88,7/20/2024
+P089,Client34,Energy,Automation Testing,LATAM,6/28/2024,12/28/2024,2809,2474,185,42,44,89,4.3,79.76,12/28/2024
+P090,Client35,Energy,Functional Testing,North America,1/14/2024,8/26/2024,7390,7014,312,32,45,76,4.1,43.31,8/26/2024
+P091,Client36,Energy,Managed Testing Service,North America,1/25/2024,10/23/2024,9957,9328,63,8,59,89,3.5,5.33,10/23/2024
+P092,Client37,Public Sector,Managed Testing Service,LATAM,6/18/2024,9/7/2024,4761,4334,214,10,74,89,4.3,43.84,9/7/2024
+P093,Client38,Technology,Performance Testing,Europe,4/5/2024,12/20/2024,4277,3901,306,23,61,81,4.7,74.35,12/20/2024
+P094,Client39,Technology,Automation Testing,LATAM,6/20/2024,11/28/2024,5949,5673,231,19,45,81,4.5,38.61,11/28/2024
+P095,Client40,Retail & E-Comm,Automation Testing,Europe,5/13/2024,10/27/2024,8951,8501,255,6,55,84,4.3,25.79,10/27/2024
+P096,Client41,Energy,Performance Testing,Europe,1/18/2024,9/25/2024,5820,5317,282,35,56,80,4.3,49.35,9/25/2024
+P097,Client42,Technology,Managed Testing Service,LATAM,2/23/2024,8/15/2024,9531,8845,187,44,29,86,4,23.93,8/15/2024
+P098,Client43,Healthcare,Security Testing,LATAM,6/26/2024,7/24/2024,5695,5309,190,38,53,98,3.8,36.38,7/24/2024
+P099,Client44,Energy,Managed Testing Service,India,5/2/2024,9/23/2024,9001,8681,174,12,31,84,4.3,20.64,9/23/2024
+P100,Client45,Healthcare,Automation Testing,Middle East,5/14/2024,8/16/2024,8873,8574,141,25,53,82,3.5,14.95,8/16/2024
+P101,Client46,Healthcare,Security Testing,Europe,4/19/2024,10/22/2024,5880,5672,139,8,70,91,3.4,25.95,10/22/2024
+P102,Client47,Energy,Automation Testing,North America,3/11/2024,11/22/2024,2654,2383,252,8,62,88,4.5,95.15,11/22/2024
+P103,Client48,Technology,Security Testing,LATAM,1/8/2024,12/4/2024,6760,6384,173,13,63,87,4.3,26.29,12/4/2024
+P104,Client49,Banking,Functional Testing,Middle East,2/9/2024,12/18/2024,4463,4059,141,26,54,89,3.8,30.86,12/18/2024
+P105,Client50,Retail & E-Comm,Security Testing,North America,2/9/2024,9/7/2024,9331,9076,56,43,38,87,3.6,7.28,9/7/2024
+P106,Client51,Technology,Functional Testing,Middle East,4/9/2024,7/25/2024,3776,3388,172,25,59,94,4.3,52.32,7/25/2024
+P107,Client52,Technology,Functional Testing,Middle East,3/17/2024,11/13/2024,10572,9790,71,13,83,82,3.5,6.93,11/13/2024
+P108,Client53,Healthcare,Managed Testing Service,India,6/12/2024,9/25/2024,1872,1559,238,21,37,86,3.6,119.27,9/25/2024
+P109,Client54,Banking,Automation Testing,North America,3/24/2024,11/22/2024,9133,8538,118,21,62,78,4.9,15.42,11/22/2024
+P110,Client55,Banking,Functional Testing,India,5/25/2024,10/23/2024,6937,6553,99,39,46,95,4.1,14.75,10/23/2024
+P111,BankOne,Banking,Functional Testing,North America,1/5/2025,3/13/2025,4518,4379,163,9,39,99,4.4,29.66,3/13/2025
+P112,MediCare+,Healthcare,Automation Testing,Europe,2/1/2025,4/14/2025,7230,7219,92,4,75,96,4.7,11.72,4/14/2025
+P113,ShopEZ,Retail & E-Comm,Performance Testing,India,1/20/2025,3/2/2025,2967,2846,138,21,56,88,4,47.44,3/2/2025
+P114,FinCore,Banking,Security Testing,Middle East,3/1/2025,4/30/2025,5378,5372,108,14,56,87,4.7,15.49,4/30/2025
+P115,GreenEnergy,Energy,Managed Testing Service,LATAM,2/15/2025,4/27/2025,7602,7227,180,26,60,90,4.5,25.86,4/27/2025
+P116,Client6,Retail & E-Comm,Security Testing,LATAM,2/10/2025,8/30/2025,4585,4406,139,22,52,88,5,30.02,8/30/2025
+P117,Client7,Technology,Performance Testing,North America,5/20/2025,11/5/2025,10286,9995,50,39,33,98,4.4,5.24,11/5/2025
+P118,Client8,Technology,Automation Testing,Middle East,2/10/2025,7/19/2025,12635,11989,264,4,66,81,4.4,27.5,7/19/2025
+P119,Client9,Technology,Automation Testing,India,6/1/2025,9/8/2025,6524,6244,110,12,51,90,3.7,19.01,9/8/2025
+P120,Client10,Public Sector,Security Testing,LATAM,4/3/2025,8/1/2025,7141,6690,263,18,48,83,3.6,41.83,8/1/2025
+P121,Client11,Healthcare,Managed Testing Service,Middle East,6/27/2025,8/12/2025,3827,3517,286,5,34,85,4.3,74.18,8/12/2025
+P122,Client12,Energy,Performance Testing,LATAM,5/4/2025,12/6/2025,6495,6028,281,8,36,87,3.9,50.08,12/6/2025
+P123,Client13,Technology,Automation Testing,Europe,4/2/2025,7/8/2025,5090,4757,291,29,58,91,4,59.71,7/8/2025
+P124,Client14,Healthcare,Automation Testing,North America,5/1/2025,11/9/2025,7783,7562,159,24,60,92,4.8,18.07,11/9/2025
+P125,Client15,Energy,Performance Testing,LATAM,5/4/2025,9/23/2025,10796,10550,282,24,88,93,3.8,27.7,9/23/2025
+P126,Client16,Banking,Managed Testing Service,Europe,3/14/2025,10/30/2025,12513,12500,51,29,34,84,4.5,4.86,10/30/2025
+P127,Client17,Retail & E-Comm,Managed Testing Service,North America,6/20/2025,8/8/2025,7513,7169,291,5,74,82,4.2,37.74,8/8/2025
+P128,Client18,Banking,Automation Testing,Middle East,6/21/2025,10/18/2025,9045,8873,303,6,86,94,4.8,29.63,10/18/2025
+P129,Client19,Public Sector,Functional Testing,North America,6/26/2025,10/7/2025,5641,5463,239,5,51,94,3.5,37.57,10/7/2025
+P130,Client20,Technology,Security Testing,Europe,1/23/2025,10/21/2025,6060,5830,207,31,68,76,4.4,33.5,10/21/2025
+P131,Client21,Retail & E-Comm,Performance Testing,India,2/13/2025,7/12/2025,1880,1640,245,24,83,83,5,111.82,7/12/2025
+P132,Client22,Technology,Managed Testing Service,North America,4/10/2025,7/4/2025,2296,2076,255,26,81,92,3.5,121.38,7/4/2025
+P133,Client23,Healthcare,Performance Testing,North America,5/19/2025,10/21/2025,11785,11663,268,16,87,90,3.6,23.98,10/21/2025
+P134,Client24,Energy,Functional Testing,Europe,2/14/2025,8/26/2025,10939,10597,63,16,83,88,5,6.5,8/26/2025
+P135,Client25,Technology,Automation Testing,India,1/9/2025,7/29/2025,11511,11127,171,41,33,77,4.4,13.27,7/29/2025
+P136,Client26,Energy,Automation Testing,India,5/3/2025,10/28/2025,10796,10377,218,25,60,77,4.3,24.03,10/28/2025
+P137,Client27,Technology,Managed Testing Service,India,5/12/2025,9/25/2025,9280,9270,102,12,85,95,5,11.05,9/25/2025
+P138,Client28,Technology,Automation Testing,Europe,2/23/2025,9/28/2025,9272,8889,187,28,38,95,4.4,18.94,9/28/2025
+P139,Client29,Banking,Security Testing,Middle East,2/8/2025,11/12/2025,7813,7379,235,29,62,79,4.1,30.41,11/12/2025
+P140,Client30,Retail & E-Comm,Security Testing,North America,3/27/2025,8/17/2025,9214,9154,212,29,95,95,3.8,22.69,8/17/2025
+P141,Client31,Banking,Security Testing,LATAM,3/19/2025,12/3/2025,4257,4098,61,25,32,94,4.6,12.77,12/3/2025
+P142,Client32,Technology,Managed Testing Service,North America,4/26/2025,10/13/2025,3790,3674,124,10,55,86,3.6,30.69,10/13/2025
+P143,Client33,Retail & E-Comm,Functional Testing,North America,5/26/2025,7/23/2025,11636,11246,92,16,53,92,4.1,7.89,7/23/2025
+P144,Client34,Energy,Automation Testing,LATAM,6/28/2025,12/28/2025,2480,2317,184,41,41,91,4.5,68.54,12/28/2025
+P145,Client35,Energy,Functional Testing,North America,1/14/2025,9/26/2025,6908,6582,300,34,51,84,4.4,41.97,9/26/2025
+P146,Client36,Energy,Managed Testing Service,North America,1/25/2025,10/28/2025,10766,10657,56,6,60,90,3.6,5.97,10/28/2025
+P147,Client37,Public Sector,Managed Testing Service,LATAM,6/18/2025,8/30/2025,4044,3763,181,11,83,85,4.4,48.61,8/30/2025
+P148,Client38,Technology,Performance Testing,Europe,4/5/2025,12/7/2025,4180,3798,259,21,65,81,5,75.13,12/7/2025
+P149,Client39,Technology,Automation Testing,LATAM,6/20/2025,12/7/2025,5864,5726,203,17,48,81,4.5,33.37,12/7/2025
+P150,Client40,Retail & E-Comm,Automation Testing,Europe,5/13/2025,10/25/2025,10057,9802,210,8,60,82,4.9,23.31,10/25/2025
+P151,Client41,Energy,Performance Testing,Europe,1/18/2025,8/29/2025,5531,5433,262,30,70,84,4.1,45.65,8/29/2025
+P152,Client42,Technology,Managed Testing Service,LATAM,2/23/2025,9/5/2025,8050,8041,174,37,34,90,4.3,22.84,9/5/2025
+P153,Client43,Healthcare,Security Testing,LATAM,6/26/2025,7/26/2025,5790,5489,177,30,60,96,3.9,35.77,7/26/2025
+P154,Client44,Energy,Managed Testing Service,India,5/2/2025,10/24/2025,8136,7755,152,13,35,93,4.6,17.59,10/24/2025
+P155,Client45,Healthcare,Automation Testing,Middle East,5/14/2025,8/24/2025,9884,9536,138,21,63,85,3.4,13.1,8/24/2025
+P156,Client46,Healthcare,Security Testing,Europe,4/19/2025,10/7/2025,6521,6380,151,6,67,94,3.4,22.75,10/7/2025
+P157,Client47,Energy,Automation Testing,North America,3/11/2025,11/14/2025,2408,2253,226,7,71,84,4.6,80.39,11/14/2025
+P158,Client48,Technology,Security Testing,LATAM,1/8/2025,12/1/2025,6020,5836,164,10,66,85,4.5,25.68,12/1/2025
+P159,Client49,Banking,Functional Testing,Middle East,2/9/2025,12/28/2025,4282,4132,127,25,60,91,4.3,25.85,12/28/2025
+P160,Client50,Retail & E-Comm,Security Testing,North America,2/9/2025,8/31/2025,8963,8954,58,31,45,89,3.7,6.54,8/31/2025
+P161,Client51,Technology,Functional Testing,Middle East,4/9/2025,7/27/2025,3626,3456,150,17,61,95,4.5,47.19,7/27/2025
+P162,Client52,Technology,Functional Testing,Middle East,3/17/2025,11/9/2025,8800,8586,59,13,80,88,3.6,6.42,11/9/2025
+P163,Client53,Healthcare,Managed Testing Service,India,6/12/2025,9/21/2025,1913,1672,263,15,46,89,3.6,114.93,9/21/2025
+P164,Client54,Banking,Automation Testing,North America,3/24/2025,11/19/2025,9103,8910,127,23,74,83,4.9,14.49,11/19/2025
+P165,Client55,Banking,Functional Testing,India,5/25/2025,10/19/2025,6833,6784,96,32,51,96,4,13.57,10/19/2025
