@@ -1,17 +1,17 @@
 table 'Measure Table'
 	lineageTag: 22122c0d-1160-4b1a-bb41-0cf0c0806790
 
-	/// Percentage of tests passed out of total tests executed. Calculated as Total Passed Tests divided by Total Tests.
+	/// Percentage of tests that passed, calculated as Total Passed Tests divided by Total Tests. Core quality metric for the selected period.
 	measure 'Pass Rate %' = DIVIDE ( [Total Passed Tests], [Total Tests], 0 )
 		formatString: 0.00%;-0.00%;0.00%
 		lineageTag: e3ef0775-e7e0-46a0-b83a-fbf50379eb4c
 
-	/// Total number of tests that did not pass. Calculated as the difference between Total Tests and Passed Tests.
+	/// Total number of failed tests, calculated as the difference between Total Tests and Passed Tests.
 	measure 'Failed Tests' = SUM(QualitestData[TotalTests]) - SUM(QualitestData[PassedTests])
 		formatString: 0
 		lineageTag: e3bd176a-4293-477b-9e6d-b0b05ce2e442
 
-	/// Average number of days from project start date to end date across all projects in the current filter context.
+	/// Average number of days from project start to end date across all projects in the current filter context.
 	measure 'Avg Project Duration Days' =
 			
 			AVERAGEX(
@@ -22,7 +22,7 @@ table 'Measure Table'
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
-	/// Count of projects with zero critical defects and a pass rate of 90% or higher, representing fully successful project deliveries.
+	/// Count of projects meeting strict success criteria: zero critical defects and a pass rate of at least 90%.
 	measure 'Project Success Count' = ```
 			
 			SUMX(
@@ -38,7 +38,7 @@ table 'Measure Table'
 		formatString: 0
 		lineageTag: 69c40bb3-a8e8-4ebe-9abf-e951e6b72ee2
 
-	/// Distinct count of projects started quarter-to-date (QTD) based on the project start date.
+	/// Distinct count of projects started in the current quarter (quarter-to-date using project start date).
 	measure 'Projects This Quarter' =
 			
 			CALCULATE(
@@ -48,7 +48,7 @@ table 'Measure Table'
 		formatString: 0
 		lineageTag: fae3058d-8921-4d8d-8fd0-ad640fd3a2a1
 
-	/// Distinct count of projects active month-to-date (MTD) based on the Calendar date table.
+	/// Distinct count of projects started in the current month (month-to-date using the Calendar table).
 	measure 'Projects This Month' = ```
 			
 			CALCULATE(
@@ -60,7 +60,7 @@ table 'Measure Table'
 		formatString: 0
 		lineageTag: 23209c37-2a96-463a-84fc-6b766d025556
 
-	/// Distinct count of all unique projects (by Project ID) within the current filter context.
+	/// Distinct count of all projects in the current filter context based on Project ID.
 	measure 'Total Projects' = ```
 			
 			DISTINCTCOUNT(QualitestData[ProjectID])
@@ -70,7 +70,7 @@ table 'Measure Table'
 		formatString: #,0
 		lineageTag: db68c464-672c-49fc-8d19-dbf73e16c031
 
-	/// Month-to-date pass rate calculated as the ratio of passed tests to total tests using the Calendar date table.
+	/// Month-to-date pass rate: ratio of passed tests to total tests for the current month using the Calendar table.
 	measure 'Pass Rate' =
 			
 			VAR TotalTests =
@@ -82,12 +82,12 @@ table 'Measure Table'
 		formatString: 0.00%;-0.00%;0.00%
 		lineageTag: 6e12f227-1e5a-4d72-8909-13c9da68353e
 
-	/// Alias for the Pass Rate measure. Returns the month-to-date pass rate formatted as a percentage with one decimal place.
+	/// Alias for Pass Rate (MTD). Returns the month-to-date pass rate as a percentage.
 	measure 'Avg Pass Rate %' = [Pass Rate]
 		formatString: 0.0%;-0.0%;0.0%
 		lineageTag: ac73f0bd-2606-4410-998a-750064b7b458
 
-	/// Average customer satisfaction score (scale 1–5) for projects month-to-date based on the Calendar date table.
+	/// Average customer satisfaction score (scale 1–5) for the current month-to-date period.
 	measure 'Avg CSAT' =
 			
 			CALCULATE(
@@ -98,7 +98,7 @@ table 'Measure Table'
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
-	/// Average automation rate across all projects expressed as a percentage. Divides the raw automation rate field (stored as 0–100) by 100.
+	/// Average automation rate expressed as a decimal (0–1), derived from the AutomationRate column which is stored as a percentage.
 	measure 'Avg Automation Rate %' = ```
 			DIVIDE( AVERAGE(QualitestData[AutomationRate (%)]), 100 )
 			
@@ -106,7 +106,7 @@ table 'Measure Table'
 		formatString: 0.00%;-0.00%;0.00%
 		lineageTag: ed4f86ef-37cc-4fa8-a1cd-cc9bad6f7e08
 
-	/// Weighted average defect density per 1,000 tests. Weights each project's defect rate by its test volume to produce an accurate aggregate.
+	/// Weighted average defect rate per 1,000 tests, weighted by the number of tests in each row to ensure accuracy across projects of different sizes.
 	measure 'Defects per 1000' =
 			
 			VAR TotalTests = SUM(QualitestData[TotalTests])
@@ -117,7 +117,7 @@ table 'Measure Table'
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
-	/// Average on-time delivery rate across all projects, expressed as a percentage. Converts the raw 0–100 field to a decimal ratio.
+	/// Average on-time delivery rate as a decimal (0–1), derived from the OnTimeDelivery column which is stored as a percentage.
 	measure 'Ontime Delivery %' = ```
 			
 			DIVIDE( AVERAGE( QualitestData[OnTimeDelivery (%)] ), 100 )
@@ -127,22 +127,22 @@ table 'Measure Table'
 		formatString: 0.0%;-0.0%;0.0%
 		lineageTag: e0c92a51-d251-4a50-8a19-186f3cfce908
 
-	/// Sum of total tests executed across all projects in the current filter context.
+	/// Sum of all tests executed across all projects in the current filter context.
 	measure 'Total Tests' = SUM(QualitestData[TotalTests])
 		formatString: #,0
 		lineageTag: 7dd6d94f-78a6-4feb-af53-8fe6c80d3144
 
-	/// Sum of tests that passed across all projects in the current filter context.
+	/// Sum of all tests that passed across all projects in the current filter context.
 	measure 'Total Passed Tests' = SUM(QualitestData[PassedTests])
 		formatString: #,0
 		lineageTag: 618633e9-3057-45a0-8d1c-923dd6b99342
 
-	/// Sum of critical defects recorded across all projects in the current filter context.
+	/// Sum of critical defects found across all projects in the current filter context.
 	measure 'Total Critical Defects' = SUM(QualitestData[CriticalDefects])
 		formatString: #,0
 		lineageTag: abab3264-76d5-41bd-886d-e4c95a464077
 
-	/// Composite quality score combining pass rate (up to 4 pts), customer satisfaction (up to 6 pts), and a defect penalty (up to -2 pts). Higher scores indicate better quality.
+	/// Composite quality score (max ~10 points): 4 points from pass rate, up to 6 points from CSAT (score × 1.5), minus up to 2 points penalty for high defect rates (capped at 50 defects/1000).
 	measure 'Quality Score' =
 			
 			VAR PassRateScore = [Pass Rate] * 4  // Max 4 points
@@ -154,7 +154,7 @@ table 'Measure Table'
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
-	/// Ratio of projects with zero critical defects and a pass rate ≥ 85% to total distinct projects. Represents an overall project success benchmark.
+	/// Proportion of projects deemed successful at row level: zero critical defects and a pass rate ≥ 85% per row. Note: this is a row-level calculation, not project-aggregated.
 	measure 'Project Success Rate' = ```
 			VAR SuccessfulProjects = SUMX( QualitestData, IF( QualitestData[CriticalDefects] = 0 && DIVIDE(QualitestData[PassedTests], QualitestData[TotalTests], 0) >= 0.85, 1, 0 ) ) VAR TotalProjects = DISTINCTCOUNT(QualitestData[ProjectID]) RETURN DIVIDE(SuccessfulProjects, TotalProjects, 0)
 			
@@ -162,7 +162,7 @@ table 'Measure Table'
 		formatString: 0.00%;-0.00%;0.00%
 		lineageTag: 4856a832-4a34-49d1-b277-23cad41f9166
 
-	/// Stricter project success rate requiring ≤ 7 critical defects and a pass rate ≥ 95% at the project level, calculated using a project-level summary.
+	/// Percentage of unique projects that are successful, where success is defined as ≤7 critical defects and a pass rate ≥ 95% when aggregated to the project level.
 	measure 'Project Success Rate %' = ```
 			
 			VAR Proj =
@@ -180,7 +180,7 @@ table 'Measure Table'
 		formatString: 0.00%;-0.00%;0.00%
 		lineageTag: b26df309-db06-488a-bc2c-db6a576db105
 
-	/// Difference between the current context pass rate and the industry-wide average pass rate. Positive values indicate above-industry performance.
+	/// Difference between the current context pass rate and the industry-wide average pass rate, keeping only the industry dimension constant. Positive values indicate above-industry performance.
 	measure 'Pass Rate vs Industry Avg' = ```
 			
 			VAR CurrentPassRate = [Pass Rate]
@@ -196,7 +196,7 @@ table 'Measure Table'
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
-	/// Difference between the current context average CSAT and the regional average CSAT. Positive values indicate above-regional satisfaction.
+	/// Difference between the current context CSAT and the regional average CSAT, keeping only the region constant. Positive values indicate above-average satisfaction for the region.
 	measure 'Satisfaction vs Region Avg' = ```
 			
 			VAR CurrentSatisfaction = [Avg CSAT]
@@ -212,7 +212,7 @@ table 'Measure Table'
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
-	/// Rank of each industry segment by average automation rate, sorted descending. Rank 1 indicates the highest automation rate.
+	/// Rank of each industry by average automation rate (descending), where rank 1 indicates the highest automation rate across all industries.
 	measure 'Automation Rate Rank' =
 			
 			RANKX(
@@ -224,7 +224,7 @@ table 'Measure Table'
 		formatString: 0
 		lineageTag: 27e38bbe-8963-4385-b887-8d437e750c40
 
-	/// Difference between the industry segment's quality score and the overall quality score across all data. Highlights which industries perform above or below average.
+	/// Difference between the selected industry Quality Score and the overall Quality Score across all data. Positive values indicate the industry outperforms the company average.
 	measure 'Industry vs Overall Performance' =
 			
 			VAR IndustryScore = [Quality Score]
@@ -235,7 +235,7 @@ table 'Measure Table'
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
-	/// Pass rate for the prior month (one month back from the current date context), used as the baseline for month-over-month comparisons.
+	/// Pass rate for the same period one month prior (previous month), used as the baseline for month-over-month comparisons.
 	measure 'Pass Rate PM' =
 			
 			CALCULATE(
@@ -246,13 +246,13 @@ table 'Measure Table'
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
-	/// Absolute change in pass rate between the current month and the prior month (Pass Rate minus Pass Rate PM).
+	/// Absolute change in pass rate compared to the previous month (current pass rate minus previous month pass rate).
 	measure 'Pass Rate MoM Change' = [Pass Rate] - [Pass Rate PM]
 		lineageTag: ebad9949-d955-46e8-8743-83c2e73a608b
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
-	/// Percentage change in pass rate relative to the prior month. Calculated as (Pass Rate MoM Change / Pass Rate PM) × 100.
+	/// Percentage change in pass rate compared to the previous month, expressed as a percentage value (e.g., 2 = 2% improvement).
 	measure 'Pass Rate MoM Change %' =
 			
 			DIVIDE([Pass Rate MoM Change], [Pass Rate PM], 0) * 100
@@ -260,7 +260,7 @@ table 'Measure Table'
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
-	/// Average pass rate over the rolling 3-month window ending at the latest project start date in the current context.
+	/// Pass rate calculated over a rolling 3-month window ending at the latest project start date visible in context.
 	measure 'Rolling 3M Avg Pass Rate' = ```
 			
 			VAR Last3Months = 
@@ -277,7 +277,7 @@ table 'Measure Table'
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
-	/// Distinct count of projects year-to-date (YTD) based on project start date. Resets at the beginning of each calendar year.
+	/// Cumulative count of distinct projects from the start of the calendar year through the current date.
 	measure 'YTD Projects' =
 			
 			CALCULATE(
@@ -287,7 +287,7 @@ table 'Measure Table'
 		formatString: 0
 		lineageTag: 57197ca0-779e-4761-b99c-35bf65893e24
 
-	/// Distinct count of projects for the same period last year (prior year same period), used as the baseline for year-over-year comparisons.
+	/// Distinct project count for the same period in the prior year (Prior Year Same Period), used as the denominator in YoY growth calculations.
 	measure 'PYSP Projects' =
 			
 			CALCULATE(
@@ -297,7 +297,7 @@ table 'Measure Table'
 		formatString: 0
 		lineageTag: 2eb5298c-e1b5-4a80-91b4-a186613f9a19
 
-	/// Year-over-year growth in project count expressed as a percentage. Compares YTD Projects to the same period last year (PYSP Projects).
+	/// Year-over-year growth rate in project count: (YTD Projects − Prior Year Same Period) ÷ Prior Year Same Period × 100.
 	measure 'YoY Growth %' =
 			
 			VAR CurrentPeriod = [YTD Projects]
@@ -308,7 +308,7 @@ table 'Measure Table'
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
-	/// Returns a hex color code based on the current Pass Rate: green (#27AE60) if ≥ 90%, orange (#F39C12) if ≥ 80%, or red (#E74C3C) if below 80%. Used for conditional formatting in visuals.
+	/// Conditional formatting color for Pass Rate: green (#27AE60) if ≥90%, orange (#F39C12) if ≥80%, red (#E74C3C) if below 80%.
 	measure 'Pass Rate Color' =
 			
 			SWITCH(
@@ -319,7 +319,7 @@ table 'Measure Table'
 			)
 		lineageTag: 363aab74-6c7e-40b8-be72-6a15dbc564a5
 
-	/// Returns a hex color code based on Avg CSAT: green (#27AE60) if ≥ 4.0, orange (#F39C12) if ≥ 3.5, or red (#E74C3C) if below 3.5. Used for conditional formatting in visuals.
+	/// Conditional formatting color for CSAT score: green (#27AE60) if ≥4.0, orange (#F39C12) if ≥3.5, red (#E74C3C) if below 3.5.
 	measure 'Satisfaction Color' =
 			
 			SWITCH(
@@ -330,7 +330,7 @@ table 'Measure Table'
 			)
 		lineageTag: 84f21946-067b-4081-8d34-12cb6a1e5e78
 
-	/// Returns a hex color code based on Defects per 1000: green (#27AE60) if ≤ 20, orange (#F39C12) if ≤ 40, or red (#E74C3C) if above 40. Used for conditional formatting in visuals.
+	/// Conditional formatting color for Defects per 1000: green (#27AE60) if ≤20, orange (#F39C12) if ≤40, red (#E74C3C) if above 40.
 	measure 'Defect Color' =
 			
 			SWITCH(
@@ -341,7 +341,7 @@ table 'Measure Table'
 			)
 		lineageTag: dff07434-d4d6-4ee0-a5d8-258b24d17323
 
-	/// Returns a hex color code based on Avg Automation Rate: green (#27AE60) if ≥ 70, orange (#F39C12) if ≥ 50, or red (#E74C3C) if below 50. Used for conditional formatting in visuals.
+	/// Conditional formatting color for Automation Rate: green (#27AE60) if ≥70%, orange (#F39C12) if ≥50%, red (#E74C3C) if below 50%.
 	measure 'Automation Color' =
 			
 			SWITCH(
@@ -352,7 +352,7 @@ table 'Measure Table'
 			)
 		lineageTag: a2821ea7-d00c-4983-bd5a-f0fa3498bbd0
 
-	/// Returns the pass rate only for the top 5 clients ranked by pass rate (descending). Returns BLANK for all other clients, enabling targeted visuals highlighting top performers.
+	/// Returns the Pass Rate only for the top 5 clients ranked by pass rate (descending). Returns BLANK() for all other clients, enabling focused visual comparisons.
 	measure 'Top 5 Clients Pass Rate' = ```
 			
 			VAR CurrentClient = SELECTEDVALUE(QualitestData[ClientName])
@@ -370,7 +370,7 @@ table 'Measure Table'
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
-	/// Returns the average CSAT only for the bottom 5 clients ranked by satisfaction (ascending). Returns BLANK for all other clients, enabling targeted visuals highlighting under-performers.
+	/// Returns the CSAT score only for the bottom 5 clients ranked by satisfaction (ascending). Returns BLANK() for all other clients, highlighting the lowest-performing accounts.
 	measure 'Bottom 5 Clients Satisfaction' = ```
 			
 			VAR CurrentClient = SELECTEDVALUE(QualitestData[ClientName])
@@ -388,7 +388,7 @@ table 'Measure Table'
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
-	/// Returns the name of the region with the highest quality score. Used as a dynamic KPI label to highlight the top-performing region.
+	/// Returns the name of the region with the highest Quality Score. Used to surface the top-performing region as a text insight.
 	measure 'Best Region' = ```
 			
 			VAR BestRegionName = 
@@ -402,7 +402,7 @@ table 'Measure Table'
 			```
 		lineageTag: ff3c7dcd-1d2f-46aa-ab6d-2cd992eb72b2
 
-	/// Returns the name of the service type with the lowest pass rate. Used as a dynamic KPI label to highlight the lowest-performing service category.
+	/// Returns the name of the service type with the lowest Pass Rate. Used to surface the underperforming service category as a text insight.
 	measure 'Worst Service Type' = ```
 			
 			VAR WorstService = 
@@ -417,7 +417,7 @@ table 'Measure Table'
 			```
 		lineageTag: cbfcef8c-fa6b-4af7-bac1-5bb78d82148f
 
-	/// Count of projects with an automation rate of 70% or higher, indicating projects that meet the high-automation threshold.
+	/// Count of projects where the automation rate is 70% or higher. Measures adoption of high-automation practices.
 	measure 'High Automation Projects' =
 			
 			CALCULATE(
@@ -427,7 +427,7 @@ table 'Measure Table'
 		formatString: 0
 		lineageTag: 02a92dc9-3220-43f2-a35d-e7c74f2c3559
 
-	/// Percentage of total projects that have a high automation rate (≥ 70%). Calculated as High Automation Projects divided by Total Projects × 100.
+	/// Percentage of projects with automation rate ≥70% out of all projects. Indicates the proportion running at high automation levels.
 	measure 'High Automation Projects %' =
 			
 			DIVIDE([High Automation Projects], [Total Projects], 0) * 100
@@ -435,7 +435,7 @@ table 'Measure Table'
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
-	/// Count of projects with more than 10 critical defects, flagging projects that require immediate quality attention.
+	/// Count of projects with more than 10 critical defects. Flags projects requiring urgent quality attention.
 	measure 'Critical Projects' = ```
 			
 			CALCULATE(
@@ -447,7 +447,7 @@ table 'Measure Table'
 		formatString: 0
 		lineageTag: fa7165ce-a297-4c33-b38b-4f8aafe22875
 
-	/// Percentage of total projects classified as critical (more than 10 critical defects). Calculated as Critical Projects divided by Total Projects × 100.
+	/// Percentage of projects with more than 10 critical defects out of all projects.
 	measure 'Critical Projects %' =
 			
 			DIVIDE([Critical Projects], [Total Projects], 0) * 100
@@ -455,7 +455,7 @@ table 'Measure Table'
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
-	/// Estimated financial impact of critical defects, assuming a cost of $1,000 per critical defect. Provides a monetary risk indicator for quality issues.
+	/// Estimated financial exposure from critical defects, calculated as total critical defects × $1,000 cost per defect. Used as a proxy for quality-driven revenue risk.
 	measure 'Revenue Impact' =
 			
 			VAR CostPerDefect = 1000  // Assume $1000 per critical defect
@@ -465,7 +465,7 @@ table 'Measure Table'
 		formatString: 0
 		lineageTag: 68eb2dbd-51dd-4b6a-99f7-661957876820
 
-	/// Composite efficiency score combining automation rate (up to 30 pts), pass rate (up to 50 pts), and customer satisfaction (up to 20 pts). Higher scores indicate more efficient project delivery.
+	/// Composite efficiency score out of 100: 30 points from automation rate, 50 points from pass rate, and 20 points from CSAT (normalized to 0–1 scale).
 	measure 'Efficiency Score' =
 			
 			VAR AutomationBonus = [Avg Automation Rate] * 30
@@ -477,7 +477,7 @@ table 'Measure Table'
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
-	/// Average number of tests executed per project. Calculated as Total Tests divided by Total Projects.
+	/// Average number of tests executed per project, calculated as Total Tests divided by Total Projects.
 	measure 'Avg Tests per Project' =
 			
 			DIVIDE([Total Tests], [Total Projects], 0)
@@ -485,7 +485,7 @@ table 'Measure Table'
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
-	/// Proxy return-on-investment for automation, combining the product of automation rate and pass rate with a satisfaction bonus. Higher values indicate greater automation value.
+	/// Proxy return-on-investment metric for automation, combining automation rate × pass rate plus a CSAT quality bonus (CSAT × 0.2).
 	measure 'Automation ROI' =
 			
 			VAR AutomationBenefit = [Avg Automation Rate] * [Pass Rate]
@@ -496,13 +496,13 @@ table 'Measure Table'
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
-	/// Formatted text label combining the average pass rate percentage and the total project count, e.g. '94.5% (42)'. Used for data labels in visuals.
+	/// Formatted label combining the pass rate percentage and project count (e.g., '97.5% (142)'). Used as a data label or tooltip in visuals.
 	measure 'Pass Rate Label' =
 			
 			FORMAT([Avg Pass Rate %], "0.0%") & " (" & [Total Projects] & ")"
 		lineageTag: 80e6840b-fe8b-4d7b-9d13-6388f16e5d48
 
-	/// Multi-line tooltip string showing service type name, pass rate, total projects, and average tests per project. Used for rich tooltips on service type visuals.
+	/// Multi-line tooltip text for service type visuals, displaying service type name, pass rate, total projects, and average tests per project.
 	measure 'Service Type Tooltip' =
 			
 			"Service Type: " & SELECTEDVALUE(QualitestData[ServiceType]) &
@@ -511,14 +511,14 @@ table 'Measure Table'
 			UNICHAR(10) & "Avg Tests per Project: " & FORMAT([Avg Tests per Project], "#,##0")
 		lineageTag: 48561661-fd4f-40b0-9fb7-6b8de5a16f35
 
-	/// Average customer satisfaction score expressed as a percentage of the maximum score of 5. Calculated as average satisfaction divided by 5.
+	/// Average CSAT score normalized to a 0–1 percentage scale (divides the 1–5 score by 5). Used for gap-to-target calculations.
 	measure 'Avg Customer Satisfaction %' =
 			
 			DIVIDE( AVERAGE(QualitestData[CustomerSatisfaction (1–5)]), 5 )
 		formatString: 0.00%;-0.00%;0.00%
 		lineageTag: c0edd5ee-bd24-4ad3-bd61-851174ead191
 
-	/// Count of distinct project IDs visible in the current filter context. Used as a helper measure for context-aware calculations.
+	/// Count of distinct project IDs visible in the current filter context. Used as a denominator for context-aware success rate calculations.
 	measure 'Projects in Context' = ```
 			COUNTROWS ( VALUES ( QualitestData[ProjectID] ) )
 			
@@ -529,7 +529,7 @@ table 'Measure Table'
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
-	/// Count of projects in the current context that meet strict success criteria: ≤ 5 critical defects and a pass rate ≥ 95%.
+	/// Count of projects meeting strict success criteria in the current context: ≤5 critical defects and a pass rate ≥95% at the project level.
 	measure 'Successful Projects in Context' =
 			
 			SUMX (
@@ -543,7 +543,7 @@ table 'Measure Table'
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
-	/// Ratio of Successful Projects in Context to Projects in Context, using the stricter success thresholds (≤ 5 critical defects, ≥ 95% pass rate). Returns 0 if no projects exist.
+	/// Context-aware project success rate: successful projects in context divided by total projects in context. Uses COALESCE to return 0 instead of BLANK.
 	measure 'Project Success Rate1 %' =
 			
 			VAR Proj = VALUES(QualitestData[ProjectID])
@@ -553,7 +553,7 @@ table 'Measure Table'
 		formatString: 0.00%;-0.00%;0.00%
 		lineageTag: 764122b1-5d58-420f-8787-763c515dd4d7
 
-	/// Proportion of all defects found that are classified as critical. Calculated as Total Critical Defects divided by Total Defects Found.
+	/// Proportion of critical defects relative to all defects found. Measures the severity mix of the defect portfolio.
 	measure 'Critical Defect Rate %' = ```
 			
 			DIVIDE( SUM(QualitestData[CriticalDefects]),
@@ -565,51 +565,51 @@ table 'Measure Table'
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
-	/// Static target value for pass rate set at 98% (0.98). Used as the benchmark line in pass rate gap and target analyses.
+	/// KPI target for pass rate: 98% (0.98). Used as the benchmark in Pass Gap calculations and target line visuals.
 	measure 'Pass Target' = 0.98
 		lineageTag: 24e6178d-8afa-47c6-aad5-e953f144ff4b
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
-	/// Static target value for on-time delivery set at 95% (0.95). Used as the benchmark line in on-time delivery gap and target analyses.
+	/// KPI target for on-time delivery: 95% (0.95). Used as the benchmark in On-Time Gap calculations and target line visuals.
 	measure 'OnTime Target' = 0.95
 		lineageTag: 04b65119-6a03-4522-af06-cbbe4af67b59
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
-	/// Static target value for automation rate set at 65% (0.65). Used as the benchmark line in automation gap and target analyses.
+	/// KPI target for automation rate: 65% (0.65). Used as the benchmark in Automation Gap calculations and target line visuals.
 	measure 'Automation Target' = 0.65
 		lineageTag: fb08dbe1-5f91-4f00-ac44-78adc9f2d425
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
-	/// Static target value for customer satisfaction expressed as a percentage, set at 85% (0.85). Used as the benchmark line in CSAT gap and target analyses.
+	/// KPI target for customer satisfaction: 85% normalized (0.85). Used as the benchmark in CSAT Gap calculations and target line visuals.
 	measure 'CSAT Target' = 0.85
 		lineageTag: f99ece59-53d9-4cff-9f9e-e0249cdde6b1
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
-	/// Difference in percentage points between the actual Pass Rate % and the Pass Target (98%). Negative values indicate underperformance against target.
+	/// Gap between actual Pass Rate % and the 98% target, expressed in percentage points. Negative values indicate under-target performance.
 	measure 'Pass Gap (pp)' = [Pass Rate %] - [Pass Target]
 		formatString: 0.0%;-0.0%;0.0%
 		lineageTag: 49f5adc8-bdb1-47d8-b594-0ffc5ac8055e
 
-	/// Difference in percentage points between the actual On-Time Delivery % and the On-Time Target (95%). Negative values indicate underperformance against target.
+	/// Gap between actual On-Time Delivery % and the 95% target, in percentage points. Negative values indicate under-target performance.
 	measure 'On-Time Gap (pp)' = [Ontime Delivery %] - [OnTime Target]
 		formatString: 0.0%;-0.0%;0.0%
 		lineageTag: 2cd9867d-aa97-47f9-af65-56b0fb9b502a
 
-	/// Difference in percentage points between the actual Avg Automation Rate % and the Automation Target (65%). Negative values indicate underperformance against target.
+	/// Gap between actual Avg Automation Rate % and the 65% target, in percentage points. Negative values indicate under-target performance.
 	measure 'Automation Gap (pp)' = [Avg Automation Rate %] - [Automation Target]
 		formatString: 0.0%;-0.0%;0.0%
 		lineageTag: d06eb75a-fca7-4909-b3eb-af92f8365362
 
-	/// Difference in percentage points between the actual Avg Customer Satisfaction % and the CSAT Target (85%). Negative values indicate underperformance against target.
+	/// Gap between actual Avg Customer Satisfaction % (normalized 0–1) and the 85% CSAT target, in percentage points. Negative values indicate under-target performance.
 	measure 'CSAT Gap (pp)' = [Avg Customer Satisfaction %] - [CSAT Target]
 		formatString: 0.0%;-0.0%;0.0%
 		lineageTag: 179333e3-5fbd-44a5-a9e2-a5d278c55568
 
-	/// Returns a constant value of 0. Used as a reference baseline in charts to visually mark the zero axis for delta and gap measures.
+	/// Constant value of 0. Used as a reference line in charts to visually represent the zero/baseline axis (e.g., for MoM delta charts).
 	measure 'Zero Line' = ```
 			0
 			
@@ -617,7 +617,7 @@ table 'Measure Table'
 		formatString: 0
 		lineageTag: b75bd56a-ea1e-42e2-9cf8-9e9026051262
 
-	/// Distinct count of projects active during the prior full month (month-to-date of the previous month), used as the baseline for month-over-month project count comparison.
+	/// Distinct count of projects for the prior calendar month (month-to-date shifted back one month using the Calendar table).
 	measure 'Projects Last Month' = ```
 			
 			CALCULATE(
@@ -631,14 +631,14 @@ table 'Measure Table'
 		formatString: 0
 		lineageTag: 39be12ea-26f5-4c53-b92f-38eb2a13069d
 
-	/// Absolute month-over-month change in project count. Calculated as Projects This Month minus Projects Last Month.
+	/// Absolute change in project count versus the prior month: Projects This Month minus Projects Last Month.
 	measure 'Projects MoM Δ' =
 			
 			[Projects This Month] - [Projects Last Month]
 		formatString: 0
 		lineageTag: 59ee95e9-0f72-4f93-89cf-c0576dae8c7e
 
-	/// Formatted text label showing the month-over-month project count change with a directional arrow (▲/▼/▬) and 'vs last month' context. Used for KPI card subtitles.
+	/// Formatted text label for the projects MoM change, including an up/down/flat arrow indicator (e.g., '+5 vs last month ▲').
 	measure 'Projects MoM Label' =
 			
 			VAR d = [Projects MoM Δ]
@@ -646,7 +646,7 @@ table 'Measure Table'
 			RETURN FORMAT(d, "+#,0;-#,0;0") & " vs last month " & arrow
 		lineageTag: d0a174e6-07ed-4229-8016-cafceb9683c0
 
-	/// Returns a hex color code based on the Projects MoM Δ: green (#059669) for positive change, red (#DC2626) for negative change, or grey (#6B7280) for no change.
+	/// Conditional formatting color for MoM project change: green (#059669) if positive, red (#DC2626) if negative, grey (#6B7280) if flat.
 	measure 'Projects MoM Color' = ```
 			
 			VAR d = [Projects MoM Δ]
@@ -656,7 +656,7 @@ table 'Measure Table'
 			```
 		lineageTag: a16b55e5-e84e-41ca-905e-d0f924ba5934
 
-	/// Distinct count of all projects ignoring any Calendar date filters. Represents the total project portfolio regardless of the selected time period.
+	/// Total distinct project count ignoring all date filters from the Calendar table. Always reflects the full dataset regardless of date slicers.
 	measure 'Total Projects (All Time)' = ```
 			
 			CALCULATE(
@@ -668,7 +668,7 @@ table 'Measure Table'
 		formatString: 0
 		lineageTag: fc51fa8e-bde0-4dae-84a4-e5023b512537
 
-	/// Month-to-date pass rate for the prior month (one month back from the current Calendar date), used as the baseline for month-over-month pass rate comparison.
+	/// Pass rate for the prior calendar month (MTD shifted back one month). Used as the baseline in Pass Rate MoM delta calculations.
 	measure 'Pass Rate (Last Month)' =
 			
 			VAR TotalTests =
@@ -683,7 +683,7 @@ table 'Measure Table'
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
-	/// Absolute change in pass rate between the current month and the prior month (Pass Rate minus Pass Rate Last Month).
+	/// Absolute change in pass rate vs. last month: current month pass rate minus prior month pass rate.
 	measure 'Pass Rate Δ' =
 			
 			[Pass Rate] - [Pass Rate (Last Month)]
@@ -691,7 +691,7 @@ table 'Measure Table'
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
-	/// Formatted text label showing the month-over-month pass rate change as a percentage with a directional arrow and 'vs last month' context.
+	/// Formatted text label for the pass rate MoM change with an up/down/flat arrow indicator (e.g., '+1.2% vs last month ▲').
 	measure 'Pass Rate Δ Label' =
 			
 			VAR d = [Pass Rate Δ]
@@ -701,7 +701,7 @@ table 'Measure Table'
 			FORMAT(d, "+0.0%;-0.0%;0.0%") & " vs last month " & arrow
 		lineageTag: ea2e7664-a74a-4ec8-ae96-39556df8a0a9
 
-	/// Returns a hex color code based on the Pass Rate Δ: green (#059669) for improvement, red (#DC2626) for decline, or grey (#6B7280) for no change.
+	/// Conditional formatting color for pass rate MoM change: green (#059669) if improved, red (#DC2626) if declined, grey (#6B7280) if flat.
 	measure 'Pass Rate Δ Color' =
 			
 			VAR d = [Pass Rate Δ]
@@ -709,7 +709,7 @@ table 'Measure Table'
 			    IF(d > 0, "#059669", IF(d < 0, "#DC2626", "#6B7280"))
 		lineageTag: 77601a25-3f00-41f9-ba3e-d361e1f1bd88
 
-	/// Average customer satisfaction score (1–5) for the prior month's month-to-date period, used as the baseline for CSAT month-over-month comparison.
+	/// Average CSAT score for the prior calendar month (MTD shifted back one month). Baseline for CSAT MoM delta calculations.
 	measure 'Avg CSAT (Last Month)' =
 			
 			CALCULATE(
@@ -720,7 +720,7 @@ table 'Measure Table'
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
-	/// Absolute change in average CSAT score between the current month and the prior month (Avg CSAT minus Avg CSAT Last Month).
+	/// Absolute change in CSAT score vs. last month (current minus prior month CSAT on the 1–5 scale).
 	measure 'CSAT Δ' =
 			
 			[Avg CSAT] - [Avg CSAT (Last Month)]
@@ -728,7 +728,7 @@ table 'Measure Table'
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
-	/// Relative percentage change in average CSAT score versus the prior month. Calculated as CSAT Δ divided by Avg CSAT Last Month.
+	/// Percentage change in CSAT vs. last month, expressed as a ratio (e.g., 0.05 = 5% improvement).
 	measure 'CSAT % Δ' =
 			
 			DIVIDE( [Avg CSAT] - [Avg CSAT (Last Month)], [Avg CSAT (Last Month)] )
@@ -736,7 +736,7 @@ table 'Measure Table'
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
-	/// Formatted text label showing the CSAT absolute change with a directional arrow and 'vs last month' context.
+	/// Formatted text label for the CSAT absolute change with arrow indicator (e.g., '+0.15 vs last month ▲').
 	measure 'CSAT Δ Label' =
 			
 			VAR d = [CSAT Δ]
@@ -744,7 +744,7 @@ table 'Measure Table'
 			RETURN FORMAT( d, "+0.00;-0.00;0.00" ) & " vs last month " & arrow
 		lineageTag: 40640e4b-a879-4fd8-9a00-fc200708d07e
 
-	/// Extended CSAT change label showing both the absolute change and percentage change in a single string with a directional arrow, e.g. '+0.15 (+3.2%) vs last month ▲'.
+	/// Extended label combining both absolute CSAT change and percentage change, with arrow indicator (e.g., '+0.15 (+3.2%) vs last month ▲').
 	measure 'CSAT Δ Label (Abs + %)' =
 			
 			VAR dAbs = [CSAT Δ]
@@ -754,20 +754,20 @@ table 'Measure Table'
 			       FORMAT(dPct, "+0.0%;-0.0%;0.0%") & ") vs last month " & arrow
 		lineageTag: 16facd3b-fc27-431f-91d3-645105af028c
 
-	/// Returns a hex color code based on CSAT Δ: green (#059669) for improvement, red (#DC2626) for decline, or grey (#6B7280) for no change.
+	/// Conditional formatting color for CSAT MoM change: green (#059669) if improved, red (#DC2626) if declined, grey (#6B7280) if flat.
 	measure 'CSAT Δ Color' =
 			
 			VAR d = [CSAT Δ]
 			RETURN IF( d > 0, "#059669", IF( d < 0, "#DC2626", "#6B7280" ) )
 		lineageTag: 610c50b4-823e-4299-9278-02780b0675f7
 
-	/// Simple average of the AutomationRate (%) field across all projects in the current filter context. Raw value on a 0–100 scale.
+	/// Simple average of the AutomationRate (%) column across all rows in context. Returns as a raw percentage value (0–100 scale).
 	measure 'Avg Automation Rate' = AVERAGE(QualitestData[AutomationRate (%)])
 		lineageTag: a5727b24-8c91-4764-a5e0-78fe6de35afc
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
-	/// Average automation rate for the current month-to-date period expressed as a decimal percentage (0–1 scale).
+	/// Average automation rate for the current month (MTD), expressed as a decimal (0–1). Uses the Calendar table for time filtering.
 	measure 'Automation (This Month)' =
 			
 			VAR ThisMonthVal =
@@ -779,7 +779,7 @@ table 'Measure Table'
 		formatString: 0.00%;-0.00%;0.00%
 		lineageTag: 7c5d7438-e790-44b3-862f-b7fcbc7acf02
 
-	/// Average automation rate for the prior month's month-to-date period expressed as a decimal percentage (0–1 scale), used as the baseline for automation MoM comparison.
+	/// Average automation rate for the prior month (MTD shifted back one month), expressed as a decimal (0–1). Baseline for Automation MoM delta.
 	measure 'Automation (Last Month)' =
 			
 			VAR LastMonthVal =
@@ -791,7 +791,7 @@ table 'Measure Table'
 		formatString: 0.00%;-0.00%;0.00%
 		lineageTag: da084d33-d2af-4a75-bd2b-9d78c5eb8826
 
-	/// Absolute change in automation rate between the current month and the prior month (Automation This Month minus Automation Last Month).
+	/// Absolute change in automation rate vs. last month: this month minus last month, in decimal form (e.g., 0.05 = 5 percentage point increase).
 	measure 'Automation Δ' =
 			
 			[Automation (This Month)] - [Automation (Last Month)]
@@ -799,7 +799,7 @@ table 'Measure Table'
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
-	/// Formatted text label showing the month-over-month automation rate change as a percentage with a directional arrow and 'vs last month' context.
+	/// Formatted text label for automation rate MoM change with arrow indicator (e.g., '+5.0% vs last month ▲').
 	measure 'Automation Δ Label' =
 			
 			VAR d = [Automation Δ]
@@ -807,7 +807,7 @@ table 'Measure Table'
 			RETURN FORMAT(d, "+0.0%;-0.0%;0.0%") & " vs last month " & arrow
 		lineageTag: cc5d23f0-0494-4821-87b5-4c2dc7cf17ea
 
-	/// Returns a hex color code based on Automation Δ: green (#059669) for improvement, red (#DC2626) for decline, or grey (#6B7280) for no change.
+	/// Conditional formatting color for automation rate MoM change: green (#059669) if improved, red (#DC2626) if declined, grey (#6B7280) if flat.
 	measure 'Automation Δ Color' =
 			
 			VAR d = [Automation Δ]
@@ -815,7 +815,7 @@ table 'Measure Table'
 			    IF(d > 0, "#059669", IF(d < 0, "#DC2626", "#6B7280"))
 		lineageTag: bbd8a509-241d-477b-b494-473d90fba185
 
-	/// Weighted average defect density per 1,000 tests for the current month-to-date period, weighting each project's rate by its test volume.
+	/// Weighted average defects per 1,000 tests for the current month (MTD), weighted by test volume per row.
 	measure 'Defects/1000 (This Month)' =
 			
 			VAR TotalTests_MTD =
@@ -830,7 +830,7 @@ table 'Measure Table'
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
-	/// Weighted average defect density per 1,000 tests for the prior month's month-to-date period, used as the baseline for defect density MoM comparison.
+	/// Weighted average defects per 1,000 tests for the prior month (MTD shifted back one month). Baseline for Defects/1000 MoM delta.
 	measure 'Defects/1000 (Last Month)' =
 			
 			VAR TotalTests_LM =
@@ -846,7 +846,7 @@ table 'Measure Table'
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
-	/// Absolute change in defect density between the current month and the prior month (Defects/1000 This Month minus Defects/1000 Last Month). Negative values indicate improvement.
+	/// Absolute change in defect rate vs. last month: this month minus last month. Negative values are desirable (fewer defects).
 	measure 'Defects/1000 Δ' = ```
 			
 			[Defects/1000 (This Month)] - [Defects/1000 (Last Month)]
@@ -856,7 +856,7 @@ table 'Measure Table'
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
-	/// Relative percentage change in defect density versus the prior month. Calculated as Defects/1000 Δ divided by Defects/1000 Last Month.
+	/// Percentage change in defect rate vs. last month, expressed as a ratio. Negative values indicate improvement.
 	measure 'Defects/1000 % Δ' =
 			
 			DIVIDE( [Defects/1000 Δ], [Defects/1000 (Last Month)] )
@@ -864,7 +864,7 @@ table 'Measure Table'
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
-	/// Formatted text label showing the defect density absolute change with a directional arrow (inverted: ▼ is good) and 'vs last month' context.
+	/// Formatted text label for the defects/1000 absolute change with arrow indicator. Note: arrow is inverted — down arrow (▼) is favorable.
 	measure 'Defects/1000 Δ Label' =
 			
 			VAR d = [Defects/1000 Δ]
@@ -872,7 +872,7 @@ table 'Measure Table'
 			RETURN FORMAT(d, "+0.00;-0.00;0.00") & " vs last month " & arrow
 		lineageTag: 94fb91e6-e30c-4a32-924d-68dc8638d2ca
 
-	/// Extended defect density change label showing both the absolute and percentage change with a directional arrow, e.g. '-1.50 (-5.0%) vs last month ▼'.
+	/// Extended label combining absolute and percentage change in defect rate with inverted arrow indicator (down = good).
 	measure 'Defects/1000 Δ Label (Abs + %)' =
 			
 			VAR dAbs = [Defects/1000 Δ]
@@ -882,14 +882,14 @@ table 'Measure Table'
 			       FORMAT(dPct, "+0.0%;-0.0%;0.0%") & ") vs last month " & arrow
 		lineageTag: 2bb02a0f-1d1d-4178-a1a9-a587f612560d
 
-	/// Returns a hex color code based on Defects/1000 Δ (inverted logic): green (#059669) for a decrease (improvement), red (#DC2626) for an increase (deterioration).
+	/// Conditional formatting color for defect rate MoM change: green (#059669) if decreased (improved), red (#DC2626) if increased, grey if flat. Logic is inverted vs. other KPIs.
 	measure 'Defects/1000 Δ Color' =
 			
 			VAR d = [Defects/1000 Δ]
 			RETURN IF(d < 0, "#059669", IF(d > 0, "#DC2626", "#6B7280"))
 		lineageTag: 37555c00-dd38-43c4-8d49-a7d2c37aeffe
 
-	/// Average on-time delivery rate for the current month-to-date period expressed as a decimal percentage (0–1 scale).
+	/// Average on-time delivery rate for the current month (MTD), expressed as a decimal (0–1). Uses the Calendar table for time filtering.
 	measure 'Ontime (This Month)' =
 			
 			VAR ThisMonthVal =
@@ -901,7 +901,7 @@ table 'Measure Table'
 		formatString: 0.00%;-0.00%;0.00%
 		lineageTag: 63377494-1409-415b-ab8c-40fa3ca2c248
 
-	/// Average on-time delivery rate for the prior month's month-to-date period expressed as a decimal, used as the MoM baseline.
+	/// Average on-time delivery rate for the prior month (MTD shifted back one month), expressed as a decimal (0–1). Baseline for Ontime MoM delta.
 	measure 'Ontime (Last Month)' =
 			
 			VAR LastMonthVal =
@@ -914,7 +914,7 @@ table 'Measure Table'
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
-	/// Absolute change in on-time delivery rate between the current month and the prior month (Ontime This Month minus Ontime Last Month).
+	/// Absolute change in on-time delivery rate vs. last month, in decimal form. Positive values indicate improvement.
 	measure 'Ontime Δ' =
 			
 			[Ontime (This Month)] - [Ontime (Last Month)]
@@ -922,7 +922,7 @@ table 'Measure Table'
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
-	/// Relative percentage change in on-time delivery rate versus the prior month. Calculated as Ontime Δ divided by Ontime Last Month.
+	/// Percentage change in on-time delivery rate vs. last month, expressed as a ratio. Positive values indicate improvement.
 	measure 'Ontime % Δ' =
 			
 			DIVIDE([Ontime Δ], [Ontime (Last Month)])
@@ -930,7 +930,7 @@ table 'Measure Table'
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
-	/// Formatted text label showing the month-over-month on-time delivery change as a percentage with a directional arrow and 'vs last month' context.
+	/// Formatted text label for the on-time delivery MoM change with arrow indicator (e.g., '+2.5% vs last month ▲').
 	measure 'Ontime Δ Label' =
 			
 			VAR d = [Ontime Δ]
@@ -939,7 +939,7 @@ table 'Measure Table'
 			RETURN FORMAT(d, "+0.0%;-0.0%;0.0%") & " vs last month " & arrow
 		lineageTag: 6674b6fb-af5a-4b53-9666-e7d7a6e8e1ee
 
-	/// Extended on-time delivery change label showing both the absolute and percentage change with a directional arrow, e.g. '+1.5% (+1.6%) vs last month ▲'.
+	/// Extended label combining absolute and percentage change in on-time delivery rate with arrow indicator (e.g., '+2.5% (+2.7%) vs last month ▲').
 	measure 'Ontime Δ Label (Abs + %)' =
 			
 			VAR dAbs = [Ontime Δ]
@@ -950,14 +950,14 @@ table 'Measure Table'
 			       FORMAT(dPct, "+0.0%;-0.0%;0.0%") & ") vs last month " & arrow
 		lineageTag: 569904c8-67ae-427d-a34c-53e623277759
 
-	/// Returns a hex color code based on Ontime Δ: green (#059669) for improvement, red (#DC2626) for decline, or grey (#6B7280) for no change.
+	/// Conditional formatting color for on-time delivery MoM change: green (#059669) if improved, red (#DC2626) if declined, grey (#6B7280) if flat.
 	measure 'Ontime Δ Color' =
 			
 			VAR d = [Ontime Δ]
 			RETURN IF(d > 0, "#059669", IF(d < 0, "#DC2626", "#6B7280"))
 		lineageTag: ba5f1c72-4097-4f9e-949b-feae58397e0c
 
-	/// Sum of critical defects recorded in the current month-to-date period.
+	/// Total critical defects for the current month (MTD) using the Calendar table for filtering.
 	measure 'Critical Defects (This Month)' =
 			
 			CALCULATE(
@@ -967,7 +967,7 @@ table 'Measure Table'
 		formatString: 0
 		lineageTag: 4cecb1d6-cf12-42de-ad75-aa5d32785c89
 
-	/// Sum of critical defects recorded in the prior month's month-to-date period, used as the MoM baseline.
+	/// Total critical defects for the prior month (MTD shifted back one month). Baseline for Critical Defects MoM delta.
 	measure 'Critical Defects (Last Month)' =
 			
 			CALCULATE(
@@ -977,14 +977,14 @@ table 'Measure Table'
 		formatString: 0
 		lineageTag: f21c2189-560b-4449-a76e-d1266f83da60
 
-	/// Absolute change in critical defects between the current month and the prior month. Negative values indicate improvement.
+	/// Absolute change in critical defects vs. last month. Negative values are desirable (fewer critical defects).
 	measure 'Critical Defects Δ' =
 			
 			[Critical Defects (This Month)] - [Critical Defects (Last Month)]
 		formatString: 0
 		lineageTag: ecae8522-85ac-4820-a5dc-fa95b9df6d4f
 
-	/// Relative percentage change in critical defects versus the prior month. Calculated as Critical Defects Δ divided by Critical Defects Last Month.
+	/// Percentage change in critical defects vs. last month. Negative values indicate improvement.
 	measure 'Critical Defects % Δ' =
 			
 			DIVIDE( [Critical Defects Δ], [Critical Defects (Last Month)] )
@@ -992,7 +992,7 @@ table 'Measure Table'
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
-	/// Formatted text label showing the critical defect count change with an inverted directional arrow (▼ is good) and 'vs last month' context.
+	/// Formatted text label for critical defects MoM change with inverted arrow indicator (down arrow = improvement).
 	measure 'Critical Defects Δ Label' =
 			
 			VAR d = [Critical Defects Δ]
@@ -1000,7 +1000,7 @@ table 'Measure Table'
 			RETURN FORMAT( d, "+#,0;-#,0;0" ) & " vs last month " & arrow
 		lineageTag: 03f0f0ec-01f5-4653-be01-f82d606f796b
 
-	/// Extended critical defects change label showing both the absolute and percentage change with an inverted directional arrow.
+	/// Extended label combining absolute and percentage change in critical defects with inverted arrow indicator (down = good).
 	measure 'Critical Defects Δ Label (Abs + %)' =
 			
 			VAR dAbs = [Critical Defects Δ]
@@ -1010,14 +1010,14 @@ table 'Measure Table'
 			       FORMAT(dPct, "+0.0%;-0.0%;0.0%") & ") vs last month " & arrow
 		lineageTag: ed210c94-18c8-42c2-8acc-b58db972060e
 
-	/// Returns a hex color code based on Critical Defects Δ (inverted): green (#059669) for a decrease, red (#DC2626) for an increase, grey (#6B7280) for no change.
+	/// Conditional formatting color for critical defects MoM change: green (#059669) if decreased (improved), red (#DC2626) if increased, grey if flat. Logic is inverted vs. most KPIs.
 	measure 'Critical Defects Δ Color' =
 			
 			VAR d = [Critical Defects Δ]
 			RETURN IF( d < 0, "#059669", IF( d > 0, "#DC2626", "#6B7280" ) )
 		lineageTag: ce982dd2-8f5a-4ebf-9cff-6ae23cade88e
 
-	/// Relative percentage change in project count versus the prior month. Calculated as Projects MoM Δ divided by Projects Last Month.
+	/// Percentage change in project count vs. last month: Projects MoM Δ divided by Projects Last Month.
 	measure 'Projects % Δ' =
 			
 			DIVIDE([Projects MoM Δ], [Projects Last Month])
@@ -1025,7 +1025,7 @@ table 'Measure Table'
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
-	/// Extended project count change label showing both the absolute and percentage change with a directional arrow, e.g. '+3 (+7.5%) vs last month ▲'.
+	/// Extended label combining absolute project count change and percentage change with arrow indicator (e.g., '+5 (+3.6%) vs last month ▲').
 	measure 'Projects Δ Label (Abs + %)' =
 			
 			VAR dAbs = [Projects MoM Δ]
@@ -1036,13 +1036,13 @@ table 'Measure Table'
 			    FORMAT(dPct, "+0.0%;-0.0%;0.0%") & ") vs last month " & arrow
 		lineageTag: 6d22740b-87c0-4e23-8fc5-2471d2c8de07
 
-	/// Simple average of the customer satisfaction score (1–5 scale) across all projects in the current filter context, with no date restriction.
+	/// Simple average of the CustomerSatisfaction column (1–5 scale) across all rows in context. Returns the raw score, not normalized.
 	measure 'Avg Customer Satisfaction' = AVERAGE(QualitestData[CustomerSatisfaction (1–5)])
 		lineageTag: 2bed5c80-77e2-4e10-9b4c-579b61a2f316
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
-	/// Returns the project count for the selected or latest month when scoped to the Calendar MonthName level. Used to plot a single highlighted marker point on a line chart using a disconnected slicer.
+	/// Marker measure for line charts using the disconnected MarkerMonth slicer. Returns project count only for the selected month, enabling a highlight dot to be placed on the chart.
 	measure 'Projects Marker (Disconnected)' = ```
 			
 			VAR SelMonth =
@@ -1060,7 +1060,7 @@ table 'Measure Table'
 		formatString: 0
 		lineageTag: bf9b4827-c9c6-4fd9-bdf4-2d91e15bab5c
 
-	/// Total project count filtered to the months selected in the MarkerMonth disconnected table, enabling a chart series that mirrors the slicer-selected period.
+	/// Total projects filtered to the month selected in the MarkerMonth slicer using TREATAS. Feeds the baseline series in the trend line chart.
 	measure 'Total Projects for Line Chart' =
 			
 			CALCULATE(
@@ -1070,7 +1070,7 @@ table 'Measure Table'
 		formatString: 0
 		lineageTag: b2d744dd-06ff-45cb-9210-d138dd834d85
 
-	/// Returns the Total Projects for Line Chart value only when the Calendar month matches the MarkerMonth selection. Used to render a highlighted data point marker on a line chart.
+	/// Returns project count only when the Calendar MonthYear matches the MarkerMonth selection. Creates the highlight point overlay on the trend line chart.
 	measure 'Current Month Highlight' =
 			
 			IF(
@@ -1080,7 +1080,7 @@ table 'Measure Table'
 		formatString: 0
 		lineageTag: 85998694-6542-4062-b1d9-409631be9e4d
 
-	/// Pass rate filtered to the months selected in the MarkerMonth disconnected table, enabling a chart series that mirrors the slicer-selected period.
+	/// Pass rate filtered to the month selected in the MarkerMonth slicer via TREATAS. Feeds the pass rate series in the trend line chart.
 	measure 'Pass Rate % for Line Chart' =
 			
 			CALCULATE(
@@ -1090,7 +1090,7 @@ table 'Measure Table'
 		formatString: 0.00%;-0.00%;0.00%
 		lineageTag: 7bb16ab0-a299-4ba3-8be5-c6dbcc14049d
 
-	/// Returns the Pass Rate % for Line Chart only when the Calendar month matches the MarkerMonth selection. Used to render a highlighted data point marker on the pass rate line chart.
+	/// Returns pass rate only when the Calendar MonthYear matches the MarkerMonth selection. Creates the highlight point overlay on the pass rate trend chart.
 	measure 'CM Pass Rate Highlight' =
 			
 			IF(
@@ -1101,7 +1101,7 @@ table 'Measure Table'
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
-	/// Average CSAT filtered to the months selected in the MarkerMonth disconnected table, enabling a chart series that mirrors the slicer-selected period.
+	/// Average CSAT score filtered to the month selected in the MarkerMonth slicer via TREATAS. Feeds the CSAT series in the trend line chart.
 	measure 'CSAT for Line Chart' =
 			
 			CALCULATE(
@@ -1112,7 +1112,7 @@ table 'Measure Table'
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
-	/// Returns the CSAT for Line Chart value only when the Calendar month matches the MarkerMonth selection. Used to render a highlighted data point marker on the CSAT line chart.
+	/// Returns CSAT only when the Calendar MonthYear matches the MarkerMonth selection. Creates the highlight point overlay on the CSAT trend chart.
 	measure 'CM CSAT Highlight' =
 			
 			IF(
@@ -1123,7 +1123,7 @@ table 'Measure Table'
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
-	/// Automation rate (this month) filtered to the months selected in the MarkerMonth disconnected table, enabling a chart series that mirrors the slicer-selected period.
+	/// Automation rate (This Month) filtered to the month selected in the MarkerMonth slicer via TREATAS. Feeds the automation series in the trend line chart.
 	measure 'Automation for Line Chart' =
 			
 			CALCULATE(
@@ -1134,7 +1134,7 @@ table 'Measure Table'
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
-	/// Returns the Automation for Line Chart value only when the Calendar month matches the MarkerMonth selection. Used to render a highlighted data point marker on the automation line chart.
+	/// Returns automation rate only when the Calendar MonthYear matches the MarkerMonth selection. Creates the highlight point overlay on the automation trend chart.
 	measure 'CM Automation Highlight' =
 			
 			IF(
@@ -1145,7 +1145,7 @@ table 'Measure Table'
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
-	/// Defect density (this month) filtered to the months selected in the MarkerMonth disconnected table, enabling a chart series that mirrors the slicer-selected period.
+	/// Defects/1000 (This Month) filtered to the month selected in the MarkerMonth slicer via TREATAS. Feeds the defect rate series in the trend line chart.
 	measure 'Defects/1000 for Line Chart' =
 			
 			CALCULATE(
@@ -1156,7 +1156,7 @@ table 'Measure Table'
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
-	/// Returns the Defects/1000 for Line Chart value only when the Calendar month matches the MarkerMonth selection. Used to render a highlighted data point marker on the defect density line chart.
+	/// Returns defects/1000 only when the Calendar MonthYear matches the MarkerMonth selection. Creates the highlight point overlay on the defect rate trend chart.
 	measure 'CM Defects/1000 Highlight' =
 			
 			IF(
@@ -1167,7 +1167,7 @@ table 'Measure Table'
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
-	/// On-time delivery rate (this month) filtered to the months selected in the MarkerMonth disconnected table, enabling a chart series that mirrors the slicer-selected period.
+	/// On-time delivery rate (This Month) filtered to the month selected in the MarkerMonth slicer via TREATAS. Feeds the on-time delivery series in the trend line chart.
 	measure 'Ontime Delivery for Line Chart' =
 			
 			CALCULATE(
@@ -1178,7 +1178,7 @@ table 'Measure Table'
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
-	/// Returns the Ontime Delivery for Line Chart value only when the Calendar month matches the MarkerMonth selection. Used to render a highlighted data point marker on the on-time delivery line chart.
+	/// Returns on-time delivery rate only when the Calendar MonthYear matches the MarkerMonth selection. Creates the highlight point overlay on the on-time trend chart.
 	measure 'CM Ontime Delivery Highlight' =
 			
 			IF(
@@ -1189,7 +1189,7 @@ table 'Measure Table'
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
-	/// Critical defect count (this month) filtered to the months selected in the MarkerMonth disconnected table, enabling a chart series that mirrors the slicer-selected period.
+	/// Critical defects (This Month) filtered to the month selected in the MarkerMonth slicer via TREATAS. Feeds the critical defects series in the trend line chart.
 	measure 'Critical Defects for Line Chart' =
 			
 			CALCULATE(
@@ -1199,7 +1199,7 @@ table 'Measure Table'
 		formatString: 0
 		lineageTag: 7e72883a-2ae7-418d-8fdd-bd54d2c48e21
 
-	/// Returns the Critical Defects for Line Chart value only when the Calendar month matches the MarkerMonth selection. Used to render a highlighted data point marker on the critical defects line chart.
+	/// Returns critical defects only when the Calendar MonthYear matches the MarkerMonth selection. Creates the highlight point overlay on the critical defects trend chart. (Note: 'Defencts' is a typo in the original measure name.)
 	measure 'CM Critical Defencts Highlight' =
 			
 			IF(

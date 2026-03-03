@@ -1,0 +1,179 @@
+table 'Time Intelligence'
+	lineageTag: 881b22f5-02a4-44db-bd5b-623f3c6e3ab1
+
+	/// Calculation group providing standard time intelligence comparisons. Apply to any base measure to get period-over-period analysis. Items ordered by typical usage frequency.
+	calculationGroup
+		precedence: 10
+
+		/// Returns the base measure value as-is for the selected period. Use this as the default/unmodified view.
+		calculationItem Current = SELECTEDMEASURE()
+
+		/// Month-to-date: accumulates the base measure from the first day of the current month through the last visible date.
+		calculationItem MTD =
+				CALCULATE(
+				    SELECTEDMEASURE(),
+				    DATESMTD('Calendar'[Date])
+				)
+
+		/// Quarter-to-date: accumulates the base measure from the first day of the current quarter through the last visible date.
+		calculationItem QTD =
+				CALCULATE(
+				    SELECTEDMEASURE(),
+				    DATESQTD('Calendar'[Date])
+				)
+
+		/// Year-to-date: accumulates the base measure from Jan 1 of the current year through the last visible date.
+		calculationItem YTD =
+				CALCULATE(
+				    SELECTEDMEASURE(),
+				    DATESYTD('Calendar'[Date])
+				)
+
+		/// Prior year: returns the base measure for the same period one full year ago.
+		calculationItem PY =
+				CALCULATE(
+				    SELECTEDMEASURE(),
+				    SAMEPERIODLASTYEAR('Calendar'[Date])
+				)
+
+		/// Prior year-to-date: YTD value for the same period in the previous year. Use to compare cumulative performance year-over-year.
+		calculationItem 'PY YTD' =
+				CALCULATE(
+				    SELECTEDMEASURE(),
+				    DATESYTD(SAMEPERIODLASTYEAR('Calendar'[Date]))
+				)
+
+		/// Prior month: returns the base measure for the same date range shifted back one full month.
+		calculationItem PM =
+				CALCULATE(
+				    SELECTEDMEASURE(),
+				    DATEADD('Calendar'[Date], -1, MONTH)
+				)
+
+		/// Prior quarter: returns the base measure for the same date range shifted back one full quarter.
+		calculationItem PQ =
+				CALCULATE(
+				    SELECTEDMEASURE(),
+				    DATEADD('Calendar'[Date], -1, QUARTER)
+				)
+
+		/// Year-over-year absolute change: Current period minus the same period last year. Positive = growth.
+		calculationItem YoY =
+				VAR _current = SELECTEDMEASURE()
+				VAR _py = CALCULATE(
+				    SELECTEDMEASURE(),
+				    SAMEPERIODLASTYEAR('Calendar'[Date])
+				)
+				RETURN
+				    IF(
+				        NOT ISBLANK(_current) && NOT ISBLANK(_py),
+				        _current - _py
+				    )
+
+		/// Year-over-year percentage change: (Current - Prior Year) / Prior Year. Returns BLANK if either period is empty.
+		calculationItem 'YoY %' =
+				VAR _current = SELECTEDMEASURE()
+				VAR _py = CALCULATE(
+				    SELECTEDMEASURE(),
+				    SAMEPERIODLASTYEAR('Calendar'[Date])
+				)
+				RETURN
+				    IF(
+				        NOT ISBLANK(_current) && NOT ISBLANK(_py),
+				        DIVIDE(_current - _py, _py)
+				    )
+
+		/// Month-over-month absolute change: Current period minus the same period one month prior. Positive = growth.
+		calculationItem MoM =
+				VAR _current = SELECTEDMEASURE()
+				VAR _pm = CALCULATE(
+				    SELECTEDMEASURE(),
+				    DATEADD('Calendar'[Date], -1, MONTH)
+				)
+				RETURN
+				    IF(
+				        NOT ISBLANK(_current) && NOT ISBLANK(_pm),
+				        _current - _pm
+				    )
+
+		/// Month-over-month percentage change: (Current - Prior Month) / Prior Month. Returns BLANK if either period is empty.
+		calculationItem 'MoM %' =
+				VAR _current = SELECTEDMEASURE()
+				VAR _pm = CALCULATE(
+				    SELECTEDMEASURE(),
+				    DATEADD('Calendar'[Date], -1, MONTH)
+				)
+				RETURN
+				    IF(
+				        NOT ISBLANK(_current) && NOT ISBLANK(_pm),
+				        DIVIDE(_current - _pm, _pm)
+				    )
+
+		/// Quarter-over-quarter absolute change: Current period minus the same period one quarter prior.
+		calculationItem QoQ =
+				VAR _current = SELECTEDMEASURE()
+				VAR _pq = CALCULATE(
+				    SELECTEDMEASURE(),
+				    DATEADD('Calendar'[Date], -1, QUARTER)
+				)
+				RETURN
+				    IF(
+				        NOT ISBLANK(_current) && NOT ISBLANK(_pq),
+				        _current - _pq
+				    )
+
+		/// Quarter-over-quarter percentage change: (Current - Prior Quarter) / Prior Quarter.
+		calculationItem 'QoQ %' =
+				VAR _current = SELECTEDMEASURE()
+				VAR _pq = CALCULATE(
+				    SELECTEDMEASURE(),
+				    DATEADD('Calendar'[Date], -1, QUARTER)
+				)
+				RETURN
+				    IF(
+				        NOT ISBLANK(_current) && NOT ISBLANK(_pq),
+				        DIVIDE(_current - _pq, _pq)
+				    )
+
+		/// Rolling 3-month average: averages the base measure across the 3 months ending on the last visible date. Smooths short-term volatility.
+		calculationItem 'Rolling 3M' =
+				CALCULATE(
+				    SELECTEDMEASURE(),
+				    DATESINPERIOD(
+				        'Calendar'[Date],
+				        LASTDATE('Calendar'[Date]),
+				        -3,
+				        MONTH
+				    )
+				)
+
+		/// Rolling 6-month window: returns the base measure across the 6 months ending on the last visible date. Useful for medium-term trend analysis.
+		calculationItem 'Rolling 6M' =
+				CALCULATE(
+				    SELECTEDMEASURE(),
+				    DATESINPERIOD(
+				        'Calendar'[Date],
+				        LASTDATE('Calendar'[Date]),
+				        -6,
+				        MONTH
+				    )
+				)
+
+		/// Rolling 12-month (trailing year) window: returns the base measure across the 12 months ending on the last visible date. Eliminates seasonality for trend comparison.
+		calculationItem 'Rolling 12M' =
+				CALCULATE(
+				    SELECTEDMEASURE(),
+				    DATESINPERIOD(
+				        'Calendar'[Date],
+				        LASTDATE('Calendar'[Date]),
+				        -12,
+				        MONTH
+				    )
+				)
+
+	column 'Time Intelligence'
+		dataType: string
+		lineageTag: c5f0bd32-1356-45e8-99cb-a047ff2f897a
+
+	partition 'Partition_Time Intelligence' = calculationGroup
+
