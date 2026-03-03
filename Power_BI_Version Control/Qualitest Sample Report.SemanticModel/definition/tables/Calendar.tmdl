@@ -50,7 +50,7 @@ table Calendar
 		summarizeBy: none
 		isNameInferred
 		sourceColumn: [MonthYear]
-		sortByColumn: Month
+		sortByColumn: MonthStart
 
 		annotation SummarizationSetBy = Automatic
 
@@ -71,6 +71,30 @@ table Calendar
 		sourceColumn: [MonthStart]
 
 		annotation SummarizationSetBy = Automatic
+
+	/// Standard drill-down hierarchy for date-based visuals. Drill from Year → Quarter → Month → Date.
+	hierarchy 'Date Hierarchy'
+		lineageTag: 6ba42ca0-93eb-41dd-b313-c2973289bc28
+
+		/// Calendar year (e.g. 2025)
+		level Year
+			lineageTag: 8c0ba099-26a3-42a4-a407-9dfbefdb7165
+			column: Year
+
+		/// Calendar quarter (e.g. Q1 2025)
+		level Quarter
+			lineageTag: 289fbfbd-98ae-49a8-b159-7c39e63850bf
+			column: Quarter
+
+		/// Month and year label (e.g. Jan 2025)
+		level Month
+			lineageTag: 17b86b68-fa8d-4113-ac26-806b49acb74b
+			column: MonthYear
+
+		/// Individual calendar date
+		level Date
+			lineageTag: 9a31c9c1-c5a5-4045-8f33-852a88cec8e9
+			column: Date
 
 	partition Calendar = calculated
 		mode: import

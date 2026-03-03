@@ -1,5 +1,5 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.5.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.6.0/schema.json",
   "name": "29e62f29a16db23feae1",
   "position": {
     "x": 9.2943201376936315,
@@ -34,6 +34,23 @@
         }
       }
     },
+    "expansionStates": [
+      {
+        "roles": [
+          "Values"
+        ],
+        "levels": [
+          {
+            "queryRefs": [
+              "Calendar.MonthYear"
+            ],
+            "isCollapsed": true,
+            "isPinned": true
+          }
+        ],
+        "root": {}
+      }
+    ],
     "objects": {
       "data": [
         {
@@ -81,7 +98,7 @@
                           [
                             {
                               "Literal": {
-                                "Value": "'Feb 2025'"
+                                "Value": "'Feb 2023'"
                               }
                             }
                           ]

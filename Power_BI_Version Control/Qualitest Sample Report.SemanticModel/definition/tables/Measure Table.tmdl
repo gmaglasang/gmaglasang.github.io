@@ -1209,6 +1209,11 @@ table 'Measure Table'
 		formatString: 0
 		lineageTag: 690e2fd7-2531-4cc7-a07c-0f9bd25d0bf1
 
+	/// Total number of rows in the QualitestData table. Use this on a card visual to show the raw record count.
+	measure 'Total Rows' = COUNTROWS(QualitestData)
+		formatString: #,0
+		lineageTag: fc98301d-6ebd-482e-9e73-4fb2ea45e46f
+
 	column Column1
 		dataType: string
 		isHidden

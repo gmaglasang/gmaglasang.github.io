@@ -4,14 +4,14 @@
     {
       "ordinal": 0,
       "scrollPosition": {
-        "x": 340,
-        "y": 67
+        "x": 0,
+        "y": 0
       },
       "nodes": [
         {
           "location": {
             "x": 51,
-            "y": 510.59375
+            "y": 635.890625
           },
           "nodeIndex": "QualitestData",
           "nodeLineageTag": "1a9fc569-cf13-495b-9032-61462d444123",
@@ -24,7 +24,7 @@
         {
           "location": {
             "x": 476,
-            "y": 250.59375
+            "y": 375.890625
           },
           "nodeIndex": "Measure Table",
           "nodeLineageTag": "22122c0d-1160-4b1a-bb41-0cf0c0806790",
@@ -37,11 +37,12 @@
         {
           "location": {
             "x": 434,
-            "y": 533.59375
+            "y": 658.890625
           },
           "nodeIndex": "Calendar",
+          "nodeLineageTag": "418320de-6264-46af-a41c-f6a99b645f50",
           "size": {
-            "height": 200,
+            "height": 426.759808,
             "width": 234
           },
           "zIndex": 3
@@ -49,7 +50,7 @@
         {
           "location": {
             "x": 942,
-            "y": 356.34375
+            "y": 481.640625
           },
           "nodeIndex": "Time Periods",
           "size": {
@@ -61,7 +62,7 @@
         {
           "location": {
             "x": 1175,
-            "y": 343.21875
+            "y": 468.515625
           },
           "nodeIndex": "Parameter",
           "nodeLineageTag": "4daf39fa-f276-4b2f-8b75-1442c312e812",
@@ -73,19 +74,33 @@
         },
         {
           "location": {
-            "x": 1408,
-            "y": 263.53125
+            "x": 1005.8556529999998,
+            "y": 881.322083
           },
           "nodeIndex": "MarkerMonth",
+          "nodeLineageTag": "f7ed33eb-1de2-41e4-9643-36f323e6eace",
           "size": {
             "height": 200,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 1641,
+            "y": 353.296875
+          },
+          "nodeIndex": "Time Intelligence",
+          "nodeLineageTag": "881b22f5-02a4-44db-bd5b-623f3c6e3ab1",
+          "size": {
+            "height": 104,
             "width": 234
           },
           "zIndex": 0
         }
       ],
       "name": "All tables",
-      "zoomValue": 100,
+      "zoomValue": 56.447393005377734,
       "pinKeyFieldsToTop": false,
       "showExtraHeaderInfo": false,
       "hideKeyFieldsWhenCollapsed": false,
