@@ -15,6 +15,23 @@ A fully functional, browser-based CRM built to manage a high-volume job search �
 
 [**→ Open Live Demo**](https://gmaglasang.github.io/App_Build/linkedin-crm/)
 
+### Screenshots
+
+**Messages Tab** — Track conversations with status tags (Hot, Interview, Replied, Ghosted) and one-click filtering
+![Messages Tab](assets/crm-messages.png)
+
+**Contact Detail & AI Follow-up Assistant** — View message history, add notes, and generate AI-powered follow-ups
+![Contact Detail Modal](assets/crm-modal.png)
+
+**Connections Tab** — Manage 862+ LinkedIn connections with company, title, and date context
+![Connections Tab](assets/crm-connections.png)
+
+**Applications Tab** — Track 200+ job applications with company, title, and date applied
+![Applications Tab](assets/crm-applications.png)
+
+**AI Settings** — Connect your own API key (Google Gemini free tier supported, no credit card required)
+![AI Settings](assets/crm-ai-settings.png)
+
 ---
 
 ## 📊 BI & Analytics Projects
