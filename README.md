@@ -1,6 +1,6 @@
 # Portfolio – Guilbert Maglasang
 
-Senior Business Intelligence Developer specializing in Power BI, DAX, SQL, and data storytelling. This portfolio showcases dashboards, analytics projects, and full-stack web applications built to solve real problems.
+Senior Business Intelligence Developer specializing in Power BI, DAX, SQL, and data storytelling. This portfolio showcases dashboards, analytics projects, and browser-based tools built to solve real problems.
 
 ---
 
@@ -11,7 +11,7 @@ A fully functional, browser-based CRM built to manage a high-volume job search �
 
 **Features:** Message tracking with status tags (Hot, Interview, Replied, Ghosted) · Connection manager · Application log · AI follow-up assistant (Gemini/Anthropic/Groq) · Excel export · Zero dependencies
 
-**Built with:** Vanilla HTML, CSS, JavaScript · localStorage · SheetJS
+**Built with:** AI-assisted development · Runs entirely in the browser · No installation required
 
 [**→ Open Live Demo**](https://gmaglasang.github.io/App_Build/linkedin-crm/)
 
@@ -35,8 +35,8 @@ End-to-end sales analytics dashboard with dynamic filtering and trend analysis.
 See featured project above.
 
 ### Mouth Breathing Tracker
-Web application built with AI to track mouth-open frequency over time — helping mouth breathers monitor progress.
-**Tools:** HTML, JavaScript, AI/CV integration
+Web application built to track mouth-open frequency over time — helping mouth breathers monitor progress.
+**Built with:** AI-assisted development · Integrates MediaPipe Face Mesh for real-time facial landmark detection
 
 ---
 
@@ -45,9 +45,9 @@ Web application built with AI to track mouth-open frequency over time — helpin
 | Area | Tools |
 |---|---|
 | BI & Reporting | Power BI, DAX, Power Query, Paginated Reports |
-| Data & Databases | SQL, Snowflake, Azure Synapse, SQL Server |
+| Data & Databases | SQL, Snowflake, SQL Server |
 | Automation | Power Automate |
-| Web / Apps | HTML, CSS, JavaScript |
+| AI-Assisted Dev | Shipped browser-based tools using AI coding assistance |
 
 ---
 
