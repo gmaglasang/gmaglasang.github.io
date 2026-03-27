@@ -46,7 +46,7 @@ Web application built with AI to track mouth-open frequency over time — helpin
 |---|---|
 | BI & Reporting | Power BI, DAX, Power Query, Paginated Reports |
 | Data & Databases | SQL, Snowflake, Azure Synapse, SQL Server |
-| Automation | Power Automate, Python |
+| Automation | Power Automate |
 | Web / Apps | HTML, CSS, JavaScript |
 
 ---
