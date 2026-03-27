@@ -23,9 +23,9 @@ A fully functional, browser-based CRM built to manage a high-volume job search �
 Executive-level vendor performance dashboard tracking KPIs across supply chain operations.
 **Tools:** Power BI, DAX, SQL
 
-### Sample Dashboards – Sales Performance Analysis
-End-to-end sales analytics dashboard with dynamic filtering and trend analysis.
-**Tools:** Power BI, Power Query, DAX
+### Sales Performance Analysis Dashboard
+End-to-end sales analytics dashboard with dynamic filtering, YoY trend analysis, and executive-level KPI tracking — migrated from Excel to Power BI.
+**Tools:** Power BI, Power Query, DAX, SQL
 
 ---
 
