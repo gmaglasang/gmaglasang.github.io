@@ -1,0 +1,2039 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guilbert's LinkedIn CRM - Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+  :root {
+    --bg: #070a12;
+    --surface: #0f172a;
+    --surface2: #111c33;
+    --border: #24324a;
+    --accent: #3b82f6;
+    --accent2: #f59e0b;
+    --green: #22c55e;
+    --red: #ef4444;
+    --purple: #a855f7;
+    --text: #e5e7eb;
+    --muted: #94a3b8;
+    --tag-bg: #1e3a5f;
+  }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Outfit', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  /* HEADER */
+  .header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; }
+  .header-left { display: flex; align-items: center; gap: 12px; }
+  .logo { width: 36px; height: 36px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 18px; color: white; }
+  .header-title { font-size: 18px; font-weight: 600; }
+  .header-sub { font-size: 12px; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+  .header-right { display: flex; align-items: center; gap: 16px; }
+  .header-stats { display: flex; gap: 24px; }
+  .hstat { text-align: right; }
+  .hstat-val { font-size: 20px; font-weight: 700; font-family: 'JetBrains Mono', monospace; color: var(--accent); }
+  .hstat-lbl { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+  .api-key-btn { background: rgba(139,92,246,0.1); border: 1px solid rgba(139,92,246,0.3); color: #a78bfa; padding: 7px 12px; border-radius: 8px; font-size: 12px; cursor: pointer; font-family: 'Outfit', sans-serif; font-weight: 500; white-space: nowrap; }
+  .api-key-btn:hover { background: rgba(139,92,246,0.2); }
+  .api-key-set { border-color: rgba(16,185,129,0.4); color: #10b981; background: rgba(16,185,129,0.1); }
+
+  /* TABS */
+  .tabs { display: flex; border-bottom: 1px solid var(--border); background: var(--surface); padding: 0 24px; }
+  .tab { padding: 14px 20px; font-size: 14px; font-weight: 500; cursor: pointer; border-bottom: 2px solid transparent; color: var(--muted); transition: all 0.2s; }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .tab-badge { background: var(--surface2); color: var(--muted); border-radius: 20px; padding: 1px 7px; font-size: 11px; font-family: 'JetBrains Mono', monospace; margin-left: 6px; }
+
+  /* CONTENT */
+  .content { padding: 20px 24px; }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* TOOLBAR */
+  .toolbar { display: flex; gap: 10px; margin-bottom: 16px; align-items: center; flex-wrap: wrap; }
+  .search-wrap { position: relative; flex: 1; min-width: 200px; }
+  .search-wrap svg { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--muted); }
+  .search { width: 100%; background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 9px 12px 9px 34px; border-radius: 8px; font-size: 14px; font-family: 'Outfit', sans-serif; outline: none; }
+  .search:focus { border-color: var(--accent); }
+  .filter-btn { background: var(--surface2); border: 1px solid var(--border); color: var(--muted); padding: 8px 14px; border-radius: 8px; font-size: 13px; cursor: pointer; font-family: 'Outfit', sans-serif; transition: all 0.15s; white-space: nowrap; }
+  .filter-btn:hover, .filter-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(59,130,246,0.08); }
+  .export-btn { background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); color: #10b981; padding: 8px 14px; border-radius: 8px; font-size: 13px; cursor: pointer; font-family: 'Outfit', sans-serif; font-weight: 500; display: flex; align-items: center; gap: 6px; transition: all 0.15s; white-space: nowrap; }
+  .export-btn:hover { background: rgba(16,185,129,0.2); }
+
+  /* TABLE */
+  .table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+  th { background: var(--surface2); padding: 11px 14px; text-align: left; font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; border-bottom: 1px solid var(--border); white-space: nowrap; position: relative; user-select: none; overflow: hidden; }
+  th.sortable { cursor: pointer; }
+  th.sortable:hover { color: var(--text); background: rgba(59,130,246,0.06); }
+  .sort-icon { margin-left: 4px; opacity: 0.4; font-size: 9px; }
+  th.asc .sort-icon::after { content: "▲"; opacity: 1; }
+  th.desc .sort-icon::after { content: "▼"; opacity: 1; }
+  th:not(.asc):not(.desc) .sort-icon::after { content: "⇅"; }
+  th.drag-over { background: rgba(59,130,246,0.15); border-left: 2px solid var(--accent); }
+  th.dragging { opacity: 0.4; }
+
+  /* RESIZE HANDLE */
+  .resize-handle { position: absolute; right: 0; top: 0; width: 6px; height: 100%; cursor: col-resize; background: transparent; z-index: 2; }
+  .resize-handle:hover, .resize-handle.resizing { background: var(--accent); opacity: 0.5; }
+
+  td { padding: 10px 14px; font-size: 13px; border-bottom: 1px solid rgba(30,45,69,0.5); vertical-align: middle; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(59,130,246,0.04); cursor: pointer; }
+
+  /* STATUS TAGS */
+  .status { display: inline-block; padding: 2px 9px; border-radius: 20px; font-size: 11px; font-weight: 600; font-family: 'JetBrains Mono', monospace; }
+  .status-new { background: rgba(59,130,246,0.15); color: #60a5fa; }
+  .status-replied { background: rgba(16,185,129,0.15); color: #34d399; }
+  .status-interview { background: rgba(245,158,11,0.15); color: #fbbf24; }
+  .status-passed { background: rgba(139,92,246,0.15); color: #a78bfa; }
+  .status-ghosted { background: rgba(100,116,139,0.15); color: #94a3b8; }
+  .status-hot { background: rgba(239,68,68,0.15); color: #f87171; }
+  .status-archive { background: rgba(100,116,139,0.1); color: #64748b; }
+
+  select.status-select { background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 3px 6px; border-radius: 6px; font-size: 12px; font-family: 'JetBrains Mono', monospace; cursor: pointer; outline: none; }
+  select.status-select:focus { border-color: var(--accent); }
+
+  /* PAGINATION */
+  .pagination { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; background: var(--surface2); border-top: 1px solid var(--border); }
+  .pagination-info { font-size: 13px; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+  .pagination-btns { display: flex; gap: 6px; }
+  .pg-btn { background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: 5px 12px; border-radius: 6px; font-size: 13px; cursor: pointer; transition: all 0.15s; font-family: 'Outfit', sans-serif; }
+  .pg-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+  .pg-btn:disabled { opacity: 0.3; cursor: default; }
+  .pg-btn.active-page { background: var(--accent); border-color: var(--accent); color: white; }
+
+  /* MODAL */
+  .modal-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,10,0.8); z-index: 100; align-items: center; justify-content: center; padding: 20px; }
+  .modal-backdrop.open { display: flex; }
+  .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; width: 100%; max-width: 700px; max-height: 88vh; display: flex; flex-direction: column; }
+  .modal-header { padding: 20px 24px 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: flex-start; }
+  .modal-title { font-size: 16px; font-weight: 600; }
+  .modal-sub { font-size: 13px; color: var(--muted); margin-top: 2px; }
+  .modal-close { background: none; border: none; color: var(--muted); font-size: 22px; cursor: pointer; line-height: 1; padding: 0 4px; }
+  .modal-close:hover { color: var(--text); }
+  .modal-body { padding: 20px 24px; overflow-y: auto; flex: 1; }
+  .modal-footer { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .modal-sm { max-width: 440px; }
+
+  /* NOTES */
+  .notes-area { width: 100%; background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 10px 12px; border-radius: 8px; font-size: 13px; font-family: 'Outfit', sans-serif; resize: vertical; min-height: 80px; outline: none; }
+  .notes-area:focus { border-color: var(--accent); }
+  .save-btn { background: var(--accent); color: white; border: none; padding: 8px 18px; border-radius: 8px; font-size: 13px; font-family: 'Outfit', sans-serif; cursor: pointer; font-weight: 500; }
+  .save-btn:hover { background: #2563eb; }
+
+  /* AI PANEL */
+  .ai-panel { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 14px; margin-top: 14px; }
+  .ai-panel-title { font-size: 12px; font-weight: 600; color: var(--accent); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .ai-response { font-size: 13px; color: var(--text); line-height: 1.6; white-space: pre-wrap; }
+  .ai-loading { color: var(--muted); font-style: italic; font-size: 13px; }
+  .ai-btn { background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.3); color: var(--accent); padding: 7px 14px; border-radius: 8px; font-size: 12px; font-family: 'Outfit', sans-serif; cursor: pointer; font-weight: 500; transition: all 0.15s; }
+  .ai-btn:hover { background: rgba(59,130,246,0.2); }
+  .ai-key-warning { background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.3); color: #fbbf24; padding: 10px 12px; border-radius: 8px; font-size: 12px; margin-top: 10px; }
+
+  /* EMPTY */
+  .empty { text-align: center; padding: 48px 20px; color: var(--muted); font-size: 14px; }
+
+  /* INDICATORS */
+  .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 6px; vertical-align: middle; flex-shrink: 0; }
+  .dot-green { background: var(--green); }
+  .dot-orange { background: var(--accent2); }
+
+  .name-cell { font-weight: 500; }
+.name-stack{display:flex;flex-direction:column;gap:2px;}
+.name-top{display:flex;align-items:center;gap:8px;}
+.name-sub{font-size:12px;color:var(--muted);}
+.copy-row{display:inline-flex;gap:6px;}
+.mini-ico{height:20px;min-width:22px;padding:0 6px;border-radius:8px;border:1px solid var(--border);background:rgba(255,255,255,0.03);color:var(--text);cursor:pointer;font-size:12px;}
+.mini-ico:hover{background:rgba(255,255,255,0.06);}
+
+  .preview-cell { color: var(--muted); font-size: 12px; }
+  .notes-cell { color: #94a3b8; font-size: 12px; font-style: italic; }
+  .date-cell { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--muted); white-space: nowrap; }
+
+  /* DASHBOARD CARDS */
+  .dash-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; margin-bottom: 20px; }
+  .dash-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; }
+.dash-card.clickable { cursor: pointer; }
+.dash-card.clickable:hover { border-color: rgba(255,255,255,0.18); }
+
+  .dash-num { font-size: 32px; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+  .dash-lbl { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .dash-blue .dash-num { color: var(--accent); }
+  .dash-green .dash-num { color: var(--green); }
+  .dash-amber .dash-num { color: var(--accent2); }
+  .dash-purple .dash-num { color: var(--purple); }
+  .dash-red .dash-num { color: var(--red); }
+
+  .bulk-bar { display: none; align-items: center; gap: 10px; margin-left: 10px; padding: 6px 10px; border: 1px solid var(--border); background: rgba(59,130,246,0.06); border-radius: 10px; flex-wrap: wrap; }
+  .bulk-bar .bulk-lbl { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-right: 2px; }
+  .bulk-bar .bulk-btn { background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 7px 10px; border-radius: 8px; font-size: 12px; cursor: pointer; }
+  .bulk-bar .bulk-btn.danger { border-color: rgba(239,68,68,0.4); color: #fca5a5; background: rgba(239,68,68,0.08); }
+  .row-check { width: 16px; height: 16px; accent-color: var(--accent); cursor: pointer; }
+  .fu-input { width: 130px; background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 6px 8px; border-radius: 8px; font-size: 12px; font-family: 'JetBrains Mono', monospace; outline: none; }
+  .fu-input:focus { border-color: rgba(59,130,246,0.6); }
+  .tone-pill { display:inline-flex; align-items:center; padding: 4px 8px; border-radius: 999px; font-size: 12px; border: 1px solid var(--border); background: rgba(148,163,184,0.08); }
+
+  /* INTERVIEW LIKELIHOOD (5★) */
+  .stars{display:inline-flex;gap:2px;align-items:center;}
+  .star{font-size:14px;line-height:1;color:rgba(226,232,240,0.35);cursor:pointer;user-select:none;}
+  .star.on{color:var(--accent2);}
+  .stars.small .star{font-size:13px;}
+  .stars.readonly .star{cursor:default;}
+
+  /* API KEY INPUT */
+  .api-input { width: 100%; background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 10px 12px; border-radius: 8px; font-size: 13px; font-family: 'JetBrains Mono', monospace; outline: none; }
+  .api-input:focus { border-color: var(--accent); }
+  .api-hint { font-size: 12px; color: var(--muted); margin-top: 8px; line-height: 1.5; }
+  .sec-btn { background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 8px 16px; border-radius: 8px; font-size: 13px; font-family: 'Outfit', sans-serif; cursor: pointer; }
+
+  /* ADD / DELETE BUTTONS */
+  .add-btn { background: rgba(59,130,246,0.12); border: 1px solid rgba(59,130,246,0.35); color: var(--accent); padding: 8px 14px; border-radius: 8px; font-size: 13px; cursor: pointer; font-family: 'Outfit', sans-serif; font-weight: 500; white-space: nowrap; transition: all 0.15s; }
+  .add-btn:hover { background: rgba(59,130,246,0.22); }
+  .del-btn { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: #f87171; padding: 8px 14px; border-radius: 8px; font-size: 13px; cursor: pointer; font-family: 'Outfit', sans-serif; font-weight: 500; white-space: nowrap; transition: all 0.15s; }
+  .del-btn:hover { background: rgba(239,68,68,0.2); }
+  .row-del { background: none; border: none; color: var(--muted); cursor: pointer; padding: 0 4px; font-size: 14px; opacity: 0; transition: opacity 0.15s; vertical-align: middle; }
+  tr:hover .row-del { opacity: 1; }
+  .row-del:hover { color: #f87171; }
+  .row-del-inline { background: none; border: 1px solid rgba(239,68,68,0.3); color: #f87171; cursor: pointer; padding: 1px 5px; font-size: 10px; border-radius: 4px; opacity: 0.5; transition: opacity 0.15s, background 0.15s; vertical-align: middle; margin-left: 6px; line-height: 1.4; }
+  .row-del-inline:hover { opacity: 1; background: rgba(239,68,68,0.12); }
+
+  /* FORM FIELDS */
+  .form-group { margin-bottom: 14px; }
+  .form-label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 5px; display: block; }
+  .form-input { width: 100%; background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 9px 12px; border-radius: 8px; font-size: 13px; font-family: 'Outfit', sans-serif; outline: none; }
+  .form-input:focus { border-color: var(--accent); }
+  .form-select { width: 100%; background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 9px 12px; border-radius: 8px; font-size: 13px; font-family: 'Outfit', sans-serif; outline: none; cursor: pointer; }
+
+  .form-row { display: flex; gap: 12px; align-items: flex-start; }
+  .form-row .form-group { flex: 1; }
+  @media (max-width: 640px) { .form-row { flex-direction: column; gap: 0; } }
+
+  /* FREE API BADGES */
+  .api-badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-left: 6px; vertical-align: middle; }
+  .badge-free { background: rgba(16,185,129,0.15); color: #10b981; }
+  .badge-paid { background: rgba(100,116,139,0.15); color: #94a3b8; }
+  .api-option { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px; cursor: pointer; transition: border-color 0.15s; }
+  .api-option:hover { border-color: var(--accent); }
+  .api-option.selected { border-color: var(--accent); background: rgba(59,130,246,0.08); }
+  .api-option-name { font-size: 14px; font-weight: 600; }
+  .api-option-desc { font-size: 12px; color: var(--muted); margin-top: 3px; line-height: 1.4; }
+
+  /* Job Hunt Focus */
+  .status-hot { border: 1px solid rgba(239,68,68,0.25); }
+  .status-interview { border: 1px solid rgba(245,158,11,0.25); }
+  .status-replied { border: 1px solid rgba(34,197,94,0.22); }
+
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <div class="logo">G</div>
+    <div>
+      <div class="header-title">Guilbert's LinkedIn CRM</div>
+      <div class="header-sub">Demo Mode &middot; Sample data only &middot; <a href="https://gmaglasang.github.io/App_Build/linkedin-crm/" style="color:var(--accent)">View live app</a></div>
+    </div>
+  </div>
+  <div class="header-right">
+    <button class="api-key-btn" id="apiKeyBtn" onclick="openApiModal()">⚙ Set API Key</button>
+    <button class="api-key-btn" id="backupBtn" onclick="backupAllData()" title="Download a JSON backup of all CRM data">💾 Backup</button>
+    <button class="api-key-btn" id="restoreBtn" onclick="openRestorePicker()" title="Restore from a JSON backup">📥 Restore</button>
+    <input type="file" id="restoreInput" accept="application/json" style="display:none" onchange="restoreAllData(this.files[0])">
+    <button class="api-key-btn" id="resetBtn" onclick="resetAllData()" title="Clears all CRM data stored in this browser">🧹 Reset Data</button>
+    <div class="header-stats">
+      <div class="hstat"><div class="hstat-val" id="stat-convs">392</div><div class="hstat-lbl">Conversations</div></div>
+      <div class="hstat"><div class="hstat-val" id="stat-conns">862</div><div class="hstat-lbl">Connections</div></div>
+      <div class="hstat"><div class="hstat-val" id="stat-apps">200</div><div class="hstat-lbl">Applications</div></div>
+    </div>
+  </div>
+</div>
+
+<div id="demo-banner" style="background:rgba(59,130,246,0.08);border-bottom:1px solid rgba(59,130,246,0.15);padding:8px 20px;font-size:12px;color:#64748b;text-align:center">
+  &#128202; This is a <strong style="color:#3b82f6">demo version</strong> of Guilbert's LinkedIn CRM â€” all data is fictional.
+  <a href="https://gmaglasang.github.io/App_Build/linkedin-crm/" style="color:#3b82f6;text-decoration:none;font-weight:500">View portfolio &#8594;</a>
+</div>
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('messages')">💬 Messages <span class="tab-badge">392</span></div>
+  <div class="tab" onclick="switchTab('connections')">🔗 Connections <span class="tab-badge">862</span></div>
+  <div class="tab" onclick="switchTab('applications')">📋 Applications <span class="tab-badge">200</span></div>
+</div>
+
+<div class="content">
+  <!-- MESSAGES TAB -->
+  <div id="tab-messages" class="tab-panel active">
+    <div class="dash-grid">
+      <div class="dash-card dash-blue clickable" onclick="setFilter('all')"><div class="dash-num" id="d-total">0</div><div class="dash-lbl">Total Conversations</div></div>
+      <div class="dash-card dash-green clickable" onclick="setFilter('replied')"><div class="dash-num" id="d-replied">0</div><div class="dash-lbl">I Replied</div></div>
+      <div class="dash-card dash-amber clickable" onclick="setFilter('pending')"><div class="dash-num" id="d-pending">0</div><div class="dash-lbl">No Reply Yet</div></div>
+      <div class="dash-card dash-purple clickable" onclick="setFilter('interview')"><div class="dash-num" id="d-interview">0</div><div class="dash-lbl">Interview Stage</div></div>
+      <div class="dash-card dash-red clickable" onclick="setFilter('hot')"><div class="dash-num" id="d-hot">0</div><div class="dash-lbl">🔥 Hot</div></div>
+      <div class="dash-card dash-amber clickable" onclick="setFilter('followup')"><div class="dash-num" id="d-followups">0</div><div class="dash-lbl">Follow ups scheduled</div></div>
+    </div>
+    <div class="toolbar">
+      <div class="search-wrap">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input class="search" id="msg-search" placeholder="Search conversations, contacts..." oninput="renderMessages()">
+      </div>
+      <button class="filter-btn active" id="f-all" onclick="setFilter('all')">All</button>
+      <button class="filter-btn" id="f-replied" onclick="setFilter('replied')">Replied</button>
+      <button class="filter-btn" id="f-pending" onclick="setFilter('pending')">No Reply</button>
+      <button class="filter-btn" id="f-ghosted" onclick="setFilter('ghosted')">👻 Ghosted</button>
+      <button class="filter-btn" id="f-followup" onclick="setFilter('followup')">📅 Follow up</button>
+      <button class="filter-btn" id="f-hot" onclick="setFilter('hot')">🔥 Hot</button>
+      <button class="filter-btn" id="f-interview" onclick="setFilter('interview')">Interview</button>
+      <button class="filter-btn" id="f-archive" onclick="setFilter('archive')">📦 Archive</button>
+      <div id="bulk-bar" class="bulk-bar">
+        <span class="bulk-lbl"><span id="bulk-count">0</span> selected</span>
+        <select class="status-select" style="padding:6px 10px;font-size:12px" onchange="bulkSetStatus(this.value)">
+          <option value="">Bulk Status…</option>
+          <option value="new">🔵 New</option>
+          <option value="replied">✅ Replied</option>
+          <option value="interview">⭐ Interview</option>
+          <option value="hot">🔥 Hot</option>
+          <option value="passed">✓ Passed</option>
+          <option value="ghosted">👻 Ghosted</option>
+          <option value="archive">📦 Archive</option>
+        </select>
+        <input class="fu-input" type="date" onchange="bulkSetFollowUp(this.value)" title="Set follow-up date for selected">
+        <button class="bulk-btn danger" onclick="deleteSelectedMsgs()">Delete</button>
+        <button class="bulk-btn" onclick="clearMsgSelection()">Clear</button>
+      </div>
+      <button class="add-btn" onclick="openAddModal('msg')">+ Add Contact</button>
+      <button class="export-btn" onclick="exportExcel()">⬇ Export Excel</button>
+    </div>
+    <div class="table-wrap">
+      <table id="msg-table"><colgroup id="msg-colgroup"></colgroup>
+        <thead><tr id="msg-thead-row"></tr></thead>
+        <tbody id="msg-tbody"></tbody>
+      </table>
+      <div class="pagination">
+        <div class="pagination-info" id="msg-page-info"></div>
+        <div class="pagination-btns" id="msg-page-btns"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONNECTIONS TAB -->
+  <div id="tab-connections" class="tab-panel">
+    <div class="toolbar">
+      <div class="search-wrap">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input class="search" id="conn-search" placeholder="Search name, company, title..." oninput="renderConnections()">
+      </div>
+      <button class="add-btn" onclick="openAddModal('conn')">+ Add Connection</button>
+      <button class="export-btn" onclick="exportExcel()">⬇ Export Excel</button>
+    </div>
+    <div class="table-wrap">
+      <table id="conn-table"><colgroup id="conn-colgroup"></colgroup>
+        <thead><tr id="conn-thead-row"></tr></thead>
+        <tbody id="conn-tbody"></tbody>
+      </table>
+      <div class="pagination">
+        <div class="pagination-info" id="conn-page-info"></div>
+        <div class="pagination-btns" id="conn-page-btns"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- APPLICATIONS TAB -->
+  <div id="tab-applications" class="tab-panel">
+    <div class="toolbar">
+      <div class="search-wrap">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input class="search" id="app-search" placeholder="Search company, job title..." oninput="renderApplications()">
+      </div>
+      <button class="add-btn" onclick="openAddModal('app')">+ Add Application</button>
+      <button class="export-btn" onclick="exportExcel()">⬇ Export Excel</button>
+    </div>
+    <div class="table-wrap">
+      <table id="app-table"><colgroup id="app-colgroup"></colgroup>
+        <thead><tr id="app-thead-row"></tr></thead>
+        <tbody id="app-tbody"></tbody>
+      </table>
+      <div class="pagination">
+        <div class="pagination-info" id="app-page-info"></div>
+        <div class="pagination-btns" id="app-page-btns"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DETAIL MODAL -->
+<div class="modal-backdrop" id="modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="modal-title"></div>
+        <div class="modal-sub" id="modal-sub"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-footer" id="modal-footer"></div>
+  </div>
+</div>
+
+<!-- ADD / EDIT FORM MODAL -->
+<div class="modal-backdrop" id="add-modal">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <div><div class="modal-title" id="add-modal-title">Add Entry</div></div>
+      <button class="modal-close" onclick="document.getElementById('add-modal').classList.remove('open')">×</button>
+    </div>
+    <div class="modal-body" id="add-modal-body"></div>
+    <div class="modal-footer" id="add-modal-footer"></div>
+  </div>
+</div>
+
+<!-- API KEY MODAL -->
+<div class="modal-backdrop" id="api-modal">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">⚙ AI Settings &amp; API Key</div>
+        <div class="modal-sub">Configure the AI follow-up assistant</div>
+      </div>
+      <button class="modal-close" onclick="closeApiModal()">×</button>
+    </div>
+    <div class="modal-body" style="overflow-y:auto">
+
+      <p style="font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.5">
+        The AI assistant needs an API key to generate follow-ups and replies. Choose a provider below — <strong style="color:var(--green)">Google Gemini is completely free</strong> and requires no credit card.
+      </p>
+
+      <div style="margin-bottom:16px">
+        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px">Choose Provider</div>
+
+        <div class="api-option" id="opt-gemini" onclick="selectProvider('gemini')">
+          <div class="api-option-name">Google Gemini <span class="api-badge badge-free">FREE</span></div>
+          <div class="api-option-desc">No credit card needed. Free tier: 1,500 requests/day. Get key at <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:var(--accent)">aistudio.google.com</a> → "Get API Key" → "Create API key" (takes 30 seconds).</div>
+        </div>
+
+        <div class="api-option" id="opt-groq" onclick="selectProvider('groq')">
+          <div class="api-option-name">Groq <span class="api-badge badge-free">FREE</span></div>
+          <div class="api-option-desc">Very fast. Free tier with generous limits. Get key at <a href="https://console.groq.com/keys" target="_blank" style="color:var(--accent)">console.groq.com</a> → "Create API key".</div>
+        </div>
+
+        <div class="api-option" id="opt-anthropic" onclick="selectProvider('anthropic')">
+          <div class="api-option-name">Anthropic Claude <span class="api-badge badge-paid">PAID</span></div>
+          <div class="api-option-desc">This CRM was built with Claude. Requires a credit card but has a small free starting credit. Get key at <a href="https://console.anthropic.com" target="_blank" style="color:var(--accent)">console.anthropic.com</a>.</div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" id="api-key-label-text">API Key</label>
+        <input class="form-input" id="api-key-input" type="password" placeholder="Paste your API key here...">
+        <div class="api-hint" id="api-key-hint" style="margin-top:6px"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="save-btn" onclick="saveApiKey()">Save Key</button>
+      <button class="sec-btn" onclick="clearApiKey()">Clear</button>
+      <span id="api-save-status" style="font-size:13px;color:var(--green);margin-left:auto"></span>
+    </div>
+  </div>
+</div>
+
+
+<script>
+const BASE_CONVS = [{"id": "conv-001", "t": "Recruiter", "cn": "Sarah Mitchell", "dt": "2026-03-28", "r": true, "mc": 6, "pv": "Hi Guilbert! I came across your profile and your Power BI background is exactly what my client is looking for. We have a Senior BI Developer role at Microsoft that seems like a perfect match."},{"id": "conv-002", "t": "Recruiter", "cn": "David Chen", "dt": "2026-03-27", "r": false, "mc": 1, "pv": "Hello Guilbert, I am reaching out about an exciting Data Analyst opportunity at Deloitte. Your Power BI and DAX experience caught my attention. Would you be open to a quick call this week?"},{"id": "conv-003", "t": "Hiring Manager", "cn": "Angela Torres", "dt": "2026-03-26", "r": true, "mc": 8, "pv": "Guilbert, thanks for your interest in the BI Developer role at EY. I reviewed your portfolio and your dashboard work is impressive. Can we schedule a phone screen for early next week?"},{"id": "conv-004", "t": "Recruiter", "cn": "James Patel", "dt": "2026-03-25", "r": true, "mc": 4, "pv": "Hi Guilbert! We have an opening for a Power BI Developer at KPMG Houston. The role involves building executive dashboards and working closely with finance teams. Interested?"},{"id": "conv-005", "t": "Recruiter", "cn": "Linda Okafor", "dt": "2026-03-24", "r": false, "mc": 1, "pv": "Good morning Guilbert, I found your profile through LinkedIn and think you would be a strong fit for a Senior Data Analyst position at Shell. The role is hybrid in Houston."},{"id": "conv-006", "t": "Hiring Manager", "cn": "Robert Nguyen", "dt": "2026-03-22", "r": true, "mc": 10, "pv": "Guilbert, I am the BI Manager at Chevron and we are expanding our analytics team. Your Power BI and SQL skills align well with what we need. When are you available for a quick intro call?"},{"id": "conv-007", "t": "Recruiter", "cn": "Priya Sharma", "dt": "2026-03-20", "r": true, "mc": 5, "pv": "Hi Guilbert, reaching out on behalf of HEB digital team. They are looking for a BI Developer to support supply chain analytics dashboards in Power BI. Great culture and benefits."},{"id": "conv-008", "t": "Recruiter", "cn": "Michael Brooks", "dt": "2026-03-18", "r": false, "mc": 1, "pv": "Hello Guilbert, I represent United Healthcare and we have a Data Analyst opening in Houston that requires strong Power BI skills. This is a full-time permanent role with excellent benefits."},{"id": "conv-009", "t": "Recruiter", "cn": "Tanya Williams", "dt": "2026-03-17", "r": true, "mc": 7, "pv": "Guilbert, great profile! Accenture is hiring a Power Platform Developer in Houston. Your combination of Power BI, DAX, and data modeling experience is exactly what the client needs."},{"id": "conv-010", "t": "Recruiter", "cn": "Kevin Park", "dt": "2026-03-15", "r": true, "mc": 3, "pv": "Hi Guilbert, I have an IBM opportunity for a Senior BI Consultant in the energy sector. The role involves Power BI, Azure Synapse, and working with upstream oil and gas data pipelines."},{"id": "conv-011", "t": "Hiring Manager", "cn": "Rachel Greenfield", "dt": "2026-03-14", "r": false, "mc": 1, "pv": "Hello Guilbert, I manage the data analytics team at Texas Children Hospital. We are hiring a BI Developer to build clinical dashboards. Your healthcare analytics background is a plus."},{"id": "conv-012", "t": "Recruiter", "cn": "Arun Krishnamurthy", "dt": "2026-03-12", "r": true, "mc": 9, "pv": "Hi Guilbert, Cognizant has an exciting Power BI Developer role with a major energy client in Houston. The position is hybrid and offers strong growth opportunities in the data space."},{"id": "conv-013", "t": "Recruiter", "cn": "Sandra Lopez", "dt": "2026-03-10", "r": false, "mc": 1, "pv": "Guilbert, reaching out from Infosys talent acquisition. We have a Data Visualization Developer role that requires Power BI, Tableau, and strong stakeholder communication skills."},{"id": "conv-014", "t": "Recruiter", "cn": "Daniel Wright", "dt": "2026-03-08", "r": true, "mc": 6, "pv": "Hi Guilbert! NTT Data is looking for a Power BI Developer for a financial services client. Your SQL Server and DAX experience is spot on. Can we connect for a 20-minute call?"},{"id": "conv-015", "t": "Colleague", "cn": "Monica Estrada", "dt": "2026-03-07", "r": true, "mc": 12, "pv": "Hey Guilbert! Long time no talk. I heard you are looking for new opportunities. My team at Capgemini has a BI Analyst opening. Let me put in a referral for you if you are interested!"},{"id": "conv-016", "t": "Recruiter", "cn": "Brian Thompson", "dt": "2026-03-05", "r": false, "mc": 1, "pv": "Hello Guilbert, JPMorgan Chase is hiring a Business Intelligence Developer in their Houston operations center. The role focuses on Power BI dashboards for risk and compliance reporting."},{"id": "conv-017", "t": "Recruiter", "cn": "Nina Vasquez", "dt": "2026-02-28", "r": true, "mc": 4, "pv": "Hi Guilbert, Wells Fargo has an Analytics Developer opening on their consumer banking data team. Strong Power BI skills required. This is a great opportunity with a top-tier firm."},{"id": "conv-018", "t": "Hiring Manager", "cn": "Christopher Lee", "dt": "2026-02-20", "r": true, "mc": 11, "pv": "Guilbert, I lead the data team at MD Anderson Cancer Center. We are building a new reporting infrastructure and need a Power BI Developer. Your background in complex data models stands out."},{"id": "conv-019", "t": "Colleague", "cn": "Jessica Hamilton", "dt": "2026-02-12", "r": true, "mc": 5, "pv": "Guilbert! I just joined Deloitte as a Senior Manager and we are building out our analytics practice in Houston. I immediately thought of you. Would love to catch up and discuss a potential role."},{"id": "conv-020", "t": "Recruiter", "cn": "Omar Abdullah", "dt": "2026-02-01", "r": false, "mc": 1, "pv": "Hello Guilbert, I have a contract-to-hire Power BI Developer role at a major Houston energy company. The pay rate is competitive and the project involves building enterprise-level KPI dashboards."}];
+const BASE_CONNS = [{"n": "Sarah Mitchell", "co": "Deloitte", "p": "Senior Recruiter", "dt": "2026-03-28", "_uid": "conn-001"},{"n": "David Chen", "co": "Robert Half Technology", "p": "Technical Recruiter", "dt": "2026-03-27", "_uid": "conn-002"},{"n": "Angela Torres", "co": "EY", "p": "Talent Acquisition Manager", "dt": "2026-03-26", "_uid": "conn-003"},{"n": "James Patel", "co": "KPMG", "p": "Campus and Experienced Recruiter", "dt": "2026-03-25", "_uid": "conn-004"},{"n": "Robert Nguyen", "co": "Chevron", "p": "BI Analytics Manager", "dt": "2026-03-22", "_uid": "conn-005"},{"n": "Priya Sharma", "co": "HEB", "p": "Talent Partner", "dt": "2026-03-20", "_uid": "conn-006"},{"n": "Tanya Williams", "co": "Accenture", "p": "Recruiting Lead", "dt": "2026-03-17", "_uid": "conn-007"},{"n": "Kevin Park", "co": "IBM", "p": "Senior Technical Recruiter", "dt": "2026-03-15", "_uid": "conn-008"},{"n": "Monica Estrada", "co": "Capgemini", "p": "Senior BI Analyst", "dt": "2026-03-07", "_uid": "conn-009"},{"n": "Nina Vasquez", "co": "Wells Fargo", "p": "Analytics Recruiter", "dt": "2026-02-28", "_uid": "conn-010"},{"n": "Christopher Lee", "co": "MD Anderson Cancer Center", "p": "Director of Data Analytics", "dt": "2026-02-20", "_uid": "conn-011"},{"n": "Jessica Hamilton", "co": "Deloitte", "p": "Senior Manager Analytics", "dt": "2026-02-12", "_uid": "conn-012"}];
+const BASE_APPS = [{"co": "Microsoft", "t": "Senior Power BI Developer", "dt": "2026-03-27", "_uid": "app-001"},{"co": "Deloitte", "t": "Business Intelligence Developer", "dt": "2026-03-25", "_uid": "app-002"},{"co": "Chevron", "t": "Data Analytics Developer II", "dt": "2026-03-22", "_uid": "app-003"},{"co": "Accenture", "t": "Power BI Consultant", "dt": "2026-03-18", "_uid": "app-004"},{"co": "United Healthcare", "t": "Senior Data Analyst - BI", "dt": "2026-03-15", "_uid": "app-005"},{"co": "JPMorgan Chase", "t": "Business Intelligence Developer", "dt": "2026-03-10", "_uid": "app-006"},{"co": "MD Anderson Cancer Center", "t": "Power BI Developer", "dt": "2026-03-05", "_uid": "app-007"},{"co": "Shell", "t": "Senior Analytics Developer", "dt": "2026-02-28", "_uid": "app-008"}];
+
+function hasAIKey() {
+  return !!(localStorage.getItem('crm_apikey') || '').trim();
+}
+
+function daysUntilISO(isoDate) {
+  if (!isoDate) return '';
+  const d = new Date(isoDate + 'T00:00:00');
+  if (Number.isNaN(d.getTime())) return '';
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const diffMs = d.getTime() - today.getTime();
+  return Math.round(diffMs / 86400000);
+}
+
+function setFollowUp(id, isoDate) {
+  if (!isoDate) delete followUps[id];
+  else followUps[id] = isoDate;
+  save();
+  renderMessages();
+  closeModal();
+}
+
+function toneLabelRaw(t) {
+  const v = (t || '').toLowerCase().trim();
+  if (v === 'positive' || v === 'negative' || v === 'aggressive' || v === 'neutral') return v;
+  return '';
+}
+
+function renderToneCell(id) {
+  const t = toneLabelRaw(tones[id]);
+  return t ? `<span class="tone-pill">${esc(t)}</span>` : '<span style="opacity:0.35">-</span>';
+}
+
+
+function clampRating(v) {
+  const n = parseInt(v, 10);
+  if (!n) return 0;
+  return Math.max(1, Math.min(5, n));
+}
+
+function setRating(id, v) {
+  const n = clampRating(v);
+  if (!n) delete ratings[id];
+  else ratings[id] = n;
+  save();
+  renderMessages();
+  if (document.getElementById('modal').classList.contains('open')) openMsg(id);
+}
+
+function renderStars(value, opts = {}) {
+  const v = Math.max(0, Math.min(5, parseInt(value, 10) || 0));
+  const cls = ['stars', opts.small ? 'small' : '', opts.readonly ? 'readonly' : ''].filter(Boolean).join(' ');
+  let html = '';
+  for (let i = 1; i <= 5; i++) {
+    const on = i <= v ? 'on' : '';
+    const click = (!opts.readonly && opts.onClick) ? ` onclick="${opts.onClick}(${i})"` : '';
+    html += `<span class="star ${on}"${click}>★</span>`;
+  }
+  return `<span class="${cls}">${html}</span>`;
+}
+
+function renderRatingCell(id) {
+  const v = +(ratings[id] || 0);
+  return v ? renderStars(v, { small: true, readonly: true }) : '<span style="opacity:0.35">-</span>';
+}
+
+function toggleMsgSelection(id, checked) {
+  if (checked) selectedMsgIds.add(id);
+  else selectedMsgIds.delete(id);
+  renderBulkBar();
+}
+
+function toggleSelectAllOnPage(checked) {
+  msgPageIds.forEach(id => checked ? selectedMsgIds.add(id) : selectedMsgIds.delete(id));
+  renderMessages();
+}
+
+function clearMsgSelection() {
+  selectedMsgIds.clear();
+  renderMessages();
+}
+
+function renderBulkBar() {
+  const bar = document.getElementById('bulk-bar');
+  const countEl = document.getElementById('bulk-count');
+  const head = document.getElementById('msg-select-all');
+  const count = selectedMsgIds.size;
+
+  if (countEl) countEl.textContent = String(count);
+  if (bar) bar.style.display = count ? 'flex' : 'none';
+
+  if (head) {
+    const onPage = msgPageIds.length ? msgPageIds.filter(id => selectedMsgIds.has(id)).length : 0;
+    head.checked = !!msgPageIds.length && onPage === msgPageIds.length;
+    head.indeterminate = onPage > 0 && onPage < msgPageIds.length;
+  }
+}
+
+function bulkSetStatus(val) {
+  if (!val) return;
+  selectedMsgIds.forEach(id => { statuses[id] = val; });
+  save();
+  renderMessages();
+}
+
+function bulkSetFollowUp(isoDate) {
+  if (!isoDate) return;
+  selectedMsgIds.forEach(id => { followUps[id] = isoDate; });
+  save();
+  renderMessages();
+}
+
+function deleteSelectedMsgs() {
+  if (!selectedMsgIds.size) return;
+  if (!confirm(`Delete ${selectedMsgIds.size} selected record(s)? This cannot be undone.`)) return;
+
+  const ids = [...selectedMsgIds];
+  ids.forEach(uid => deletedIds.add(uid));
+  customConvs = customConvs.filter(r => !deletedIds.includes(_uid(r)));
+
+  ids.forEach(id => { delete statuses[id]; delete notes[id]; delete followUps[id]; delete tones[id]; delete ratings[id]; });
+
+  selectedMsgIds.clear();
+  save();
+  rebuildData();
+  updateStatCounts();
+  renderMessages();
+}
+
+async function genTone(id) {
+  const apiKey = (localStorage.getItem('crm_apikey') || '').trim();
+  const provider = (localStorage.getItem('crm_provider') || 'gemini').trim() || 'gemini';
+  const c = CONVS.find(x => x.id === id);
+  if (!c) return;
+
+  if (!apiKey) {
+    tones[id] = '';
+    save();
+    renderMessages();
+    if (document.getElementById('modal')?.classList.contains('open')) openMsg(id);
+    return;
+  }
+
+  // Most users run this as a local file (file://). Some providers block browser CORS.
+  if (provider !== 'gemini') {
+    toast('Tone: use Gemini key for local file');
+  }
+
+  const pvClean = (c.pv || '').replace(/<[^>]+>/g, '');
+  const noteTxt = (notes[id] || '').trim();
+  const ciTxt = (contactInfos[id] || '').trim();
+  const emTxt = (emails[id] || '').trim();
+  const phTxt = (phones[id] || '').trim();
+
+  const prompt = `Classify the tone of this LinkedIn conversation as exactly one of: Positive, Negative, Aggressive, Neutral. Output only the single label.\n\nMessage Preview:\n${pvClean}\n\nNotes:\n${noteTxt}\n\nContact Info:\nEmail: ${emTxt}\nPhone: ${phTxt}\n${ciTxt}`;
+
+  const fail = (msg) => {
+    console.error('[Tone] ' + msg);
+    toast(msg);
+  };
+
+  try {
+    let responseText = '';
+    if (provider === 'anthropic') {
+      const resp = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01',
+          // Required by Anthropic when calling directly from browser.
+          'anthropic-dangerous-direct-browser-access': 'true'
+        },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 10,
+          messages: [{ role: 'user', content: prompt }]
+        })
+      });
+      const data = await resp.json().catch(() => ({}));
+      if (!resp.ok) throw new Error(data?.error?.message || `HTTP ${resp.status}`);
+      responseText = data.content?.find(b => b.type === 'text')?.text || '';
+    } else if (provider === 'gemini') {
+      const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+      });
+      const data = await resp.json().catch(() => ({}));
+      if (!resp.ok) throw new Error(data?.error?.message || `HTTP ${resp.status}`);
+      responseText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    } else if (provider === 'groq') {
+      const resp = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+        body: JSON.stringify({
+          model: 'llama-3.1-8b-instant',
+          max_tokens: 10,
+          messages: [{ role: 'user', content: prompt }]
+        })
+      });
+      const data = await resp.json().catch(() => ({}));
+      if (!resp.ok) throw new Error(data?.error?.message || `HTTP ${resp.status}`);
+      responseText = data.choices?.[0]?.message?.content || '';
+    } else {
+      throw new Error('Unknown provider: ' + provider);
+    }
+
+    const firstWord = (responseText || '').replace(/[^a-zA-Z]/g, ' ').trim().split(/\s+/)[0] || '';
+    const label = toneLabelRaw(firstWord);
+    tones[id] = label || 'neutral';
+    save();
+    renderMessages();
+    if (document.getElementById('modal')?.classList.contains('open')) openMsg(id);
+  } catch (e) {
+    // Very common when running from file:// is a CORS block (shows as TypeError: Failed to fetch).
+    const msg = (e && e.message) ? e.message : String(e);
+    fail(msg.includes('Failed to fetch') ? 'Tone failed (network/CORS). Use Gemini or host the app.' : ('Tone failed: ' + msg));
+    // Keep existing tone if any; don't overwrite on failure.
+    if (!tones[id]) {
+      tones[id] = '';
+      save();
+      renderMessages();
+      if (document.getElementById('modal')?.classList.contains('open')) openMsg(id);
+    }
+  }
+}
+
+
+const _toneRecalcTimers = Object.create(null);
+function scheduleToneRecalc(id) {
+  if (!hasAIKey()) return;
+  if (_toneRecalcTimers[id]) clearTimeout(_toneRecalcTimers[id]);
+  _toneRecalcTimers[id] = setTimeout(() => { genTone(id); }, 800);
+}
+
+
+// ============================================================
+// STATE
+// ============================================================
+let statuses = {};
+let notes = {};
+let followUps = {};
+let tones = {};
+let emails = {};
+let phones = {};
+let contactInfos = {};
+let ratings = {};
+let selectedMsgIds = new Set();
+let msgPageIds = [];
+let msgFilter = 'all';
+let msgPage = 1, connPage = 1, appPage = 1;
+const PAGE = 25;
+
+// User-added and deleted records (stored in localStorage)
+let customConvs = [];
+let customConns = [];
+let customApps  = [];
+let deletedIds  = []; // ids of deleted records
+
+// Active merged arrays
+let CONVS, CONNS, APPS;
+
+function _uid(r) {
+  // Returns a stable deletion key for any record
+  return r._uid || r.id || (r.n + '|' + r.dt) || (r.co + '|' + r.t + '|' + r.dt);
+}
+
+function rebuildData() {
+  const hideBase = (localStorage.getItem('crm_hide_base') === '1');
+  const BASE_CONVS_ARR = (hideBase ? [] : (typeof BASE_CONVS !== 'undefined' ? BASE_CONVS : []));
+  const BASE_CONNS_ARR = (hideBase ? [] : (typeof BASE_CONNS !== 'undefined' ? BASE_CONNS : []));
+  const BASE_APPS_ARR  = (hideBase ? [] : (typeof BASE_APPS  !== 'undefined' ? BASE_APPS  : []));
+  CONVS = [...BASE_CONVS_ARR, ...customConvs].filter(r => !deletedIds.includes(_uid(r)));
+  CONNS = [...BASE_CONNS_ARR, ...customConns].filter(r => !deletedIds.includes(_uid(r)));
+  APPS  = [...BASE_APPS_ARR,  ...customApps ].filter(r => !deletedIds.includes(_uid(r)));
+}
+
+// Sort state
+let msgSort  = { key: 'dt', dir: 'desc' };
+let connSort = { key: 'dt', dir: 'desc' };
+let appSort  = { key: 'dt', dir: 'desc' };
+
+// ============================================================
+// COLUMN DEFINITIONS
+// ============================================================
+const MSG_COLS = [
+  { id: 'sel',    label: '',              width: 46,  sortable: false, key: null },
+  { id: 'cn',     label: 'Contact',       width: 160, sortable: true,  key: 'cn' },
+  { id: 'em',     label: 'Email',         width: 200, sortable: true,  key: 'em' },
+  { id: 'ph',     label: 'Phone',         width: 140, sortable: true,  key: 'ph' },
+  { id: 't',      label: 'Contact Type',  width: 200, sortable: true,  key: 't'  },  { id: 'status', label: 'Status',        width: 130, sortable: false, key: null },
+  { id: 'rate',   label: 'Interview Likelihood', width: 170, sortable: true,  key: 'rate' },
+  { id: 'fu',     label: 'Follow up date',width: 140, sortable: true,  key: 'fu' },
+  { id: 'du',     label: 'Days till follow up', width: 160, sortable: true,  key: 'du' },
+  { id: 'tone',   label: 'Conversation tone', width: 160, sortable: true,  key: 'tone' },
+  { id: 'notes',  label: 'Notes',         width: 180, sortable: false, key: null },
+  { id: 'dt',     label: 'Last Activity', width: 120, sortable: true,  key: 'dt' },
+  { id: 'mc',     label: 'Msgs',          width: 60,  sortable: true,  key: 'mc' },
+];
+const CONN_COLS = [
+  { id: 'n',  label: 'Name',         width: 180, sortable: true, key: 'n'  },
+  { id: 'co', label: 'Company',      width: 200, sortable: true, key: 'co' },
+  { id: 'p',  label: 'Position',     width: 240, sortable: true, key: 'p'  },
+  { id: 'dt', label: 'Connected On', width: 130, sortable: true, key: 'dt' },
+];
+const APP_COLS = [
+  { id: 'dt', label: 'Date Applied', width: 150, sortable: true, key: 'dt' },
+  { id: 'co', label: 'Company',      width: 220, sortable: true, key: 'co' },
+  { id: 't',  label: 'Job Title',    width: 280, sortable: true, key: 't'  },
+];
+
+// Column state: order = array of indices into the COL definitions
+const colState = {
+  msg:  { order: MSG_COLS.map((_,i)=>i),  widths: MSG_COLS.map(c=>c.width)  },
+  conn: { order: CONN_COLS.map((_,i)=>i), widths: CONN_COLS.map(c=>c.width) },
+  app:  { order: APP_COLS.map((_,i)=>i),  widths: APP_COLS.map(c=>c.width)  },
+};
+
+// ============================================================
+// PERSIST
+// ============================================================
+function loadState() {
+  try {
+    const s = localStorage.getItem('crm_statuses'); if (s) statuses = JSON.parse(s);
+    const n = localStorage.getItem('crm_notes');    if (n) notes    = JSON.parse(n);
+    const fu = localStorage.getItem('crm_followups'); if (fu) followUps = JSON.parse(fu);
+    const tt = localStorage.getItem('crm_tones');     if (tt) tones     = JSON.parse(tt);
+    const cs = localStorage.getItem('crm_colstate');
+    if (cs) {
+      const parsed = JSON.parse(cs);
+      ['msg','conn','app'].forEach(t => {
+        if (parsed[t]) {
+          if (parsed[t].order) colState[t].order = parsed[t].order;
+          if (parsed[t].widths) colState[t].widths = parsed[t].widths;
+        }
+      });
+    }
+    // Custom/deleted records
+    const cc = localStorage.getItem('crm_custom_convs'); if (cc) customConvs = JSON.parse(cc);
+    const cn = localStorage.getItem('crm_custom_conns'); if (cn) customConns = JSON.parse(cn);
+    const ca = localStorage.getItem('crm_custom_apps');  if (ca) customApps  = JSON.parse(ca);
+    const di = localStorage.getItem('crm_deleted_ids');  if (di) deletedIds  = JSON.parse(di) || [];
+    const em = localStorage.getItem('crm_emails');       if (em) emails = JSON.parse(em) || {};
+    const ph = localStorage.getItem('crm_phones');       if (ph) phones = JSON.parse(ph) || {};
+    const ci = localStorage.getItem('crm_contactInfos'); if (ci) contactInfos = JSON.parse(ci) || {};
+    const ra = localStorage.getItem('crm_ratings');     if (ra) ratings = JSON.parse(ra) || {};
+
+    // API key indicator
+    const k = localStorage.getItem('crm_apikey');
+    const p = localStorage.getItem('crm_provider') || 'gemini';
+    if (k) {
+      const provName = p === 'gemini' ? 'Gemini' : p === 'groq' ? 'Groq' : 'Claude';
+      document.getElementById('apiKeyBtn').textContent = `✓ ${provName} Key Set`;
+      document.getElementById('apiKeyBtn').classList.add('api-key-set');
+    }
+    rebuildData();
+  } catch(e) { rebuildData(); }
+}
+function save() {
+  try {
+    localStorage.setItem('crm_statuses',     JSON.stringify(statuses));
+    localStorage.setItem('crm_notes',        JSON.stringify(notes));
+    localStorage.setItem('crm_followups',    JSON.stringify(followUps));
+    localStorage.setItem('crm_tones',        JSON.stringify(tones));
+    localStorage.setItem('crm_emails',       JSON.stringify(emails));
+    localStorage.setItem('crm_phones',       JSON.stringify(phones));
+    localStorage.setItem('crm_contactInfos', JSON.stringify(contactInfos));
+    localStorage.setItem('crm_ratings',     JSON.stringify(ratings));
+    localStorage.setItem('crm_colstate',     JSON.stringify({
+      msg:  { order: colState.msg.order,  widths: colState.msg.widths  },
+      conn: { order: colState.conn.order, widths: colState.conn.widths },
+      app:  { order: colState.app.order,  widths: colState.app.widths  },
+    }));
+    localStorage.setItem('crm_custom_convs', JSON.stringify(customConvs));
+    localStorage.setItem('crm_custom_conns', JSON.stringify(customConns));
+    localStorage.setItem('crm_custom_apps',  JSON.stringify(customApps));
+    localStorage.setItem('crm_deleted_ids',  JSON.stringify(deletedIds));
+  } catch(e) {}
+}
+
+
+function backupAllData() {
+  try {
+    const keys = Object.keys(localStorage).filter(k => k.startsWith('crm_') || k.startsWith('gcrm_') || k === 'gcrm_v1').sort();
+    const data = {};
+    keys.forEach(k => data[k] = localStorage.getItem(k));
+    const payload = { exportedAt: new Date().toISOString(), keys, data };
+    const json = JSON.stringify(payload, null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `gcrm_backup_${new Date().toISOString().slice(0,10)}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 0);
+  } catch (e) {
+    console.error(e);
+    try {
+      const keys = Object.keys(localStorage).filter(k => k.startsWith('crm_') || k.startsWith('gcrm_') || k === 'gcrm_v1').sort();
+      const data = {}; keys.forEach(k => data[k] = localStorage.getItem(k));
+      const payload = { exportedAt: new Date().toISOString(), keys, data };
+      const json = encodeURIComponent(JSON.stringify(payload, null, 2));
+      window.open('data:application/json;charset=utf-8,' + json, '_blank');
+    } catch {}
+    alert('Backup failed: ' + (e?.message || e));
+  }
+}
+
+function openRestorePicker() {
+  document.getElementById('restoreInput').click();
+}
+
+async function restoreAllData(file) {
+  document.getElementById('restoreInput').value = '';
+  if (!file) return;
+  try {
+    const txt = await file.text();
+    const payload = JSON.parse(txt);
+    const data = payload && payload.data ? payload.data : null;
+    if (!data || typeof data !== 'object') { alert('Invalid backup file.'); return; }
+    if (!confirm('Restore will overwrite current CRM data in this browser for this file. Continue?')) return;
+    Object.keys(data).forEach(k => localStorage.setItem(k, data[k]));
+    location.reload();
+  } catch (e) {
+    console.error(e);
+    alert('Restore failed: ' + (e?.message || e));
+  }
+}
+
+
+function resetAllData() {
+  if (!confirm('Are you sure you want to reset all data? This cannot be undone.')) {
+    alert('Reset cancelled.');
+    return;
+  }
+  const a = Math.floor(Math.random() * 10) + 1;
+  const b = Math.floor(Math.random() * 10) + 1;
+  const answer = prompt('To confirm, solve this: What is ' + a + ' + ' + b + '?');
+  if (answer === null || parseInt(answer, 10) !== (a + b)) {
+    alert('Reset cancelled.');
+    return;
+  }
+
+  // Preserve AI settings across resets.
+  const preserved = {
+    crm_apikey: localStorage.getItem('crm_apikey'),
+    crm_provider: localStorage.getItem('crm_provider'),
+    crm_pref_tone_after_save: localStorage.getItem('crm_pref_tone_after_save')
+  };
+
+  const keys = Object.keys(localStorage).filter(k =>
+    k.startsWith('crm_') || k.startsWith('gcrm_') || k === 'gcrm_v1'
+  );
+  keys.forEach(k => localStorage.removeItem(k));
+
+  Object.entries(preserved).forEach(([k, v]) => {
+    if (v !== null && v !== undefined) localStorage.setItem(k, v);
+  });
+
+  // Hide the embedded export so counts go to zero.
+  localStorage.setItem('crm_hide_base', '1');
+  location.reload();
+}
+
+
+
+// ============================================================
+// API KEY MODAL  (multi-provider)
+// ============================================================
+let _selectedProvider = 'gemini';
+
+function openApiModal() {
+  const k = localStorage.getItem('crm_apikey') || '';
+  const p = localStorage.getItem('crm_provider') || 'gemini';
+  _selectedProvider = p;
+  document.getElementById('api-key-input').value = k;
+  selectProvider(p);
+  document.getElementById('api-save-status').textContent = '';
+  document.getElementById('api-modal').classList.add('open');
+}
+function closeApiModal() { document.getElementById('api-modal').classList.remove('open'); }
+
+function selectProvider(p) {
+  _selectedProvider = p;
+  ['gemini','groq','anthropic'].forEach(x => {
+    const el = document.getElementById('opt-' + x);
+    if (el) el.classList.toggle('selected', x === p);
+  });
+  const hints = {
+    gemini:    'Starts with "AIza..." — get it free at aistudio.google.com (no credit card)',
+    groq:      'Starts with "gsk_..." — get it free at console.groq.com',
+    anthropic: 'Starts with "sk-ant-..." — get it at console.anthropic.com (credit card required)'
+  };
+  const el = document.getElementById('api-key-hint');
+  if (el) el.textContent = hints[p] || '';
+}
+
+function saveApiKey() {
+  const k = document.getElementById('api-key-input').value.trim();
+  if (k) {
+    localStorage.setItem('crm_apikey', k);
+    localStorage.setItem('crm_provider', _selectedProvider);
+    const provName = _selectedProvider === 'gemini' ? 'Gemini' : _selectedProvider === 'groq' ? 'Groq' : 'Claude';
+    document.getElementById('apiKeyBtn').textContent = `✓ ${provName} Key Set`;
+    document.getElementById('apiKeyBtn').classList.add('api-key-set');
+    const st = document.getElementById('api-save-status');
+    if (st) { st.textContent = '✓ Saved!'; setTimeout(() => { st.textContent = ''; }, 2000); }
+  } else {
+    localStorage.removeItem('crm_apikey');
+    localStorage.removeItem('crm_provider');
+    document.getElementById('apiKeyBtn').textContent = '⚙ Set API Key';
+    document.getElementById('apiKeyBtn').classList.remove('api-key-set');
+  }
+}
+function clearApiKey() {
+  localStorage.removeItem('crm_apikey');
+  localStorage.removeItem('crm_provider');
+  document.getElementById('api-key-input').value = '';
+  document.getElementById('apiKeyBtn').textContent = '⚙ Set API Key';
+  document.getElementById('apiKeyBtn').classList.remove('api-key-set');
+  closeApiModal();
+}
+
+// ============================================================
+// ADD RECORD MODAL
+// ============================================================
+let _addType = '';
+function openAddModal(type) {
+  _addType = type;
+  const titles = { msg: 'Add Contact', conn: 'Add Connection', app: 'Add Application' };
+  document.getElementById('add-modal-title').textContent = titles[type] || 'Add Entry';
+  const body = document.getElementById('add-modal-body');
+  const today = new Date().toISOString().split('T')[0];
+  const plus7 = (() => { const d = new Date(); d.setDate(d.getDate() + 7); return d.toISOString().split('T')[0]; })();
+  if (type === 'msg') {
+    body.innerHTML = `
+      <div class="form-group"><label class="form-label">Contact Name *</label><input class="form-input" id="af-cn" placeholder="e.g. Jane Smith"></div>
+      <div class="form-group"><label class="form-label">Email</label><input class="form-input" id="af-em" placeholder="e.g. jane@company.com"></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Phone</label><input class="form-input" id="af-ph" placeholder="e.g. 555-123-4567" oninput="this.value=formatPhone(this.value)"></div>
+        <div class="form-group"><label class="form-label">Contact Type</label><select class="form-select" id="af-t"><option value="">-- Select type --</option><option value="Recruiter">Recruiter</option><option value="Hiring Manager">Hiring Manager</option><option value="Colleague">Colleague</option><option value="Friend">Friend</option><option value="Manager">Manager</option><option value="HR">HR</option><option value="Other">Other</option></select></div>
+      </div>
+      <div class="form-group"><label class="form-label">Notes</label><textarea class="notes-area" id="af-pv" placeholder="Notes..."></textarea></div>
+      <div class="form-group"><label class="form-label">Date</label><input class="form-input" id="af-dt" type="date" value="${today}"></div>
+      <div class="form-group"><label class="form-label">Follow up date</label><input class="form-input" id="af-fu" type="date" value="${plus7}"></div>
+      <div class="form-group">
+        <label class="form-label">Interview likelihood (1–5)</label>
+        <input type="hidden" id="af-rate" value="1">
+        <div id="af-rate-stars" style="margin-top:4px">${renderStars(1, { onClick: 'setAddRating' })}</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:6px">1 = not likely · 5 = very likely</div>
+      </div>
+      <div class="form-group" id="af-tone-wrap" style="display:none"><label class="form-label">Tone</label><label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)"><input type="checkbox" id="af-tone" checked> Analyze tone after save</label></div>
+      <div class="form-group"><label class="form-label">Status</label><select class="form-select" id="af-st">
+        <option value="followup" selected>📅 Follow up</option>
+        <option value="new">🔵 New</option>
+        <option value="replied">✅ Replied</option>
+        <option value="interview">⭐ Interview</option>
+        <option value="hot">🔥 Hot</option>
+        <option value="passed">✓ Passed</option>
+        <option value="ghosted">👻 Ghosted</option>
+      </select></div>`;
+  } else if (type === 'conn') {
+    body.innerHTML = `
+      <div class="form-group"><label class="form-label">Full Name *</label><input class="form-input" id="af-n" placeholder="e.g. Jane Smith"></div>
+      <div class="form-group"><label class="form-label">Company</label><input class="form-input" id="af-co" placeholder="e.g. Acme Corp"></div>
+      <div class="form-group"><label class="form-label">Position / Title</label><input class="form-input" id="af-p" placeholder="e.g. Technical Recruiter"></div>
+      <div class="form-group"><label class="form-label">Connected On</label><input class="form-input" id="af-dt" type="date" value="${today}"></div>`;
+  } else if (type === 'app') {
+    body.innerHTML = `
+      <div class="form-group"><label class="form-label">Company *</label><input class="form-input" id="af-co" placeholder="e.g. Acme Corp"></div>
+      <div class="form-group"><label class="form-label">Job Title *</label><input class="form-input" id="af-t" placeholder="e.g. Senior Power BI Developer"></div>
+      <div class="form-group"><label class="form-label">Date Applied</label><input class="form-input" id="af-dt" type="date" value="${today}"></div>`;
+  }
+    // Show tone option only if API key present.
+  try {
+    const wrap = document.getElementById('af-tone-wrap');
+    if (wrap) wrap.style.display = hasApiKey() ? 'block' : 'none';
+  } catch(e) {}
+
+document.getElementById('add-modal-footer').innerHTML =
+    `<button class="save-btn" onclick="saveNewRecordSafe()">Save</button>
+     <button class="sec-btn" onclick="document.getElementById('add-modal').classList.remove('open')">Cancel</button>`;
+  // Remember tone-after-save preference
+  try {
+    const pref = localStorage.getItem('crm_pref_tone_after_save');
+    const cb = document.getElementById('af-tone');
+    if (cb) {
+      cb.checked = (pref === null ? true : pref === '1');
+      cb.onchange = () => localStorage.setItem('crm_pref_tone_after_save', cb.checked ? '1' : '0');
+    }
+  } catch(e) {}
+
+  document.getElementById('add-modal').classList.add('open');
+}
+
+
+function setAddRating(v) {
+  const el = document.getElementById('af-rate');
+  if (el) el.value = String(clampRating(v) || 0);
+  const wrap = document.getElementById('af-rate-stars');
+  if (wrap) wrap.innerHTML = renderStars(+(el?.value||0), { onClick: 'setAddRating' });
+}
+
+function saveNewRecordSafe() {
+  try {
+    saveNewRecord();
+  } catch (e) {
+    console.error('Save failed:', e);
+    alert('Save failed: ' + (e && e.message ? e.message : String(e)));
+  }
+}
+
+function saveNewRecord() {
+  const uid = 'custom-' + Date.now();
+  const isoToday = () => new Date().toISOString().split('T')[0];
+  const fmtDate = (el) => el ? (el.value || isoToday()) : isoToday();
+
+  if (_addType === 'msg') {
+    const cn = document.getElementById('af-cn')?.value.trim();
+    if (!cn) { alert('Contact name is required.'); return; }
+
+    const note = document.getElementById('af-pv')?.value.trim() || '';
+    if (note) notes[uid] = note;
+
+    const rec = {
+      id: uid,
+      cn,
+      t: document.getElementById('af-t')?.value.trim() || '',
+      pv: note || '',
+      dt: fmtDate(document.getElementById('af-dt')),
+      r: false,
+      mc: 0,
+      _uid: uid
+    };
+
+    const st = document.getElementById('af-st')?.value || 'new';
+    if (st && st !== 'new') statuses[uid] = st;
+
+    const em = document.getElementById('af-em')?.value.trim() || '';
+    const ph = formatPhone(document.getElementById('af-ph')?.value.trim() || '');
+    if (em) emails[uid] = em;
+    if (ph) phones[uid] = ph;
+
+    const fuRaw = document.getElementById('af-fu')?.value || '';
+    if (fuRaw) followUps[uid] = fuRaw;
+    const rv = +(document.getElementById('af-rate')?.value || 0);
+    if (rv) ratings[uid] = clampRating(rv); else delete ratings[uid];
+    if (st === 'followup' && !fuRaw) {
+      const d = new Date(); d.setDate(d.getDate() + 7);
+      followUps[uid] = d.toISOString().slice(0, 10);
+    }
+
+    customConvs.unshift(rec);
+  } else if (_addType === 'conn') {
+    const n = document.getElementById('af-n')?.value.trim();
+    if (!n) { alert('Name is required.'); return; }
+    const dtRaw = fmtDate(document.getElementById('af-dt'));
+    const dtFmt = new Date(dtRaw).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+    const rec = { n, co: document.getElementById('af-co')?.value.trim()||'', p: document.getElementById('af-p')?.value.trim()||'', dt: dtFmt, _uid: uid };
+    customConns.unshift(rec);
+    document.getElementById('stat-conns').textContent = BASE_CONNS.length + customConns.length;
+  } else if (_addType === 'app') {
+    const co = document.getElementById('af-co')?.value.trim();
+    const t  = document.getElementById('af-t')?.value.trim();
+    if (!co || !t) { alert('Company and job title are required.'); return; }
+    const dtRaw = fmtDate(document.getElementById('af-dt'));
+    const dtFmt = new Date(dtRaw).toLocaleString('en-US',{month:'numeric',day:'numeric',year:'2-digit',hour:'numeric',minute:'2-digit'});
+    const rec = { dt: dtFmt, co, t, _uid: uid };
+    customApps.unshift(rec);
+    document.getElementById('stat-apps').textContent = BASE_APPS.length + customApps.length;
+  }
+
+  save();
+  rebuildData();
+
+  // Close modal
+  document.getElementById('add-modal').classList.remove('open');
+
+  // Make sure user sees it immediately
+  if (_addType === 'msg')  {
+    try { document.getElementById('msg-search').value = ''; } catch(e) {}
+    msgFilter = 'all';
+    setFilter('all');
+    rebuildData();
+    msgSort = { key: 'dt', dir: 'desc' };
+    msgPage = 1;
+    renderMessages();
+    renderAll();
+
+    // Optional: analyze tone after save
+    try {
+      const wantTone = !!document.getElementById('af-tone')?.checked;
+      if (wantTone && hasApiKey()) {
+        analyzeTone(uid).then(() => renderMessages()).catch(() => {});
+      }
+    } catch(e) {}
+  }
+  if (_addType === 'conn') { connPage=1; renderConnections(); }
+  if (_addType === 'app')  { appPage=1;  renderApplications(); }
+}
+
+// ============================================================
+// DELETE RECORD
+// ============================================================
+function deleteRecord(type, uid) {
+  if (!confirm('Delete this record? This cannot be undone.')) return;
+  if (!deletedIds.includes(uid)) deletedIds.push(uid);
+  // Also remove from custom arrays if it was user-added
+  if (type === 'msg')  customConvs = customConvs.filter(r => _uid(r) !== uid);
+  if (type === 'conn') customConns = customConns.filter(r => _uid(r) !== uid);
+  if (type === 'app')  customApps  = customApps.filter(r =>  _uid(r) !== uid);
+  save();
+  rebuildData();
+  updateStatCounts();
+  if (type === 'msg')  renderMessages();
+  if (type === 'conn') renderConnections();
+  if (type === 'app')  renderApplications();
+}
+
+function updateStatCounts() {
+  document.getElementById('stat-convs').textContent = CONVS.length;
+  document.getElementById('stat-conns').textContent = CONNS.length;
+  document.getElementById('stat-apps').textContent  = APPS.length;
+  // Update tab badges
+  const badges = document.querySelectorAll('.tab-badge');
+  if (badges[0]) badges[0].textContent = CONVS.length;
+  if (badges[1]) badges[1].textContent = CONNS.length;
+  if (badges[2]) badges[2].textContent = APPS.length;
+}
+
+// ============================================================
+// TABS
+// ============================================================
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach((t,i) => {
+    t.classList.toggle('active', ['messages','connections','applications'][i] === tab);
+  });
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+}
+
+// ============================================================
+// COLUMN HEADER RENDER (sort, resize, reorder)
+// ============================================================
+function renderHeaders(tabId, colDefs, state, sortObj, sortFn) {
+  const tr = document.getElementById(tabId + '-thead-row');
+  const cg = document.getElementById(tabId + '-colgroup');
+  cg.innerHTML = '';
+  tr.innerHTML = '';
+
+  state.order.forEach((colIdx, posIdx) => {
+    const col = colDefs[colIdx];
+    const w = state.widths[colIdx];
+
+    // colgroup col
+    const colEl = document.createElement('col');
+    colEl.style.width = w + 'px';
+    cg.appendChild(colEl);
+
+    // th
+    const th = document.createElement('th');
+    th.dataset.colIdx = colIdx;
+    th.dataset.posIdx = posIdx;
+    th.style.width = w + 'px';
+    th.style.minWidth = w + 'px';
+    th.style.maxWidth = w + 'px';
+
+    if (col.sortable) {
+      th.classList.add('sortable');
+      if (sortObj.key === col.key) th.classList.add(sortObj.dir);
+      th.onclick = (e) => {
+        if (e.target.classList.contains('resize-handle')) return;
+        sortFn(col.key);
+      };
+    }
+
+    // drag-to-reorder
+    th.draggable = true;
+    th.addEventListener('dragstart', (e) => {
+      if (e.target.classList.contains('resize-handle')) { e.preventDefault(); return; }
+      e.dataTransfer.setData('text/plain', posIdx);
+      setTimeout(() => th.classList.add('dragging'), 0);
+    });
+    th.addEventListener('dragend', () => th.classList.remove('dragging'));
+    th.addEventListener('dragover', (e) => { e.preventDefault(); th.classList.add('drag-over'); });
+    th.addEventListener('dragleave', () => th.classList.remove('drag-over'));
+    th.addEventListener('drop', (e) => {
+      e.preventDefault();
+      th.classList.remove('drag-over');
+      const fromPos = parseInt(e.dataTransfer.getData('text/plain'));
+      const toPos = posIdx;
+      if (fromPos !== toPos) {
+        const newOrder = [...state.order];
+        const [moved] = newOrder.splice(fromPos, 1);
+        newOrder.splice(toPos, 0, moved);
+        state.order = newOrder;
+        save();
+        if (tabId === 'msg')  renderMessages();
+        if (tabId === 'conn') renderConnections();
+        if (tabId === 'app')  renderApplications();
+      }
+    });
+
+    // label + sort icon
+    const labelSpan = document.createElement('span');
+    if (tabId === 'msg' && col.id === 'sel') {
+      labelSpan.innerHTML = `<input type="checkbox" class="row-check" id="msg-select-all" onclick="event.stopPropagation();toggleSelectAllOnPage(this.checked)">`;
+    } else {
+      labelSpan.textContent = col.label;
+    }
+    th.appendChild(labelSpan);
+    if (col.sortable) {
+      const si = document.createElement('span');
+      si.className = 'sort-icon';
+      th.appendChild(si);
+    }
+
+    // resize handle
+    const handle = document.createElement('div');
+    handle.className = 'resize-handle';
+    handle.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const startX = e.pageX;
+      const startW = state.widths[colIdx];
+      handle.classList.add('resizing');
+      const onMove = (ev) => {
+        const newW = Math.max(50, startW + ev.pageX - startX);
+        state.widths[colIdx] = newW;
+        // Apply WITHOUT re-rendering (just update the widths in-place)
+        const cols = cg.querySelectorAll('col');
+        const ths  = tr.querySelectorAll('th');
+        const thsArr = Array.from(ths);
+        // find position of this colIdx
+        const pos = state.order.indexOf(colIdx);
+        if (cols[pos]) {
+          cols[pos].style.width = newW + 'px';
+          thsArr[pos].style.width = newW + 'px';
+          thsArr[pos].style.minWidth = newW + 'px';
+          thsArr[pos].style.maxWidth = newW + 'px';
+        }
+      };
+      const onUp = () => {
+        handle.classList.remove('resizing');
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onUp);
+        save();
+      };
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onUp);
+    });
+    th.appendChild(handle);
+    tr.appendChild(th);
+  });
+}
+
+// ============================================================
+// FILTER
+// ============================================================
+function setFilter(f) {
+  msgFilter = f;
+  msgPage = 1;
+  ['all','replied','pending','ghosted','followup','hot','interview','archive'].forEach(x => {
+    document.getElementById('f-'+x)?.classList.toggle('active', x === f);
+  });
+  renderMessages();
+}
+
+function normalizeStatusVal(raw) {
+  if (!raw) return "";
+  const v = String(raw).trim().toLowerCase();
+  if (!v) return "";
+  if (v.includes("follow")) return "followup";
+  if (v.includes("ghost")) return "ghosted";
+  if (v.includes("interview")) return "interview";
+  if (v.includes("hot")) return "hot";
+  if (v.includes("archiv")) return "archive";
+  if (v.includes("replied") || v.includes("reply")) return "replied";
+  if (v.includes("no reply") || v.includes("pending") || v.includes("new")) return "new";
+  return v;
+}
+
+function getFilteredMessages() {
+  const q = (document.getElementById('msg-search')?.value || '').toLowerCase();
+  return CONVS
+    .filter(c => {
+      const st = normalizeStatusVal(statuses[c.id]) || (c.r ? 'replied' : 'new');
+      if (msgFilter === 'replied'  && st !== 'replied')  return false;
+      if (msgFilter === 'pending'  && c.r)               return false;
+      if (msgFilter === 'ghosted'  && st !== 'ghosted')  return false;
+      if (msgFilter === 'followup'  && st !== 'followup')  return false;
+      if (msgFilter === 'hot'      && st !== 'hot')      return false;
+      if (msgFilter === 'interview'&& st !== 'interview')return false;
+      if (msgFilter === 'archive'  && st !== 'archive')  return false;
+      if (q) return (c.cn||'').toLowerCase().includes(q)||(c.t||'').toLowerCase().includes(q)||(c.pv||'').toLowerCase().includes(q)||(toneLabelRaw(tones[c.id])||'').toLowerCase().includes(q);
+      return true;
+    })
+    .map(c => {
+      const fu = followUps[c.id] || '';
+      const du = fu ? String(daysUntilISO(fu)) : '';
+      const tone = toneLabelRaw(tones[c.id]) || '';
+      return { ...c, fu, du, tone };
+      const rate = +(ratings[c.id] || 0);
+      return { ...c, fu, du, tone, rate };
+    });
+}
+
+// ============================================================
+// SORT HELPERS
+// ============================================================
+function applySort(arr, sortObj) {
+  return [...arr].sort((a,b) => {
+    let av = a[sortObj.key]||'', bv = b[sortObj.key]||'';
+    if (sortObj.key === 'em') { av = (emails[a.id]||''); bv = (emails[b.id]||''); }
+    if (sortObj.key === 'ph') { av = (phones[a.id]||''); bv = (phones[b.id]||''); }
+    if (sortObj.key === 'mc' || sortObj.key === 'du') { av = +av||0; bv = +bv||0; }
+    if (sortObj.key === 'rate') { av = +(ratings[a.id]||0); bv = +(ratings[b.id]||0); }
+    if (sortObj.key === 'fu') { av = av||'9999-12-31'; bv = bv||'9999-12-31'; }
+    if (av < bv) return sortObj.dir==='asc' ? -1 : 1;
+    if (av > bv) return sortObj.dir==='asc' ?  1 : -1;
+    return 0;
+  });
+}
+
+
+function toggleSort(sortObj, key) {
+  if (sortObj.key === key) sortObj.dir = sortObj.dir==='asc' ? 'desc' : 'asc';
+  else { sortObj.key = key; sortObj.dir = 'asc'; }
+}
+
+// ============================================================
+// RENDER MESSAGES
+// ============================================================
+function renderMessages() {
+  updateDashStats();
+  const filtered = getFilteredMessages();
+  const sorted   = applySort(filtered, msgSort);
+  const total = sorted.length;
+  const start = (msgPage-1)*PAGE;
+  const page  = sorted.slice(start, start+PAGE);
+
+  msgPageIds = page.map(c => c.id);
+
+  renderHeaders('msg', MSG_COLS, colState.msg, msgSort, (key) => {
+    toggleSort(msgSort, key); msgPage=1; renderMessages();
+  });
+
+  const tbody = document.getElementById('msg-tbody');
+  const colCount = colState.msg.order.length;
+
+  if (!page.length) {
+    tbody.innerHTML = `<tr><td colspan="${colCount}"><div class="empty">No conversations found</div></td></tr>`;
+  } else {
+    tbody.innerHTML = page.map(c => {
+      const st = statuses[c.id] || (c.r ? 'replied' : 'new');
+      const dot = c.r ? 'dot-green' : 'dot-orange';
+      const noteText = (notes[c.id]||'').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      const pvClean = (c.pv||'').replace(/<[^>]+>/g,'');
+      const fu = followUps[c.id] || '';
+      const du = fu ? daysUntilISO(fu) : '';
+      const checked = selectedMsgIds.has(c.id) ? 'checked' : '';
+
+      const cells = colState.msg.order.map(colIdx => {
+        const col = MSG_COLS[colIdx];
+        const delBtn = '';
+        switch(col.id) {
+          case 'sel':
+            return `<td class="date-cell"><input type="checkbox" class="row-check" ${checked} onclick="event.stopPropagation();toggleMsgSelection('${c.id}', this.checked)"></td>`;
+          case 'cn':
+            const em = (emails[c.id] || '').trim();
+            const ph = formatPhone((phones[c.id] || '').trim());
+            const sub = [em, ph].filter(Boolean).join(' · ');
+            const copyBtns = `<span class="copy-row"><button class="mini-ico" title="Copy name" onclick='return copyClick(event, ${jsonStr(c.cn)})'>⧉</button><button class="mini-ico" title="Copy email" onclick='return copyClick(event, ${jsonStr(em)})'>@</button><button class="mini-ico" title="Copy phone" onclick='return copyClick(event, ${jsonStr(ph)})'>☎</button></span>`;
+            return `<td class="name-cell"><span class="dot ${dot}"></span><div class=\"name-stack\"><div class=\"name-top\">${esc(c.cn)} ${copyBtns}</div>${sub?`<div class=\"name-sub\">${esc(sub)}</div>`:''}</div></td>`;
+          case 'em':
+            return `<td class="muted-cell">${esc((emails[c.id]||'').trim() || '-')}</td>`;
+          case 'ph':
+            return `<td class="muted-cell">${esc(formatPhone((phones[c.id]||'').trim()) || '-')}</td>`;
+          case 't':
+            return `<td>${esc(c.t)}</td>`;
+          case 'pv':
+            return `<td class="preview-cell">${esc(pvClean).substring(0,120)}</td>`;
+          case 'rate':
+            return `<td onclick="event.stopPropagation()" title="Interview likelihood">${renderStars(+(ratings[c.id]||0), { small:true, onClick: "setRating.bind(null,\'${c.id}\')" })}</td>`;
+          case 'status':
+            return `<td><select class="status-select" onclick="event.stopPropagation()" onchange="setStatus('${c.id}',this.value)">
+              <option value="new"      ${st==='new'      ?'selected':''}>🔵 New</option>
+              <option value="replied"  ${st==='replied'  ?'selected':''}>✅ Replied</option>
+              <option value="interview"${st==='interview'?'selected':''}>⭐ Interview</option>
+              <option value="hot"      ${st==='hot'      ?'selected':''}>🔥 Hot</option>
+              <option value="passed"   ${st==='passed'   ?'selected':''}>✓ Passed</option>
+              <option value="ghosted"  ${st==='ghosted'  ?'selected':''}>👻 Ghosted</option>
+              <option value="followup"  ${st==='followup'  ?'selected':''}>📅 Follow up</option>
+              <option value="archive"  ${st==='archive'  ?'selected':''}>📦 Archive</option>
+              </select></td>`;
+          case 'fu':
+            return st==='followup'
+              ? `<td><input class="fu-input" type="date" value="${esc(fu)}" onclick="event.stopPropagation()" onchange="setFollowUp('${c.id}', this.value)"></td>`
+              : `<td class="date-cell"></td` + `>`;
+          case 'du':
+            return (st==='followup' && fu)
+              ? `<td class="date-cell">${esc(String(du))}</td>`
+              : `<td class="date-cell"></td` + `>`;
+          case 'tone':
+            return `<td onclick="event.stopPropagation()">${renderToneCell(c.id)} ${hasAIKey() && !toneLabelRaw(tones[c.id]) ? `<button class="bulk-btn" style="padding:4px 8px;font-size:11px;margin-left:6px" onclick="event.stopPropagation();genTone('${c.id}')">Analyze</button>` : ''}</td>`;
+          case 'notes':
+            return `<td class="notes-cell">${noteText ? noteText.substring(0,80)+(noteText.length>80?'…':'') : '<span style="opacity:0.3">—</span>'}</td>`;
+          case 'dt':
+            return `<td class="date-cell">${c.dt}</td>`;
+          case 'mc':
+            return `<td class="date-cell">${c.mc}</td>`;
+          default:
+            return '<td></td>';
+        }
+      }).join('');
+      return `<tr onclick="openMsg('${c.id}')">${cells}</tr>`;
+    }).join('');
+  }
+
+  renderPagination('msg', total, msgPage, v => { msgPage = v; renderMessages(); });
+  document.getElementById('msg-page-info').textContent = total ? `${start+1}–${Math.min(start+PAGE,total)} of ${total}` : `0 of 0`;
+  renderBulkBar();
+}
+
+// ============================================================
+// RENDER CONNECTIONS
+// ============================================================
+function renderAll() {
+  rebuildData();
+  updateDashStats();
+  renderMessages();
+  renderConnections();
+  renderApplications();
+}
+
+
+function renderConnections() {
+  const q = (document.getElementById('conn-search')?.value||'').toLowerCase();
+  const filtered = CONNS.filter(c =>
+    !q||(c.n||'').toLowerCase().includes(q)||(c.co||'').toLowerCase().includes(q)||(c.p||'').toLowerCase().includes(q)
+  );
+  const sorted = applySort(filtered, connSort);
+  const total  = sorted.length;
+  const start  = (connPage-1)*PAGE;
+  const page   = sorted.slice(start, start+PAGE);
+
+  renderHeaders('conn', CONN_COLS, colState.conn, connSort, (key) => {
+    toggleSort(connSort, key); connPage=1; renderConnections();
+  });
+
+  const tbody = document.getElementById('conn-tbody');
+  tbody.innerHTML = page.map(c => {
+    const cells = colState.conn.order.map(colIdx => {
+      const col = CONN_COLS[colIdx];
+      const delBtn = `<button class="row-del-inline" onclick="event.stopPropagation();deleteRecord('conn','${(c._uid || (c.n+'|'+c.dt)).replace(/'/g,'')}')" title="Delete contact">✕</button>`;
+      switch(col.id) {
+        case 'n':  return `<td class="name-cell">${esc(c.n)} ${delBtn}</td>`;
+        case 'co': return `<td>${esc(c.co)}</td>`;
+        case 'p':  return `<td style="color:var(--muted);font-size:12px">${esc(c.p)}</td>`;
+        case 'dt': return `<td class="date-cell">${esc(c.dt)}</td>`;
+        default:   return '<td></td>';
+      }
+    }).join('');
+    return `<tr>${cells}</tr>`;
+  }).join('') || `<tr><td colspan="${colState.conn.order.length + 1}"><div class="empty">No connections found</div></td></tr>`;
+
+  renderPagination('conn', total, connPage, v => { connPage = v; renderConnections(); });
+  document.getElementById('conn-page-info').textContent = `${start+1}–${Math.min(start+PAGE,total)} of ${total}`;
+}
+
+// ============================================================
+// RENDER APPLICATIONS
+// ============================================================
+function renderApplications() {
+  const q = (document.getElementById('app-search')?.value||'').toLowerCase();
+  const filtered = APPS.filter(a =>
+    !q||(a.co||'').toLowerCase().includes(q)||(a.t||'').toLowerCase().includes(q)
+  );
+  const sorted = applySort(filtered, appSort);
+  const total  = sorted.length;
+  const start  = (appPage-1)*PAGE;
+  const page   = sorted.slice(start, start+PAGE);
+
+  renderHeaders('app', APP_COLS, colState.app, appSort, (key) => {
+    toggleSort(appSort, key); appPage=1; renderApplications();
+  });
+
+  const tbody = document.getElementById('app-tbody');
+  tbody.innerHTML = page.map(a => {
+    const cells = colState.app.order.map(colIdx => {
+      const col = APP_COLS[colIdx];
+      const delBtn = `<button class="row-del-inline" onclick="deleteRecord('app','${(a._uid || (a.co+'|'+a.t+'|'+a.dt)).replace(/'/g,'')}')" title="Delete">✕</button>`;
+      switch(col.id) {
+        case 'dt': return `<td class="date-cell">${esc(a.dt)}</td>`;
+        case 'co': return `<td class="name-cell">${esc(a.co)} ${delBtn}</td>`;
+        case 't':  return `<td>${esc(a.t)}</td>`;
+        default:   return '<td></td>';
+      }
+    }).join('');
+    return `<tr>${cells}</tr>`;
+  }).join('') || `<tr><td colspan="${colState.app.order.length + 1}"><div class="empty">No applications found</div></td></tr>`;
+
+  renderPagination('app', total, appPage, v => { appPage = v; renderApplications(); });
+  document.getElementById('app-page-info').textContent = `${start+1}–${Math.min(start+PAGE,total)} of ${total}`;
+}
+
+// ============================================================
+// STATUS / NOTES
+// ============================================================
+function setStatus(id, val) {
+  statuses[id] = val;
+  if (val !== 'followup') { delete followUps[id]; }
+  if (val === 'followup' && !followUps[id]) {
+    const d = new Date();
+    d.setDate(d.getDate() + 7);
+    followUps[id] = d.toISOString().split('T')[0];
+  }
+  save();
+  updateDashStats();
+  renderMessages();
+}
+
+function updateDashStats() {
+  const replied = (CONVS || []).filter(c => (normalizeStatusVal(statuses[c.id]) || (c.r ? 'replied' : 'new')) === 'replied').length;
+  const pending = (CONVS || []).filter(c => (normalizeStatusVal(statuses[c.id]) || (c.r ? 'replied' : 'new')) === 'new').length;
+  const interview = (CONVS || []).filter(c => (normalizeStatusVal(statuses[c.id]) || (c.r ? 'replied' : 'new')) === 'interview').length;
+  const hot = (CONVS || []).filter(c => (normalizeStatusVal(statuses[c.id]) || (c.r ? 'replied' : 'new')) === 'hot').length;
+  const scheduled = CONVS.filter(c => !!followUps[c.id]).length;
+  document.getElementById('d-replied').textContent   = replied;
+  document.getElementById('d-pending').textContent   = pending;
+  document.getElementById('d-interview').textContent = interview;
+  document.getElementById('d-hot').textContent       = hot;
+  const fuEl = document.getElementById('d-followups'); if (fuEl) fuEl.textContent = scheduled;
+  const totEl = document.getElementById('d-total'); if (totEl) totEl.textContent = CONVS.length;
+}
+
+// ============================================================
+// PAGINATION
+// ============================================================
+function renderPagination(prefix, total, currentPage, setPage) {
+  const totalPages = Math.ceil(total/PAGE);
+  const btns = document.getElementById(prefix+'-page-btns');
+  let html = `<button class="pg-btn" onclick="(${setPage.toString()})(${currentPage-1})" ${currentPage<=1?'disabled':''}>‹</button>`;
+  getPageNums(currentPage, totalPages).forEach(p => {
+    if (p === '...') html += `<span style="color:var(--muted);padding:0 4px">…</span>`;
+    else html += `<button class="pg-btn ${p===currentPage?'active-page':''}" onclick="(${setPage.toString()})(${p})">${p}</button>`;
+  });
+  html += `<button class="pg-btn" onclick="(${setPage.toString()})(${currentPage+1})" ${currentPage>=totalPages?'disabled':''}>›</button>`;
+  btns.innerHTML = html;
+}
+function getPageNums(cur, total) {
+  if (total<=7) return Array.from({length:total},(_,i)=>i+1);
+  if (cur<=4)   return [1,2,3,4,5,'...',total];
+  if (cur>=total-3) return [1,'...',total-4,total-3,total-2,total-1,total];
+  return [1,'...',cur-1,cur,cur+1,'...',total];
+}
+
+// ============================================================
+// DETAIL MODAL
+// ============================================================
+function openMsg(id) {
+  const c = CONVS.find(x => x.id === id);
+  if (!c) return;
+  document.getElementById('modal-title').textContent = c.t || '(No type)';
+  document.getElementById('modal-sub').textContent   = `${c.cn} · ${c.dt} · ${c.mc} messages`;
+  const note = notes[id]||'';
+  const st   = statuses[id]||(c.r?'replied':'new');
+  const fu   = followUps[id] || '';
+  const pvClean = (c.pv||'').replace(/<[^>]+>/g,'');
+  const tone = toneLabelRaw(tones[id]);
+  const email = (emails[id] || '').trim();
+  const phone = formatPhone((phones[id] || '').trim());
+  const contactInfo = (contactInfos[id] || '').trim();
+
+  document.getElementById('modal-body').innerHTML = `
+    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px">
+      ${st==='followup' ? `<div style="min-width:220px">
+        <div style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px">Follow up date</div>
+        <input class="fu-input" type="date" id="fu-area" value="${esc(fu)}" onchange="setFollowUp('${id}', this.value)">
+        <div style="font-size:12px;color:var(--muted);margin-top:6px">Days until: <span style="font-family:JetBrains Mono,monospace">${fu ? esc(String(daysUntilISO(fu))) : '-'}</span></div>
+      </div>` : ''}
+      <div style="min-width:220px">
+        <div style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px">Conversation tone</div>
+        <div style="display:flex;align-items:center;gap:8px">
+          ${tone ? `<span class="tone-pill">${esc(tone)}</span>` : '<span style="opacity:0.35">-</span>'}
+          ${hasAIKey() ? `<button class="ai-btn" style="padding:8px 10px" onclick="genTone('${id}')">Analyze Tone</button>` : ''}
+        </div>
+      </div>
+    </div>
+
+    <div style="margin: 0 0 14px;">
+      <div style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px">Interview likelihood</div>
+      <div style="display:flex;align-items:center;gap:10px">
+        ${renderStars(+(ratings[id]||0), { onClick: "setRating.bind(null,'"+id+"')" })}
+        <span style="font-size:12px;color:var(--muted);font-family:JetBrains Mono,monospace">${(ratings[id]||0) ? (ratings[id] + "/5") : "-"}</span>
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-top:6px">1 = not likely · 5 = very likely</div>
+    </div>
+
+    </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin: 12px 0 14px;">
+      <div>
+        <div style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px">Email</div>
+        <input class="input" id="email-area" placeholder="email@domain.com" value="${esc(email)}" />
+      </div>
+      <div>
+        <div style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px">Phone</div>
+        <input class="input" id="phone-area" placeholder="555-555-5555" value="${esc(phone)}" oninput="this.value=formatPhone(this.value)" />
+      </div>
+    </div>
+    <div style="margin-bottom:14px">
+      <div style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px">Contact Info</div>
+      <textarea class="notes-area" id="contactinfo-area" placeholder="Company, LinkedIn URL, any contact details...">${esc(contactInfo)}</textarea>
+    </div>
+
+<div style="margin-bottom:14px">
+      <div style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px">Notes</div>
+      <textarea class="notes-area" id="note-area" placeholder="Add notes about this opportunity...">${esc(note)}</textarea>
+    </div>
+
+    <div class="ai-panel">
+      <div class="ai-panel-title">✦ AI Follow-up Assistant</div>
+      <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">
+        <button class="ai-btn" onclick="genAI('${id}','followup')">✦ Generate Follow-up</button>
+        <button class="ai-btn" onclick="genAI('${id}','reply')">💬 Draft Reply</button>
+        <button class="ai-btn" onclick="genAI('${id}','assess')">📊 Assess Opportunity</button>
+      </div>
+      <div id="ai-out" class="ai-loading">Click a button above to get an AI suggestion.</div>
+    </div>`;
+
+  document.getElementById('modal-footer').innerHTML = `
+    <select class="status-select" style="padding:8px 12px;font-size:13px" onchange="setStatusModal('${id}',this.value)">
+      <option value="new"       ${st==='new'      ?'selected':''}>🔵 New</option>
+      <option value="replied"   ${st==='replied'  ?'selected':''}>✅ Replied</option>
+      <option value="interview" ${st==='interview'?'selected':''}>⭐ Interview</option>
+      <option value="hot"       ${st==='hot'      ?'selected':''}>🔥 Hot</option>
+      <option value="passed"    ${st==='passed'   ?'selected':''}>✓ Passed</option>
+      <option value="ghosted"   ${st==='ghosted'  ?'selected':''}>👻 Ghosted</option>
+      <option value="archive"   ${st==='archive'  ?'selected':''}>📦 Archive</option>
+    </select>
+    <button class="save-btn" onclick="saveNote('${id}')">Save Note</button>`;
+  document.getElementById('modal').classList.add('open');
+}
+
+function setStatusModal(id, val) {
+  statuses[id] = val;
+  save();
+  updateDashStats();
+}
+
+async function saveNote(id) {
+  const btn = document.querySelector('.save-btn');
+  try {
+    if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
+
+    const prevNotes = notes[id] || '';
+    const prevEmail = (emails[id] || '').trim();
+    const prevPhone = (phones[id] || '').trim();
+    const prevInfo = contactInfos[id] || '';
+
+    const nextNotes = document.getElementById('note-area').value;
+    const nextEmail = (document.getElementById('email-area')?.value || '').trim();
+    const nextPhone = formatPhone((document.getElementById('phone-area')?.value || '').trim());
+    const nextInfo = document.getElementById('contactinfo-area')?.value || '';
+
+    const changed =
+      prevNotes !== nextNotes ||
+      prevEmail !== nextEmail ||
+      prevPhone !== nextPhone ||
+      prevInfo !== nextInfo;
+
+    notes[id] = nextNotes;
+    emails[id] = nextEmail;
+    phones[id] = nextPhone;
+    contactInfos[id] = nextInfo;
+    save();
+
+    // Re-analyze tone only if notes/contact info changed, to reduce API calls.
+    if (changed && hasAIKey()) {
+      await genTone(id);
+      toast('Tone updated ✓');
+    }
+
+    renderMessages();
+    closeModal();
+  } catch (e) {
+    alert('Save failed: ' + (e?.message || e));
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Save Note'; }
+  }
+}
+
+function closeModal() { document.getElementById('modal').classList.remove('open'); }
+
+document.getElementById('modal').addEventListener('click', e => {
+  if (e.target === document.getElementById('modal')) closeModal();
+});
+document.getElementById('api-modal').addEventListener('click', e => {
+  if (e.target === document.getElementById('api-modal')) closeApiModal();
+});
+document.getElementById('add-modal').addEventListener('click', e => {
+  if (e.target === document.getElementById('add-modal')) document.getElementById('add-modal').classList.remove('open');
+});
+
+// ============================================================
+// AI FOLLOW-UP  (multi-provider)
+// ============================================================
+async function genAI(id, mode) {
+  const apiKey  = localStorage.getItem('crm_apikey') || '';
+  const provider = localStorage.getItem('crm_provider') || 'gemini';
+  const c = CONVS.find(x => x.id === id);
+  const out = document.getElementById('ai-out');
+  if (!c) return;
+
+  if (!apiKey) {
+    out.className = '';
+    out.innerHTML = `<div class="ai-key-warning">⚠ No API key set. Click <strong>⚙ Set API Key</strong> in the top-right corner. <strong>Google Gemini is free</strong> — no credit card needed!</div>`;
+    return;
+  }
+
+  out.className = 'ai-loading';
+  out.textContent = mode==='followup' ? 'Generating follow-up suggestion...' : mode==='reply' ? 'Drafting a reply...' : 'Assessing opportunity...';
+
+  const noteText = notes[id]||'';
+  const pvClean  = (c.pv||'').replace(/<[^>]+>/g,'');
+
+  const prompts = {
+    followup: `You are a career coach helping Guilbert Maglasang, a senior Power BI / BI developer in Houston TX, actively job searching.\n\nLinkedIn conversation:\nSubject: ${c.t}\nContact: ${c.cn}\nLast activity: ${c.dt}\nDid Guilbert reply: ${c.r ? 'Yes' : 'No'}\nMessage count: ${c.mc}\nPreview: ${pvClean}\nGuilbert's notes: ${noteText}\n\nProvide:\n1. Brief 1-sentence assessment of this opportunity\n2. Suggested next action\n3. A short follow-up message Guilbert could send (under 100 words, professional but warm)\n\nBe concise and practical.`,
+    reply: `You are a career coach helping Guilbert Maglasang, a senior Power BI / BI developer in Houston TX.\n\nWrite a professional reply to this recruiter message. Be warm, concise, and interested.\n\nRecruiter: ${c.cn}\nSubject: ${c.t}\nMessage preview: ${pvClean}\nDate: ${c.dt}\nGuilbert's notes: ${noteText}\n\nWrite only the reply message text (no subject line, no labels). Keep it under 120 words.`,
+    assess: `You are a career advisor helping Guilbert Maglasang evaluate job opportunities.\n\nSubject: ${c.t}\nContact: ${c.cn}\nDate: ${c.dt}\nMessage count: ${c.mc}\nPreview: ${pvClean}\nGuilbert's notes: ${noteText}\n\nProvide:\n1. 🎯 Opportunity Quality (High/Medium/Low) with brief reason\n2. ⚠️ Any red flags or things to clarify\n3. ✅ Recommended next step\n\nBe direct and practical.`
+  };
+  const prompt = prompts[mode];
+
+  try {
+    let responseText = '';
+    if (provider === 'anthropic') {
+      const resp = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json', 'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true'
+        },
+        body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 600, messages: [{ role: 'user', content: prompt }] })
+      });
+      const data = await resp.json();
+      if (data.error) throw new Error(data.error.message);
+      responseText = data.content?.find(b => b.type==='text')?.text || 'No response.';
+    } else if (provider === 'gemini') {
+      const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+      });
+      const data = await resp.json();
+      if (data.error) throw new Error(data.error.message);
+      responseText = data.candidates?.[0]?.content?.parts?.[0]?.text || 'No response.';
+    } else if (provider === 'groq') {
+      const resp = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+        body: JSON.stringify({ model: 'llama-3.1-8b-instant', max_tokens: 600, messages: [{ role: 'user', content: prompt }] })
+      });
+      const data = await resp.json();
+      if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
+      responseText = data.choices?.[0]?.message?.content || 'No response.';
+    }
+    out.className = 'ai-response';
+    out.textContent = responseText;
+  } catch(e) {
+    out.className = 'ai-response';
+    out.textContent = 'Error: ' + (e.message || 'Could not connect. Check your API key and try again.');
+  }
+}
+
+// ============================================================
+// EXPORT TO EXCEL
+// ============================================================
+function exportExcel() {
+  const wb = XLSX.utils.book_new();
+  const msgData = CONVS.map(c => ({
+    'Contact': c.cn||'', 'Subject': c.t||'',
+    'Preview': (c.pv||'').replace(/<[^>]+>/g,'').substring(0,200),
+    'Status': statuses[c.id]||(c.r?'replied':'new'),
+    'Replied': c.r?'Yes':'No', 'Last Activity': c.dt||'',
+    'Messages': c.mc||0, 'Notes': notes[c.id]||'',
+    'Email': (emails[c.id]||''), 'Phone': (phones[c.id]||''),
+    'Follow up': (followUps[c.id]||''), 'Tone': (toneLabelRaw(tones[c.id])||''),
+    'Interview Likelihood': (ratings[c.id]||'')
+  }));
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(msgData), 'Messages');
+  const connData = CONNS.map(c => ({ 'Name': c.n||'', 'Company': c.co||'', 'Position': c.p||'', 'Connected On': c.dt||'' }));
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(connData), 'Connections');
+  const appData = APPS.map(a => ({ 'Date Applied': a.dt||'', 'Company': a.co||'', 'Job Title': a.t||'' }));
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(appData), 'Applications');
+  XLSX.writeFile(wb, 'guilbert_linkedin_crm.xlsx');
+}
+
+// ============================================================
+// UTILS
+// ============================================================
+function esc(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function jsonStr(s) { return JSON.stringify(String(s||'')); }
+
+function formatPhone(raw) {
+  if (!raw) return '';
+  const digits = String(raw).replace(/\D/g, '');
+  // Strip leading country code 1 if we have 11 digits starting with 1
+  const d = (digits.length === 11 && digits[0] === '1') ? digits.slice(1) : digits;
+  if (d.length === 10) return d.slice(0,3) + '-' + d.slice(3,6) + '-' + d.slice(6);
+  // Partial formatting as user types
+  if (d.length > 6) return d.slice(0,3) + '-' + d.slice(3,6) + '-' + d.slice(6);
+  if (d.length > 3) return d.slice(0,3) + '-' + d.slice(3);
+  return d;
+}
+
+function toast(msg) {
+  let el = document.getElementById('crm-toast');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'crm-toast';
+    el.style.cssText = 'position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:8px 18px;border-radius:20px;font-size:13px;z-index:99999;pointer-events:none;opacity:0;transition:opacity 0.2s';
+    document.body.appendChild(el);
+  }
+  el.textContent = msg;
+  el.style.opacity = '1';
+  clearTimeout(el._t);
+  el._t = setTimeout(() => { el.style.opacity = '0'; }, 1500);
+}
+
+async function copyText(t, btnEl) {
+  const v = String(t || '').trim();
+  if (!v) { toast('Nothing to copy'); return; }
+  try {
+    await navigator.clipboard.writeText(v);
+  } catch {
+    const ta = document.createElement('textarea');
+    ta.value = v; document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); ta.remove();
+  }
+  toast('Copied!');
+  if (btnEl) {
+    const orig = btnEl.textContent;
+    btnEl.textContent = '✓';
+    btnEl.style.color = '#4caf50';
+    clearTimeout(btnEl._ct);
+    btnEl._ct = setTimeout(() => { btnEl.textContent = orig; btnEl.style.color = ''; }, 1500);
+  }
+}
+
+function rowClick(e, id) {
+  try {
+    const t = e?.target;
+    if (t?.closest?.('.mini-ico') || t?.closest?.('.row-check') || t?.closest?.('.bulk-bar') ) return;
+  } catch {}
+  openMsg(id);
+}
+
+function copyClick(e, t) {
+  try {
+    if (e) { e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation?.(); e.cancelBubble = true; }
+  } catch {}
+  const btn = (e && e.currentTarget) ? e.currentTarget : (e && e.target) ? e.target : null;
+  copyText(t, btn);
+  return false;
+}
+
+function normalizeColState(state, cols) {
+  const n = cols.length;
+  const widths = Array.from({ length: n }, (_, i) => (state.widths && state.widths[i] != null ? state.widths[i] : cols[i].width));
+  const orderIn = Array.isArray(state.order) ? state.order : [];
+  const order = [];
+  const seen = new Set();
+  orderIn.forEach(i => { if (Number.isInteger(i) && i >= 0 && i < n && !seen.has(i)) { order.push(i); seen.add(i); } });
+  for (let i = 0; i < n; i++) if (!seen.has(i)) order.push(i);
+  state.widths = widths;
+  state.order = order;
+}
+
+
+// ============================================================
+// DEMO STATE â€” pre-populates CRM with realistic dummy data
+// ============================================================
+function loadDemoState() {
+  statuses = {
+    'conv-001': 'interview',
+    'conv-002': 'followup',
+    'conv-003': 'replied',
+    'conv-004': 'hot',
+    'conv-006': 'replied',
+    'conv-007': 'followup',
+    'conv-009': 'hot',
+    'conv-010': 'replied',
+    'conv-012': 'interview',
+    'conv-015': 'new',
+    'conv-018': 'replied',
+    'conv-019': 'new'
+  };
+  notes = {
+    'conv-001': 'Strong fit for the role. Phone screen went very well â€” she mentioned budget approved. Follow up Monday morning.',
+    'conv-002': 'Reached out about Deloitte Houston opening. No response yet. Try again after 5 business days.',
+    'conv-003': 'Angela confirmed the JD matches my exact skill set. Waiting on calendar invite for technical screen.',
+    'conv-004': 'James sent the full JD. KPMG role requires Power BI, DAX, and SQL Server. Sent portfolio link.',
+    'conv-006': 'Robert is the hiring manager directly. Chevron role is hybrid 3 days/week. Strong interest expressed.',
+    'conv-007': 'HEB opportunity sounds solid â€” supply chain BI dashboards in Power BI. Glassdoor reviews are positive.',
+    'conv-009': 'Tanya says Accenture client is energy sector â€” right up my alley. Technical interview scheduled.',
+    'conv-010': 'IBM role is contract-to-hire. Kevin says conversion rate is high. Azure Synapse exp is a bonus.',
+    'conv-012': 'Arun confirmed this is a W2 role through Cognizant, not corp-to-corp. Moved to technical screen.',
+    'conv-018': 'Christopher is the DM directly. MD Anderson role is permanent full-time with great benefits. High interest.',
+    'conv-019': 'Jessica is a former colleague â€” strong internal referral. She submitted my name to the hiring panel.'
+  };
+  tones = {
+    'conv-001': 'positive',
+    'conv-002': 'neutral',
+    'conv-003': 'positive',
+    'conv-004': 'positive',
+    'conv-005': 'neutral',
+    'conv-006': 'positive',
+    'conv-007': 'positive',
+    'conv-008': 'neutral',
+    'conv-009': 'positive',
+    'conv-010': 'positive',
+    'conv-011': 'neutral',
+    'conv-012': 'positive',
+    'conv-013': 'negative',
+    'conv-015': 'positive',
+    'conv-018': 'positive',
+    'conv-019': 'positive',
+    'conv-020': 'neutral'
+  };
+  followUps = {
+    'conv-001': '2026-04-05',
+    'conv-002': '2026-04-02',
+    'conv-003': '2026-04-03',
+    'conv-004': '2026-04-01',
+    'conv-006': '2026-04-07',
+    'conv-007': '2026-04-04',
+    'conv-009': '2026-04-08',
+    'conv-010': '2026-04-06',
+    'conv-012': '2026-04-09',
+    'conv-015': '2026-04-01',
+    'conv-018': '2026-04-10',
+    'conv-019': '2026-04-02'
+  };
+  emails = {
+    'conv-001': 'sarah.mitchell@deloitte.com',
+    'conv-003': 'angela.torres@ey.com',
+    'conv-004': 'james.patel@kpmg.com',
+    'conv-006': 'robert.nguyen@chevron.com',
+    'conv-007': 'priya.sharma@heb.com',
+    'conv-009': 'tanya.williams@accenture.com',
+    'conv-010': 'kevin.park@ibm.com',
+    'conv-012': 'arun.krishnamurthy@cognizant.com',
+    'conv-015': 'monica.estrada@capgemini.com',
+    'conv-018': 'christopher.lee@mdanderson.org',
+    'conv-019': 'jessica.hamilton@deloitte.com'
+  };
+  phones = {
+    'conv-001': '713-555-0142',
+    'conv-003': '832-555-0217',
+    'conv-006': '281-555-0388',
+    'conv-009': '713-555-0451',
+    'conv-012': '832-555-0163',
+    'conv-015': '713-555-0529',
+    'conv-018': '713-555-0674',
+    'conv-019': '832-555-0290'
+  };
+}
+// ============================================================
+// INIT
+// ============================================================
+loadState();
+loadDemoState();
+normalizeColState(colState.msg, MSG_COLS);
+normalizeColState(colState.conn, CONN_COLS);
+normalizeColState(colState.app, APP_COLS);
+
+// Build merged datasets (embedded export + custom records), respecting hide/reset flags.
+rebuildData();
+
+updateDashStats();
+updateStatCounts();
+renderMessages();
+renderConnections();
+renderApplications();
+</script>
+</body>
+</html>
