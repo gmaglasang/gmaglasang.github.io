@@ -51,7 +51,7 @@ End-to-end sales analytics dashboard with dynamic filtering, YoY trend analysis,
 ### [LinkedIn Job Search CRM](https://gmaglasang.github.io/App_Build/linkedin-crm/demo.html)
 See featured project above.
 
-### Mouth Breathing Tracker
+### [Mouth Breathing Tracker](https://gmaglasang.github.io/App_Build/mouth-breathing-tracker.html)
 Web application built to track mouth-open frequency over time — helping mouth breathers monitor progress.
 **Built with:** AI-assisted development · Integrates MediaPipe Face Mesh for real-time facial landmark detection
 
