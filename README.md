@@ -6,14 +6,14 @@ Senior Business Intelligence Developer specializing in Power BI, DAX, SQL, and d
 
 ## 🚀 Featured Project
 
-### [LinkedIn Job Search CRM](https://gmaglasang.github.io/App_Build/linkedin-crm/)
+### [LinkedIn Job Search CRM](https://gmaglasang.github.io/App_Build/linkedin-crm/demo.html)
 A fully functional, browser-based CRM built to manage a high-volume job search — 392 conversations, 862 connections, and 200 applications tracked in a single HTML file with no backend required.
 
 **Features:** Message tracking with status tags (Hot, Interview, Replied, Ghosted) · Connection manager · Application log · AI follow-up assistant (Gemini/Anthropic/Groq) · Excel export · Zero dependencies
 
 **Built with:** AI-assisted development · Runs entirely in the browser · No installation required
 
-[**→ Open Live Demo**](https://gmaglasang.github.io/App_Build/linkedin-crm/)
+[**→ Open Live Demo**](https://gmaglasang.github.io/App_Build/linkedin-crm/demo.html)
 
 ### Screenshots
 
@@ -48,7 +48,7 @@ End-to-end sales analytics dashboard with dynamic filtering, YoY trend analysis,
 
 ## 🛠 App Build Projects
 
-### [LinkedIn Job Search CRM](https://gmaglasang.github.io/App_Build/linkedin-crm/)
+### [LinkedIn Job Search CRM](https://gmaglasang.github.io/App_Build/linkedin-crm/demo.html)
 See featured project above.
 
 ### Mouth Breathing Tracker

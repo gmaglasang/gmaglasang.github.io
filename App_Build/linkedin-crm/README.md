@@ -6,7 +6,7 @@ A self-contained, browser-based CRM built to manage a high-volume job search —
 
 ## 🔗 Live Demo
 
-[**Open the demo →**](https://gmaglasang.github.io/App_Build/linkedin-crm/)
+[**Open the demo →**](https://gmaglasang.github.io/App_Build/linkedin-crm/demo.html)
 
 ---
 
@@ -82,7 +82,7 @@ This demo uses entirely fictional sample data. No real names, messages, or perso
 ```
 App_Build/
   linkedin-crm/
-    index.html    ← the entire app (single file)
+    demo.html     ← the entire app (single file)
     README.md     ← this file
 ```
 
