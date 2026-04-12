@@ -68,4 +68,4 @@ Web application built to track mouth-open frequency over time — helping mouth 
 
 ---
 
-*📫 Connect with me on [LinkedIn](https://www.linkedin.com/in/guilbert-maglasang/) · [gmaglasang1@gmail.com](mailto:gmaglasang1@gmail.com)*
+*📫 Connect with me on [LinkedIn](https://www.linkedin.com/in/guilbert-maglasang/) · [gmaglasang1@yahoo.com](mailto:gmaglasang1@yahoo.com)*
