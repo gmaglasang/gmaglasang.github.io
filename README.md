@@ -60,6 +60,19 @@ A fully functional, browser-based CRM built to manage a high-volume job search �
 
 ---
 
+## 📐 DAX & Data Modeling
+
+### [Power BI DAX Showcase](https://github.com/gmaglasang/powerbi-dax-showcase)
+8 production DAX measures extracted directly from two real Power BI models — a SaaS Metrics Dashboard and a Vendor Quality Scorecard — each fully annotated with the pattern used, why it's non-trivial, and what DAX concept it demonstrates.
+
+**Patterns covered:** Filter context manipulation · Row context → filter context transition · `CALCULATETABLE` + `ADDCOLUMNS` · Volume-weighted aggregation · Point-in-time snapshots · Cohort analysis · Disconnected slicer with `ISINSCOPE`
+
+**Models:** 41 measures (SaaS) · 123 measures (Vendor QA)
+
+[**→ View DAX Showcase**](https://github.com/gmaglasang/powerbi-dax-showcase)
+
+---
+
 ## 📊 BI & Analytics Projects
 
 ### Corteva Agriscience – Vendor Scorecard Dashboard
