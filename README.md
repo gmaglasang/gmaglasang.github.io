@@ -15,7 +15,7 @@ A Power BI-style executive dashboard showcasing SaaS business metrics — MRR tr
 
 > 📌 *This demo was built to show exactly how a Power BI SaaS dashboard looks and behaves — interactive filters, multi-page navigation, and live chart updates — without requiring Power BI Desktop or workspace access.*
 
-[**→ Open SaaS Metrics Dashboard**](https://gmaglasang.github.io/App_Build/saas-metrics/demo.html)
+[**→ Open Live Demo**](https://gmaglasang.github.io/App_Build/saas-metrics/demo.html) · [**→ Download .pbix**](https://github.com/gmaglasang/powerbi-saas-metrics)
 
 #### Screenshots
 
@@ -61,6 +61,15 @@ A fully functional, browser-based CRM built to manage a high-volume job search �
 ---
 
 ## 📐 DAX & Data Modeling
+
+### [Power BI SaaS Metrics – .pbix File](https://github.com/gmaglasang/powerbi-saas-metrics)
+The actual Power BI file behind the SaaS Metrics Dashboard — open it in Power BI Desktop to explore the star schema data model, relationships, and DAX measures directly.
+
+**Model:** Star schema · `Fact_Subscriptions` snapshot table · `Dim_Customers`, `Dim_Plans`, `Dim_Date` · 41 DAX measures
+
+[**→ Download .pbix**](https://github.com/gmaglasang/powerbi-saas-metrics)
+
+---
 
 ### [Power BI DAX Showcase](https://github.com/gmaglasang/powerbi-dax-showcase)
 8 production DAX measures extracted directly from two real Power BI models — a SaaS Metrics Dashboard and a Vendor Quality Scorecard — each fully annotated with the pattern used, why it's non-trivial, and what DAX concept it demonstrates.
