@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SaaS Metrics Dashboard – Power BI</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --canvas: #F3F2F1;
+    --header-bg: #252423;
+    --card-bg: #FFFFFF;
+    --border: #E1DFDD;
+    --text-primary: #252423;
+    --text-secondary: #605E5C;
+    --text-muted: #8A8886;
+    --accent-yellow: #F2C811;
+    --accent-blue: #0078D4;
+    --green: #107C10;
+    --red: #A4262C;
+    --amber: #D83B01;
+    --tab-active: #252423;
+    --font: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+    --chart-1: #0078D4;
+    --chart-2: #00B294;
+    --chart-3: #F2C811;
+    --chart-4: #D83B01;
+    --chart-5: #8764B8;
+    --chart-6: #004B50;
+  }
+
+  html, body { height: 100%; overflow: hidden; font-family: var(--font); background: var(--canvas); color: var(--text-primary); font-size: 13px; }
+
+  /* ── LAYOUT ── */
+  #app { display: flex; flex-direction: column; height: 100vh; }
+
+  /* ── HEADER ── */
+  #header {
+    background: var(--header-bg);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    height: 40px;
+    flex-shrink: 0;
+    gap: 12px;
+  }
+  #header .left { display: flex; align-items: center; gap: 10px; }
+  #header .title { font-size: 13px; font-weight: 600; color: #fff; letter-spacing: 0.2px; }
+  #header .subtitle { font-size: 11px; color: #BFBCBA; }
+  #header .right { display: flex; align-items: center; gap: 12px; }
+  .pbi-logo { display: flex; align-items: center; gap: 6px; }
+  .pbi-logo svg { width: 18px; height: 18px; }
+  .refresh-info { font-size: 11px; color: #BFBCBA; display: flex; align-items: center; gap: 5px; cursor: pointer; }
+  .refresh-info:hover { color: #fff; }
+  .header-btn {
+    background: none; border: none; color: #C8C6C4; cursor: pointer;
+    padding: 4px 6px; border-radius: 2px; font-size: 14px;
+    display: flex; align-items: center; gap: 4px;
+    transition: background 0.1s, color 0.1s;
+  }
+  .header-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
+  .header-btn.active { background: rgba(255,255,255,0.15); color: #fff; }
+
+  /* ── CANVAS (scroll) ── */
+  #canvas-wrap { flex: 1; overflow: hidden; position: relative; display: flex; }
+
+  /* ── PAGES ── */
+  .page { display: none; flex: 1; overflow-y: auto; overflow-x: hidden; padding: 12px 14px 8px; }
+  .page.active { display: block; }
+
+  /* ── FILTER PANE ── */
+  #filter-pane {
+    width: 240px; background: #fff; border-left: 1px solid var(--border);
+    display: none; flex-direction: column;
+    padding: 0; flex-shrink: 0; overflow-y: auto;
+  }
+  #filter-pane.open { display: flex; }
+  .fp-header {
+    background: var(--header-bg); color: #fff; padding: 10px 14px;
+    font-size: 12px; font-weight: 600; display: flex; justify-content: space-between; align-items: center;
+  }
+  .fp-section { padding: 12px 14px; border-bottom: 1px solid var(--border); }
+  .fp-section h4 { font-size: 11px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+  .fp-chips { display: flex; flex-wrap: wrap; gap: 4px; }
+  .fp-chip {
+    padding: 3px 8px; border-radius: 2px; font-size: 11px;
+    border: 1px solid var(--border); background: var(--canvas);
+    cursor: pointer; transition: all 0.1s; color: var(--text-primary);
+  }
+  .fp-chip.active { background: var(--accent-blue); color: #fff; border-color: var(--accent-blue); }
+
+  /* ── SLICER BAR ── */
+  .slicer-bar {
+    background: #fff; border: 1px solid var(--border); border-radius: 2px;
+    padding: 8px 12px; margin-bottom: 10px;
+    display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  }
+  .slicer-group { display: flex; align-items: center; gap: 6px; }
+  .slicer-label { font-size: 11px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; white-space: nowrap; }
+  .slicer-select {
+    border: 1px solid var(--border); background: var(--canvas); padding: 3px 22px 3px 7px;
+    border-radius: 2px; font-size: 12px; font-family: var(--font); color: var(--text-primary);
+    cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='%23605E5C'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 6px center; min-width: 90px;
+    transition: border-color 0.15s;
+  }
+  .slicer-select:focus { outline: none; border-color: var(--accent-blue); }
+  .chip-group { display: flex; gap: 3px; }
+  .chip {
+    padding: 3px 9px; border-radius: 2px; font-size: 11px; font-family: var(--font);
+    border: 1px solid var(--border); background: var(--canvas); cursor: pointer;
+    transition: all 0.12s; color: var(--text-primary);
+  }
+  .chip.active { background: var(--accent-blue); color: #fff; border-color: var(--accent-blue); }
+  .reset-btn {
+    margin-left: auto; padding: 3px 10px; border-radius: 2px; font-size: 11px;
+    background: none; border: 1px solid var(--border); cursor: pointer; color: var(--text-secondary);
+    font-family: var(--font); transition: all 0.12s;
+  }
+  .reset-btn:hover { border-color: var(--accent-blue); color: var(--accent-blue); }
+
+  /* ── KPI CARDS ── */
+  .kpi-row { display: grid; gap: 8px; margin-bottom: 10px; }
+  .kpi-row.cols-5 { grid-template-columns: repeat(5, 1fr); }
+  .kpi-row.cols-3 { grid-template-columns: repeat(3, 1fr); }
+
+  .kpi-card {
+    background: var(--card-bg); border: 1px solid var(--border);
+    border-left: 3px solid var(--accent-blue); border-radius: 2px;
+    padding: 10px 12px 9px; position: relative;
+    transition: box-shadow 0.15s;
+  }
+  .kpi-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
+  .kpi-card .kpi-label { font-size: 11px; color: var(--text-muted); font-weight: 400; margin-bottom: 3px; }
+  .kpi-card .kpi-value { font-size: 26px; font-weight: 700; color: var(--text-primary); line-height: 1; margin-bottom: 4px; }
+  .kpi-card .kpi-delta { font-size: 11px; display: flex; align-items: center; gap: 3px; }
+  .kpi-card .kpi-delta.up { color: var(--green); }
+  .kpi-card .kpi-delta.down { color: var(--green); }
+  .kpi-card .kpi-delta.bad { color: var(--red); }
+
+  /* ── GRID LAYOUTS ── */
+  .viz-grid { display: grid; gap: 8px; }
+  .viz-grid.two-two { grid-template-columns: 1fr 1fr; grid-template-rows: auto auto; }
+  .viz-grid.three-one { grid-template-columns: 2fr 1fr; }
+  .viz-grid.one-two { grid-template-columns: 1fr 1fr; }
+
+  /* ── VIZ CARD ── */
+  .viz-card {
+    background: var(--card-bg); border: 1px solid var(--border);
+    border-radius: 2px; padding: 10px 12px; overflow: hidden;
+    transition: box-shadow 0.15s;
+  }
+  .viz-card:hover { box-shadow: 0 2px 10px rgba(0,0,0,0.10); }
+  .viz-title {
+    font-size: 12px; font-weight: 700; color: var(--text-primary);
+    margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;
+  }
+  .viz-title .more-btn { font-size: 16px; color: var(--text-muted); cursor: pointer; padding: 0 2px; line-height: 1; }
+  .chart-wrap { position: relative; }
+
+  /* ── TABLES ── */
+  .data-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .data-table th {
+    background: #FAF9F8; font-weight: 600; font-size: 11px;
+    color: var(--text-secondary); padding: 6px 8px; text-align: left;
+    border-bottom: 2px solid var(--border); white-space: nowrap;
+  }
+  .data-table td { padding: 5px 8px; border-bottom: 1px solid #F3F2F1; vertical-align: middle; }
+  .data-table tr:hover td { background: #F0F9FF; }
+  .data-table tr:last-child td { border-bottom: none; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 3px;
+    padding: 2px 6px; border-radius: 2px; font-size: 10px; font-weight: 600;
+  }
+  .badge.healthy { background: #DFF6DD; color: #107C10; }
+  .badge.monitor { background: #FFF4CE; color: #835200; }
+  .badge.at-risk { background: #FDE7E9; color: #A4262C; }
+  .action-link { color: var(--accent-blue); cursor: pointer; text-decoration: none; font-size: 11px; }
+  .action-link:hover { text-decoration: underline; }
+
+  /* ── MATRIX TABLE ── */
+  .matrix-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .matrix-table th, .matrix-table td { padding: 5px 10px; border: 1px solid var(--border); text-align: right; }
+  .matrix-table th { background: #FAF9F8; font-weight: 600; font-size: 11px; color: var(--text-secondary); text-align: center; }
+  .matrix-table th:first-child { text-align: left; }
+  .matrix-table td:first-child { font-weight: 600; color: var(--text-primary); text-align: left; }
+
+  /* ── KPI BIG NUMBER ── */
+  .kpi-big {
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+    height: 100%; padding: 12px 0;
+  }
+  .kpi-big .big-num { font-size: 42px; font-weight: 700; color: var(--text-primary); line-height: 1; }
+  .kpi-big .big-label { font-size: 11px; color: var(--text-muted); margin-bottom: 4px; }
+  .kpi-big .big-delta { font-size: 13px; color: var(--green); font-weight: 600; margin-top: 4px; }
+
+  /* ── PAGE TABS (bottom) ── */
+  #tab-bar {
+    background: #fff; border-top: 1px solid var(--border);
+    display: flex; align-items: stretch; padding: 0 8px;
+    height: 32px; flex-shrink: 0; overflow-x: auto;
+    scrollbar-width: none;
+  }
+  #tab-bar::-webkit-scrollbar { display: none; }
+  .tab-btn {
+    padding: 0 16px; border: none; background: none;
+    font-family: var(--font); font-size: 12px; color: var(--text-secondary);
+    cursor: pointer; border-bottom: 2px solid transparent;
+    white-space: nowrap; transition: all 0.12s; margin-right: 2px;
+    display: flex; align-items: center;
+  }
+  .tab-btn:hover { background: var(--canvas); color: var(--text-primary); }
+  .tab-btn.active { color: var(--text-primary); border-bottom-color: var(--accent-blue); font-weight: 600; }
+
+  /* ── STATUS BAR ── */
+  #status-bar {
+    background: #FAF9F8; border-top: 1px solid var(--border);
+    display: flex; align-items: center; padding: 0 14px;
+    height: 22px; flex-shrink: 0; gap: 16px;
+  }
+  .status-item { font-size: 10px; color: var(--text-muted); display: flex; align-items: center; gap: 3px; }
+  .status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
+
+  /* scrollbar styling */
+  .page::-webkit-scrollbar { width: 4px; }
+  .page::-webkit-scrollbar-track { background: transparent; }
+  .page::-webkit-scrollbar-thumb { background: #C8C6C4; border-radius: 2px; }
+
+  /* waterfall */
+  .waterfall-wrap { padding: 4px 0; }
+
+  /* nrr sparkline inline */
+  .spark-wrap { display: flex; align-items: center; gap: 8px; }
+  .spark-canvas { flex-shrink: 0; }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- HEADER -->
+  <div id="header">
+    <div class="left">
+      <!-- PBI Logo SVG -->
+      <div class="pbi-logo">
+        <svg viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="1" y="7" width="3" height="10" fill="#F2C811"/>
+          <rect x="5.5" y="4" width="3" height="13" fill="#F2C811" opacity="0.8"/>
+          <rect x="10" y="1" width="3" height="16" fill="#F2C811" opacity="0.6"/>
+          <rect x="14.5" y="5" width="3" height="12" fill="#F2C811" opacity="0.4"/>
+        </svg>
+      </div>
+      <div>
+        <div class="title">SaaS Metrics Dashboard</div>
+      </div>
+    </div>
+    <div class="right">
+      <div class="refresh-info" title="Last data refresh">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/><path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/></svg>
+        Last refreshed: Apr 15, 2026 9:00 AM
+      </div>
+      <button class="header-btn" title="Bookmarks">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v13.5a.5.5 0 0 1-.777.416L8 13.101l-5.223 2.815A.5.5 0 0 1 2 15.5V2zm2-1a1 1 0 0 0-1 1v12.566l4.723-2.482a.5.5 0 0 1 .554 0L13 14.566V2a1 1 0 0 0-1-1H4z"/></svg>
+      </button>
+      <button class="header-btn" id="filter-toggle" title="Filters" onclick="toggleFilterPane()">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M6 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5zm-2-3a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zm-2-3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5z"/></svg>
+        Filters
+      </button>
+    </div>
+  </div>
+
+  <!-- CANVAS -->
+  <div id="canvas-wrap">
+
+    <!-- PAGE 1: EXECUTIVE OVERVIEW -->
+    <div class="page active" id="page-1">
+
+      <!-- KPI Row -->
+      <div class="kpi-row cols-5">
+        <div class="kpi-card" style="border-left-color:#0078D4">
+          <div class="kpi-label">MRR</div>
+          <div class="kpi-value">$124,850</div>
+          <div class="kpi-delta up">▲ +8.2% vs last month</div>
+        </div>
+        <div class="kpi-card" style="border-left-color:#00B294">
+          <div class="kpi-label">Active Customers</div>
+          <div class="kpi-value">847</div>
+          <div class="kpi-delta up">▲ +23 this month</div>
+        </div>
+        <div class="kpi-card" style="border-left-color:#107C10">
+          <div class="kpi-label">Churn Rate</div>
+          <div class="kpi-value">2.4%</div>
+          <div class="kpi-delta down">▼ −0.3% (improved)</div>
+        </div>
+        <div class="kpi-card" style="border-left-color:#F2C811">
+          <div class="kpi-label">ARPU</div>
+          <div class="kpi-value">$147.40</div>
+          <div class="kpi-delta up">▲ +$4.20 vs last month</div>
+        </div>
+        <div class="kpi-card" style="border-left-color:#8764B8">
+          <div class="kpi-label">NRR</div>
+          <div class="kpi-value">108%</div>
+          <div class="kpi-delta up">▲ +2% vs last month</div>
+        </div>
+      </div>
+
+      <!-- Charts grid: line (wide) + donut | waterfall + bar -->
+      <div class="viz-grid two-two" style="grid-template-columns: 2fr 1fr; grid-template-rows: 240px 220px;">
+
+        <!-- MRR Trend -->
+        <div class="viz-card">
+          <div class="viz-title">MRR Trend <span class="more-btn">⋯</span></div>
+          <div class="chart-wrap" style="height:190px"><canvas id="mrrTrendChart"></canvas></div>
+        </div>
+
+        <!-- Revenue by Plan -->
+        <div class="viz-card">
+          <div class="viz-title">Revenue by Plan <span class="more-btn">⋯</span></div>
+          <div class="chart-wrap" style="height:190px"><canvas id="planDonutChart"></canvas></div>
+        </div>
+
+        <!-- Net New MRR Waterfall -->
+        <div class="viz-card">
+          <div class="viz-title">Net New MRR Breakdown <span class="more-btn">⋯</span></div>
+          <div class="chart-wrap" style="height:170px"><canvas id="waterfallChart"></canvas></div>
+        </div>
+
+        <!-- MRR by Industry -->
+        <div class="viz-card">
+          <div class="viz-title">MRR by Industry <span class="more-btn">⋯</span></div>
+          <div class="chart-wrap" style="height:170px"><canvas id="industryBarChart"></canvas></div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- PAGE 2: REVENUE BREAKDOWN -->
+    <div class="page" id="page-2">
+
+      <!-- Slicer bar -->
+      <div class="slicer-bar">
+        <div class="slicer-group">
+          <span class="slicer-label">Year</span>
+          <select class="slicer-select" id="yearSlicer" onchange="applyRevFilters()">
+            <option>All Years</option>
+            <option>2024</option>
+            <option selected>2025</option>
+            <option>2026</option>
+          </select>
+        </div>
+        <div class="slicer-group">
+          <span class="slicer-label">Plan</span>
+          <div class="chip-group" id="planChips">
+            <div class="chip active" onclick="toggleChip(this,'planChips')" data-val="all">All</div>
+            <div class="chip" onclick="toggleChip(this,'planChips')" data-val="basic">Basic</div>
+            <div class="chip" onclick="toggleChip(this,'planChips')" data-val="pro">Pro</div>
+            <div class="chip" onclick="toggleChip(this,'planChips')" data-val="enterprise">Enterprise</div>
+          </div>
+        </div>
+        <div class="slicer-group">
+          <span class="slicer-label">Country</span>
+          <select class="slicer-select" id="countrySlicer" onchange="applyRevFilters()">
+            <option>All Countries</option>
+            <option>USA</option>
+            <option>UK</option>
+            <option>Canada</option>
+            <option>Germany</option>
+            <option>Australia</option>
+          </select>
+        </div>
+        <button class="reset-btn" onclick="resetRevFilters()">↺ Reset</button>
+      </div>
+
+      <!-- KPI Row -->
+      <div class="kpi-row cols-3" style="margin-bottom:10px">
+        <div class="kpi-card" style="border-left-color:#0078D4">
+          <div class="kpi-label">Total Revenue YTD</div>
+          <div class="kpi-value">$1,247,600</div>
+          <div class="kpi-delta up">▲ +12.4% vs prior year</div>
+        </div>
+        <div class="kpi-card" style="border-left-color:#107C10">
+          <div class="kpi-label">MRR vs Target</div>
+          <div class="kpi-value">103.2%</div>
+          <div class="kpi-delta up">▲ +3.2% over target</div>
+        </div>
+        <div class="kpi-card" style="border-left-color:#F2C811">
+          <div class="kpi-label">Net New MRR</div>
+          <div class="kpi-value">$18,770</div>
+          <div class="kpi-delta up">▲ +$2,140 vs last month</div>
+        </div>
+      </div>
+
+      <!-- Charts -->
+      <div class="viz-grid" style="grid-template-columns: 2fr 1fr; gap:8px; margin-bottom:8px">
+
+        <!-- Monthly Revenue vs Target -->
+        <div class="viz-card">
+          <div class="viz-title">Monthly Revenue vs Target <span class="more-btn">⋯</span></div>
+          <div class="chart-wrap" style="height:195px"><canvas id="revTargetChart"></canvas></div>
+        </div>
+
+        <!-- MRR Growth Rate KPI -->
+        <div class="viz-card" style="display:flex;flex-direction:column">
+          <div class="viz-title">MRR Growth Rate <span class="more-btn">⋯</span></div>
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 0">
+            <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px">Month-over-Month</div>
+            <div style="font-size:48px;font-weight:700;color:var(--text-primary);line-height:1">8.2%</div>
+            <div style="color:var(--green);font-size:13px;font-weight:600;margin:4px 0">▲ improving trend</div>
+            <div style="width:100%;margin-top:8px"><canvas id="growthSparkline" height="50"></canvas></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="viz-grid" style="grid-template-columns: 1fr 1fr; gap:8px">
+
+        <!-- Revenue by Country -->
+        <div class="viz-card">
+          <div class="viz-title">Revenue by Country <span class="more-btn">⋯</span></div>
+          <div class="chart-wrap" style="height:175px"><canvas id="countryBarChart"></canvas></div>
+        </div>
+
+        <!-- Revenue Matrix -->
+        <div class="viz-card">
+          <div class="viz-title">Revenue by Plan × Quarter <span class="more-btn">⋯</span></div>
+          <div style="overflow-x:auto;margin-top:4px">
+            <table class="matrix-table" id="matrixTable">
+              <thead>
+                <tr>
+                  <th>Plan</th><th>Q1 2025</th><th>Q2 2025</th><th>Q3 2025</th><th>Q4 2025</th><th>Total</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- PAGE 3: CUSTOMER HEALTH -->
+    <div class="page" id="page-3">
+
+      <!-- Slicer bar -->
+      <div class="slicer-bar">
+        <div class="slicer-group">
+          <span class="slicer-label">Industry</span>
+          <select class="slicer-select" id="industrySlicer">
+            <option>All Industries</option>
+            <option>SaaS</option>
+            <option>Healthcare</option>
+            <option>Finance</option>
+            <option>Retail</option>
+          </select>
+        </div>
+        <div class="slicer-group">
+          <span class="slicer-label">Plan</span>
+          <div class="chip-group" id="healthPlanChips">
+            <div class="chip active" onclick="toggleChip(this,'healthPlanChips')" data-val="all">All</div>
+            <div class="chip" onclick="toggleChip(this,'healthPlanChips')" data-val="basic">Basic</div>
+            <div class="chip" onclick="toggleChip(this,'healthPlanChips')" data-val="pro">Pro</div>
+            <div class="chip" onclick="toggleChip(this,'healthPlanChips')" data-val="enterprise">Enterprise</div>
+          </div>
+        </div>
+        <div class="slicer-group">
+          <span class="slicer-label">Country</span>
+          <select class="slicer-select" id="healthCountrySlicer">
+            <option>All Countries</option>
+            <option>USA</option>
+            <option>UK</option>
+            <option>Canada</option>
+            <option>Germany</option>
+            <option>Australia</option>
+          </select>
+        </div>
+        <button class="reset-btn" onclick="resetHealthFilters()">↺ Reset</button>
+      </div>
+
+      <!-- KPI Row -->
+      <div class="kpi-row cols-5" style="margin-bottom:10px">
+        <div class="kpi-card" style="border-left-color:#0078D4">
+          <div class="kpi-label">Active Customers</div>
+          <div class="kpi-value">847</div>
+          <div class="kpi-delta up">▲ +23 MTD</div>
+        </div>
+        <div class="kpi-card" style="border-left-color:#107C10">
+          <div class="kpi-label">New Customers (MTD)</div>
+          <div class="kpi-value">31</div>
+          <div class="kpi-delta up">▲ +4 vs last month</div>
+        </div>
+        <div class="kpi-card" style="border-left-color:#A4262C">
+          <div class="kpi-label">Churned (MTD)</div>
+          <div class="kpi-value">8</div>
+          <div class="kpi-delta down">▼ −2 vs last month</div>
+        </div>
+        <div class="kpi-card" style="border-left-color:#00B294">
+          <div class="kpi-label">Net Customer Growth</div>
+          <div class="kpi-value">+23</div>
+          <div class="kpi-delta up">▲ Best month YTD</div>
+        </div>
+        <div class="kpi-card" style="border-left-color:#F2C811">
+          <div class="kpi-label">Avg Contract Value</div>
+          <div class="kpi-value">$1,769</div>
+          <div class="kpi-delta up">▲ +$84 vs last month</div>
+        </div>
+      </div>
+
+      <!-- Charts -->
+      <div class="viz-grid" style="grid-template-columns: 1.5fr 1fr; gap:8px; margin-bottom:8px">
+        <div class="viz-card">
+          <div class="viz-title">Customer Count Trend <span class="more-btn">⋯</span></div>
+          <div class="chart-wrap" style="height:175px"><canvas id="custTrendChart"></canvas></div>
+        </div>
+        <div class="viz-card">
+          <div class="viz-title">Churn Rate by Plan <span class="more-btn">⋯</span></div>
+          <div class="chart-wrap" style="height:175px"><canvas id="churnByPlanChart"></canvas></div>
+        </div>
+      </div>
+
+      <div class="viz-grid" style="grid-template-columns: 1fr 1fr; gap:8px">
+        <!-- Top Customers Table -->
+        <div class="viz-card">
+          <div class="viz-title">Top 10 Customers by MRR <span class="more-btn">⋯</span></div>
+          <div style="overflow-y:auto;max-height:195px">
+            <table class="data-table">
+              <thead><tr>
+                <th>Company</th><th>Plan</th><th>Industry</th><th>MRR</th><th>NRR</th><th>Health</th>
+              </tr></thead>
+              <tbody id="topCustBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- At-Risk Table -->
+        <div class="viz-card">
+          <div class="viz-title">At-Risk Customers <span class="more-btn">⋯</span></div>
+          <div style="overflow-y:auto;max-height:195px">
+            <table class="data-table">
+              <thead><tr>
+                <th>Company</th><th>Plan</th><th>Last Login</th><th>MRR at Risk</th><th>Action</th>
+              </tr></thead>
+              <tbody id="atRiskBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- FILTER PANE -->
+    <div id="filter-pane">
+      <div class="fp-header">
+        Filters
+        <span style="cursor:pointer;font-size:16px" onclick="toggleFilterPane()">✕</span>
+      </div>
+      <div class="fp-section">
+        <h4>Date Period</h4>
+        <div class="fp-chips">
+          <div class="fp-chip active">Last 12 Months</div>
+          <div class="fp-chip">Last 6 Months</div>
+          <div class="fp-chip">YTD 2025</div>
+          <div class="fp-chip">YTD 2026</div>
+          <div class="fp-chip">All Time</div>
+        </div>
+      </div>
+      <div class="fp-section">
+        <h4>Plan</h4>
+        <div class="fp-chips">
+          <div class="fp-chip active">All</div>
+          <div class="fp-chip">Basic</div>
+          <div class="fp-chip">Pro</div>
+          <div class="fp-chip">Enterprise</div>
+        </div>
+      </div>
+      <div class="fp-section">
+        <h4>Industry</h4>
+        <div class="fp-chips">
+          <div class="fp-chip active">All</div>
+          <div class="fp-chip">SaaS</div>
+          <div class="fp-chip">Healthcare</div>
+          <div class="fp-chip">Finance</div>
+          <div class="fp-chip">Retail</div>
+          <div class="fp-chip">Other</div>
+        </div>
+      </div>
+      <div class="fp-section">
+        <h4>Country</h4>
+        <div class="fp-chips">
+          <div class="fp-chip active">All</div>
+          <div class="fp-chip">USA</div>
+          <div class="fp-chip">UK</div>
+          <div class="fp-chip">Canada</div>
+          <div class="fp-chip">Germany</div>
+          <div class="fp-chip">Australia</div>
+        </div>
+      </div>
+      <div style="padding:12px 14px">
+        <button class="reset-btn" style="width:100%;padding:6px" onclick="clearFilterPane()">Clear All Filters</button>
+      </div>
+    </div>
+
+  </div><!-- /canvas-wrap -->
+
+  <!-- BOTTOM TAB BAR -->
+  <div id="tab-bar">
+    <button class="tab-btn active" onclick="switchPage(1, this)">Executive Overview</button>
+    <button class="tab-btn" onclick="switchPage(2, this)">Revenue Breakdown</button>
+    <button class="tab-btn" onclick="switchPage(3, this)">Customer Health</button>
+  </div>
+
+  <!-- STATUS BAR -->
+  <div id="status-bar">
+    <div class="status-item"><span class="status-dot"></span> Live connection</div>
+    <div class="status-item">847 active customers</div>
+    <div class="status-item">MRR $124,850</div>
+    <div class="status-item" style="margin-left:auto;color:#605E5C;font-size:10px">
+      Built with ♥ by Guilbert Maglasang &nbsp;·&nbsp;
+      <a href="https://github.com/gmaglasang" style="color:var(--accent-blue);text-decoration:none" target="_blank">github.com/gmaglasang</a>
+    </div>
+  </div>
+
+</div><!-- /app -->
+
+<script>
+// ── GLOBAL CHART DEFAULTS ─────────────────────────────────────────────────
+Chart.defaults.font.family = "'Segoe UI', -apple-system, sans-serif";
+Chart.defaults.font.size = 11;
+Chart.defaults.color = '#605E5C';
+Chart.defaults.plugins.legend.labels.boxWidth = 10;
+Chart.defaults.plugins.legend.labels.padding = 12;
+Chart.defaults.plugins.tooltip.backgroundColor = '#fff';
+Chart.defaults.plugins.tooltip.titleColor = '#252423';
+Chart.defaults.plugins.tooltip.bodyColor = '#605E5C';
+Chart.defaults.plugins.tooltip.borderColor = '#E1DFDD';
+Chart.defaults.plugins.tooltip.borderWidth = 1;
+Chart.defaults.plugins.tooltip.padding = 10;
+
+// ── SOURCE DATA ───────────────────────────────────────────────────────────
+const RAW = {
+  monthly: {
+    2024: {
+      labels: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+      actual: [62400,63100,64800,66200,68500,71000,73200,75100,76800,78400,80100,82000],
+      target: [63000,64500,66000,67500,69000,71000,73000,75000,77000,79000,81000,83000]
+    },
+    2025: {
+      labels: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+      actual: [88300,90100,93500,96800,99400,103200,107800,112000,115600,119400,122100,124850],
+      target: [89000,90500,92000,94000,96500,99000,102000,106000,110000,114000,118000,122000]
+    },
+    2026: {
+      labels: ['Jan','Feb','Mar','Apr'],
+      actual: [127200,129400,131800,134100],
+      target: [124000,126000,128000,130000]
+    }
+  },
+  planWeights:   { Enterprise:0.45, Pro:0.35, Basic:0.20 },
+  countryWeights:{ USA:0.465, UK:0.224, Canada:0.152, Germany:0.096, Australia:0.062 },
+  countryRevBase:{ USA:580000, UK:280000, Canada:190000, Germany:120000, Australia:77000 },
+  matrixBase: {
+    Enterprise:{ Q1:208800, Q2:221400, Q3:234600, Q4:248300 },
+    Pro:       { Q1:124500, Q2:131200, Q3:138900, Q4:146200 },
+    Basic:     { Q1:48200,  Q2:44100,  Q3:41800,  Q4:39600  }
+  },
+  churnRates: {
+    all:        { Enterprise:0.8, Pro:2.1, Basic:4.2 },
+    SaaS:       { Enterprise:0.9, Pro:1.9, Basic:4.0 },
+    Healthcare: { Enterprise:0.6, Pro:2.8, Basic:5.1 },
+    Finance:    { Enterprise:0.7, Pro:1.8, Basic:3.9 },
+    Retail:     { Enterprise:1.1, Pro:2.5, Basic:5.3 }
+  },
+  customers: [
+    {co:'Acme Corp',     plan:'Enterprise', ind:'Finance',    country:'USA',       mrr:8450, nrr:118, health:'Healthy',  days:null},
+    {co:'TechFlow Inc',  plan:'Enterprise', ind:'SaaS',       country:'UK',        mrr:7200, nrr:105, health:'Healthy',  days:null},
+    {co:'RetailBoost',   plan:'Enterprise', ind:'Retail',     country:'USA',       mrr:6800, nrr:122, health:'Healthy',  days:null},
+    {co:'CloudBridge',   plan:'Enterprise', ind:'SaaS',       country:'Australia', mrr:5600, nrr:110, health:'Healthy',  days:null},
+    {co:'FinEdge',       plan:'Enterprise', ind:'Finance',    country:'USA',       mrr:5100, nrr:115, health:'Healthy',  days:null},
+    {co:'PharmaOne',     plan:'Enterprise', ind:'Healthcare', country:'Germany',   mrr:4800, nrr:108, health:'Healthy',  days:null},
+    {co:'MediSync',      plan:'Pro',        ind:'Healthcare', country:'Canada',    mrr:4100, nrr:98,  health:'Monitor',  days:null},
+    {co:'DataVault',     plan:'Pro',        ind:'Finance',    country:'Germany',   mrr:3900, nrr:95,  health:'Monitor',  days:null},
+    {co:'DataStream',    plan:'Pro',        ind:'SaaS',       country:'UK',        mrr:3500, nrr:97,  health:'Monitor',  days:null},
+    {co:'NovaMed',       plan:'Pro',        ind:'Healthcare', country:'USA',       mrr:3200, nrr:88,  health:'At Risk',  days:28},
+    {co:'HealthNet',     plan:'Pro',        ind:'Healthcare', country:'USA',       mrr:3100, nrr:91,  health:'Monitor',  days:null},
+    {co:'SkyOps',        plan:'Pro',        ind:'SaaS',       country:'Canada',    mrr:2900, nrr:102, health:'Healthy',  days:null},
+    {co:'ShopSmart',     plan:'Basic',      ind:'Retail',     country:'UK',        mrr:1800, nrr:82,  health:'At Risk',  days:45},
+    {co:'BuildCo',       plan:'Basic',      ind:'Retail',     country:'USA',       mrr:1400, nrr:79,  health:'At Risk',  days:31},
+    {co:'LocalBiz',      plan:'Basic',      ind:'SaaS',       country:'USA',       mrr:900,  nrr:85,  health:'Monitor',  days:22},
+  ]
+};
+
+// Static Page-1 series (not filtered)
+const months18   = ['Jul 24','Aug 24','Sep 24','Oct 24','Nov 24','Dec 24','Jan 25','Feb 25','Mar 25','Apr 25','May 25','Jun 25','Jul 25','Aug 25','Sep 25','Oct 25','Nov 25','Dec 25'];
+const mrrData    = [78400,80100,79800,82500,84200,86000,88300,90100,93500,96800,99400,103200,107800,112000,115600,119400,122100,124850];
+const mrrTarget  = [80000,81500,83000,84500,86000,87500,89000,90500,92000,94000,96500,99000,102000,106000,110000,114000,118000,122000];
+const custActive = [692,710,724,741,758,772,783,796,804,812,819,828,831,836,840,843,845,847];
+const custNew    = [28,25,21,26,25,22,24,21,19,22,20,24,16,18,15,16,14,31];
+const custChurned= [8,7,9,7,8,6,7,5,8,6,7,5,8,5,6,4,9,8];
+const growthRates= [4.2,2.2,3.8,3.5,2.7,3.8,4.5,3.9,3.2,3.3,2.3,2.2];
+
+// ── CHARTS ────────────────────────────────────────────────────────────────
+let charts = {};
+
+function initCharts() {
+  // PAGE 1
+  charts.mrrTrend = new Chart(document.getElementById('mrrTrendChart'), {
+    type:'line',
+    data:{ labels:months18, datasets:[
+      { label:'MRR',    data:mrrData,   borderColor:'#0078D4', backgroundColor:'rgba(0,120,212,0.08)', borderWidth:2, pointRadius:2, pointHoverRadius:4, fill:true, tension:0.3 },
+      { label:'Target', data:mrrTarget, borderColor:'#8764B8', borderDash:[5,4], borderWidth:1.5, pointRadius:0, fill:false, tension:0.3 }
+    ]},
+    options:{ responsive:true, maintainAspectRatio:false, interaction:{mode:'index',intersect:false},
+      plugins:{legend:{position:'top',align:'end'}},
+      scales:{ y:{grid:{color:'#F3F2F1'},ticks:{callback:v=>'$'+Math.round(v/1000)+'K'}}, x:{grid:{display:false}} } }
+  });
+
+  charts.planDonut = new Chart(document.getElementById('planDonutChart'), {
+    type:'doughnut',
+    data:{ labels:['Enterprise','Pro','Basic'], datasets:[{ data:[45,35,20], backgroundColor:['#0078D4','#00B294','#F2C811'], borderColor:'#fff', borderWidth:2 }] },
+    options:{ responsive:true, maintainAspectRatio:false, cutout:'62%',
+      plugins:{ legend:{position:'right'}, tooltip:{callbacks:{label:ctx=>ctx.label+': '+ctx.parsed+'%'}} } }
+  });
+
+  charts.waterfall = new Chart(document.getElementById('waterfallChart'), {
+    type:'bar',
+    data:{ labels:['New MRR','Expansion','Contraction','Churned','Net New MRR'], datasets:[
+      { label:'Base',     data:[0,18420,24760,22660,0],   backgroundColor:'transparent', borderColor:'transparent' },
+      { label:'Value',    data:[18420,6340,0,0,18770],    backgroundColor:['#107C10','#00B294','transparent','transparent','#0078D4'], borderColor:['#107C10','#00B294','transparent','transparent','#0078D4'], borderWidth:1 },
+      { label:'Negative', data:[0,0,-2100,-3890,0],       backgroundColor:['transparent','transparent','#A4262C','#D83B01','transparent'], borderColor:['transparent','transparent','#A4262C','#D83B01','transparent'], borderWidth:1 }
+    ]},
+    options:{ responsive:true, maintainAspectRatio:false, indexAxis:'y',
+      plugins:{ legend:{display:false}, tooltip:{callbacks:{label:ctx=>{ const v=ctx.parsed.x; return (v>=0?'+':'')+fmt(v); }}} },
+      scales:{ x:{stacked:true,grid:{color:'#F3F2F1'},ticks:{callback:v=>'$'+Math.round(v/1000)+'K'}}, y:{stacked:true,grid:{display:false}} } }
+  });
+
+  charts.industryBar = new Chart(document.getElementById('industryBarChart'), {
+    type:'bar',
+    data:{ labels:['SaaS','Healthcare','Finance','Other','Retail'], datasets:[{ label:'MRR', data:[38000,28000,22000,19000,18000], backgroundColor:'#0078D4', borderRadius:2, borderSkipped:false }] },
+    options:{ responsive:true, maintainAspectRatio:false, indexAxis:'y',
+      plugins:{legend:{display:false}},
+      scales:{ x:{grid:{color:'#F3F2F1'},ticks:{callback:v=>'$'+Math.round(v/1000)+'K'}}, y:{grid:{display:false}} } }
+  });
+
+  // PAGE 2
+  charts.revTarget = new Chart(document.getElementById('revTargetChart'), {
+    type:'line',
+    data:{ labels:[...RAW.monthly[2025].labels], datasets:[
+      { label:'Actual', data:[...RAW.monthly[2025].actual], borderColor:'#0078D4', backgroundColor:'rgba(0,120,212,0.07)', borderWidth:2, pointRadius:3, fill:true, tension:0.3 },
+      { label:'Target', data:[...RAW.monthly[2025].target], borderColor:'#D83B01', borderDash:[5,4], borderWidth:1.5, pointRadius:0, fill:false }
+    ]},
+    options:{ responsive:true, maintainAspectRatio:false, interaction:{mode:'index',intersect:false},
+      plugins:{legend:{position:'top',align:'end'}},
+      scales:{ y:{grid:{color:'#F3F2F1'},ticks:{callback:v=>'$'+Math.round(v/1000)+'K'}}, x:{grid:{display:false}} } }
+  });
+
+  charts.growthSpark = new Chart(document.getElementById('growthSparkline'), {
+    type:'line',
+    data:{ labels:RAW.monthly[2025].labels, datasets:[{ data:growthRates, borderColor:'#107C10', backgroundColor:'rgba(16,124,16,0.12)', borderWidth:1.5, pointRadius:0, fill:true, tension:0.4 }] },
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false},tooltip:{enabled:false}}, scales:{x:{display:false},y:{display:false}} }
+  });
+
+  charts.countryBar = new Chart(document.getElementById('countryBarChart'), {
+    type:'bar',
+    data:{ labels:['USA','UK','Canada','Germany','Australia'], datasets:[{ label:'Revenue', data:[580000,280000,190000,120000,77000], backgroundColor:['#0078D4','#00B294','#F2C811','#8764B8','#D83B01'], borderRadius:2 }] },
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},
+      scales:{ y:{grid:{color:'#F3F2F1'},ticks:{callback:v=>'$'+Math.round(v/1000)+'K'}}, x:{grid:{display:false}} } }
+  });
+
+  // PAGE 3
+  charts.custTrend = new Chart(document.getElementById('custTrendChart'), {
+    type:'line',
+    data:{ labels:months18, datasets:[
+      { label:'Active',  data:custActive,  borderColor:'#0078D4', backgroundColor:'rgba(0,120,212,0.06)', borderWidth:2, pointRadius:2, fill:true,  tension:0.3 },
+      { label:'New',     data:custNew,     borderColor:'#107C10', borderWidth:1.5, pointRadius:2, fill:false, tension:0.3 },
+      { label:'Churned', data:custChurned, borderColor:'#A4262C', borderWidth:1.5, pointRadius:2, fill:false, tension:0.3 }
+    ]},
+    options:{ responsive:true, maintainAspectRatio:false, interaction:{mode:'index',intersect:false},
+      plugins:{legend:{position:'top',align:'end'}},
+      scales:{ y:{grid:{color:'#F3F2F1'}}, x:{grid:{display:false}} } }
+  });
+
+  charts.churnPlan = new Chart(document.getElementById('churnByPlanChart'), {
+    type:'bar',
+    data:{ labels:['Enterprise','Pro','Basic'], datasets:[{ label:'Churn Rate', data:[0.8,2.1,4.2], backgroundColor:['#107C10','#F2C811','#A4262C'], borderRadius:3 }] },
+    options:{ responsive:true, maintainAspectRatio:false, indexAxis:'y',
+      plugins:{legend:{display:false}},
+      scales:{ x:{grid:{color:'#F3F2F1'},max:6,ticks:{callback:v=>v+'%'}}, y:{grid:{display:false}} } }
+  });
+}
+
+// ── FILTER HELPERS ────────────────────────────────────────────────────────
+function getActivePlans(chipGroupId) {
+  const chips = [...document.querySelectorAll(`#${chipGroupId} .chip`)];
+  const allChip = chips.find(c => c.dataset.val === 'all');
+  if (allChip && allChip.classList.contains('active')) return ['Enterprise','Pro','Basic'];
+  const sel = chips.filter(c => c.dataset.val !== 'all' && c.classList.contains('active'))
+                   .map(c => c.dataset.val.charAt(0).toUpperCase() + c.dataset.val.slice(1));
+  return sel.length ? sel : ['Enterprise','Pro','Basic'];
+}
+
+function planMult(plans) {
+  return plans.reduce((s,p) => s + (RAW.planWeights[p] || 0), 0);
+}
+
+function countryMult(val) {
+  if (!val || val.startsWith('All')) return 1;
+  return RAW.countryWeights[val] || 1;
+}
+
+function heat(v, maxVal) {
+  return `rgba(0,120,212,${Math.min(v/maxVal*0.55, 0.55).toFixed(2)})`;
+}
+
+// ── PAGE 2: REVENUE FILTERS ───────────────────────────────────────────────
+function applyRevFilters() {
+  const yearVal    = document.getElementById('yearSlicer').value;
+  const countryVal = document.getElementById('countrySlicer').value;
+  const plans      = getActivePlans('planChips');
+  const pMult      = planMult(plans);
+  const cMult      = countryMult(countryVal);
+  const scale      = pMult * cMult;
+
+  // ── Line chart: year determines which months to show ──
+  let yd;
+  const yr = parseInt(yearVal);
+  if (yearVal === 'All Years') {
+    yd = {
+      labels: [...RAW.monthly[2024].labels.map(l=>l+' \'24'), ...RAW.monthly[2025].labels.map(l=>l+' \'25')],
+      actual: [...RAW.monthly[2024].actual, ...RAW.monthly[2025].actual],
+      target: [...RAW.monthly[2024].target, ...RAW.monthly[2025].target]
+    };
+  } else {
+    yd = RAW.monthly[yr] || RAW.monthly[2025];
+  }
+  charts.revTarget.data.labels = yd.labels;
+  charts.revTarget.data.datasets[0].data = yd.actual.map(v => Math.round(v * scale));
+  charts.revTarget.data.datasets[1].data = yd.target.map(v => Math.round(v * scale));
+  charts.revTarget.update();
+
+  // ── Country bar: scale by plan; highlight selected country ──
+  const countries = ['USA','UK','Canada','Germany','Australia'];
+  const baseColors = ['#0078D4','#00B294','#F2C811','#8764B8','#D83B01'];
+  charts.countryBar.data.datasets[0].data = countries.map(c => Math.round(RAW.countryRevBase[c] * pMult));
+  charts.countryBar.data.datasets[0].backgroundColor = countryVal.startsWith('All')
+    ? baseColors
+    : countries.map((c,i) => c === countryVal ? baseColors[i] : '#C8C6C4');
+  charts.countryBar.update();
+
+  // ── Matrix table: filter rows by plan, scale by country ──
+  const matrixTbody = document.querySelector('#matrixTable tbody');
+  const maxVal = 248300;
+  matrixTbody.innerHTML = plans.map(p => {
+    const d = RAW.matrixBase[p]; if (!d) return '';
+    const s = countryVal.startsWith('All') ? 1 : cMult;
+    const Q1=Math.round(d.Q1*s), Q2=Math.round(d.Q2*s), Q3=Math.round(d.Q3*s), Q4=Math.round(d.Q4*s);
+    const tot = Q1+Q2+Q3+Q4;
+    return `<tr>
+      <td>${p}</td>
+      <td style="background:${heat(Q1,maxVal)}">${fmtK(Q1)}</td>
+      <td style="background:${heat(Q2,maxVal)}">${fmtK(Q2)}</td>
+      <td style="background:${heat(Q3,maxVal)}">${fmtK(Q3)}</td>
+      <td style="background:${heat(Q4,maxVal)}">${fmtK(Q4)}</td>
+      <td style="font-weight:700">${fmtK(tot)}</td>
+    </tr>`;
+  }).join('');
+
+  // ── KPI cards ──
+  const baseYd = RAW.monthly[yr] || RAW.monthly[2025];
+  const ytd    = Math.round(baseYd.actual.reduce((a,b)=>a+b,0) * scale);
+  const lastA  = baseYd.actual[baseYd.actual.length-1];
+  const lastT  = baseYd.target[baseYd.target.length-1];
+  const prevA  = baseYd.actual[baseYd.actual.length-2] || lastA;
+  const pct    = ((lastA / lastT) * 100).toFixed(1);
+  const netNew = Math.round((lastA - prevA) * scale);
+
+  const kpis = document.querySelectorAll('#page-2 .kpi-row .kpi-card');
+  kpis[0].querySelector('.kpi-value').textContent = '$' + ytd.toLocaleString();
+  kpis[1].querySelector('.kpi-value').textContent = pct + '%';
+  kpis[2].querySelector('.kpi-value').textContent = (netNew >= 0 ? '+$' : '-$') + Math.abs(netNew).toLocaleString();
+  const overUnder = (pct >= 100) ? '▲ +' + (pct-100).toFixed(1) + '% over target' : '▼ ' + (100-pct).toFixed(1) + '% below target';
+  kpis[1].querySelector('.kpi-delta').textContent = overUnder;
+  kpis[1].querySelector('.kpi-delta').className   = 'kpi-delta ' + (pct >= 100 ? 'up' : 'bad');
+}
+
+// ── PAGE 3: CUSTOMER HEALTH FILTERS ──────────────────────────────────────
+function applyHealthFilters() {
+  const industryVal = document.getElementById('industrySlicer').value;
+  const countryVal  = document.getElementById('healthCountrySlicer').value;
+  const plans       = getActivePlans('healthPlanChips');
+
+  const filtered = RAW.customers.filter(c =>
+    plans.includes(c.plan) &&
+    (industryVal.startsWith('All') || c.ind === industryVal) &&
+    (countryVal.startsWith('All')  || c.country === countryVal)
+  ).sort((a,b) => b.mrr - a.mrr);
+
+  // ── Top customers table ──
+  const topTbody = document.getElementById('topCustBody');
+  topTbody.innerHTML = filtered.length === 0
+    ? `<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:16px">No customers match selected filters</td></tr>`
+    : filtered.slice(0,10).map(c => {
+        const hCls = c.health==='Healthy'?'healthy':c.health==='Monitor'?'monitor':'at-risk';
+        return `<tr>
+          <td><strong>${c.co}</strong></td><td>${c.plan}</td><td>${c.ind}</td>
+          <td>${fmt(c.mrr)}</td><td>${c.nrr}%</td>
+          <td><span class="badge ${hCls}">${c.health}</span></td>
+        </tr>`;
+      }).join('');
+
+  // ── At-risk table ──
+  const atRisk = filtered.filter(c => c.health === 'At Risk');
+  const riskTbody = document.getElementById('atRiskBody');
+  riskTbody.innerHTML = atRisk.length === 0
+    ? `<tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:16px">✅ No at-risk customers in selection</td></tr>`
+    : atRisk.map(c => `<tr>
+        <td><strong>${c.co}</strong></td><td>${c.plan}</td>
+        <td><span style="color:#A4262C;font-weight:600">${c.days ? c.days+'d ago' : '—'}</span></td>
+        <td style="color:#A4262C;font-weight:600">${fmt(c.mrr)}</td>
+        <td><a class="action-link">📧 Outreach</a></td>
+      </tr>`).join('');
+
+  // ── Churn chart: rates vary by industry, bars filtered by plan ──
+  const ind = industryVal.startsWith('All') ? 'all' : industryVal;
+  const rates = RAW.churnRates[ind] || RAW.churnRates.all;
+  const planColors = { Enterprise:'#107C10', Pro:'#F2C811', Basic:'#A4262C' };
+  charts.churnPlan.data.labels = plans;
+  charts.churnPlan.data.datasets[0].data = plans.map(p => rates[p]);
+  charts.churnPlan.data.datasets[0].backgroundColor = plans.map(p => planColors[p]);
+  const maxChurn = Math.max(...plans.map(p => rates[p]), 1);
+  charts.churnPlan.options.scales.x.max = Math.ceil(maxChurn + 1);
+  charts.churnPlan.update();
+
+  // ── KPI cards ──
+  const total  = RAW.customers.length;
+  const ratio  = total > 0 ? filtered.length / total : 0;
+  const active = Math.round(847 * ratio);
+  const newC   = Math.round(31  * ratio);
+  const churnC = Math.round(8   * ratio);
+  const avgCV  = filtered.length > 0 ? Math.round(filtered.reduce((s,c)=>s+c.mrr,0)/filtered.length*12) : 0;
+
+  const kpis = document.querySelectorAll('#page-3 .kpi-row .kpi-card');
+  kpis[0].querySelector('.kpi-value').textContent = active;
+  kpis[1].querySelector('.kpi-value').textContent = newC;
+  kpis[2].querySelector('.kpi-value').textContent = churnC;
+  kpis[3].querySelector('.kpi-value').textContent = '+' + (newC - churnC);
+  kpis[4].querySelector('.kpi-value').textContent = filtered.length > 0 ? '$' + avgCV.toLocaleString() : '—';
+}
+
+// ── RESET ─────────────────────────────────────────────────────────────────
+function resetRevFilters() {
+  document.getElementById('yearSlicer').value     = '2025';
+  document.getElementById('countrySlicer').value  = 'All Countries';
+  document.querySelectorAll('#planChips .chip').forEach(c => c.classList.remove('active'));
+  document.querySelector('#planChips [data-val="all"]').classList.add('active');
+  applyRevFilters();
+}
+
+function resetHealthFilters() {
+  document.getElementById('industrySlicer').value      = 'All Industries';
+  document.getElementById('healthCountrySlicer').value = 'All Countries';
+  document.querySelectorAll('#healthPlanChips .chip').forEach(c => c.classList.remove('active'));
+  document.querySelector('#healthPlanChips [data-val="all"]').classList.add('active');
+  applyHealthFilters();
+}
+
+// ── CHIP TOGGLE (triggers the right filter after state change) ────────────
+function toggleChip(el, groupId) {
+  const group = document.getElementById(groupId);
+  const chips = group.querySelectorAll('.chip');
+  if (el.dataset.val === 'all') {
+    chips.forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+  } else {
+    group.querySelector('[data-val="all"]').classList.remove('active');
+    el.classList.toggle('active');
+    const anyActive = [...chips].filter(c => c.dataset.val !== 'all' && c.classList.contains('active'));
+    if (anyActive.length === 0) group.querySelector('[data-val="all"]').classList.add('active');
+  }
+  if (groupId === 'planChips')       applyRevFilters();
+  if (groupId === 'healthPlanChips') applyHealthFilters();
+}
+
+// ── HELPERS ───────────────────────────────────────────────────────────────
+function fmt(v)  { return '$' + v.toLocaleString(); }
+function fmtK(v) { return v >= 1000 ? '$' + (v/1000).toFixed(0) + 'K' : '$' + v; }
+
+// ── NAVIGATION ────────────────────────────────────────────────────────────
+function switchPage(n, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + n).classList.add('active');
+  btn.classList.add('active');
+  setTimeout(() => Object.values(charts).forEach(c => c.resize()), 50);
+}
+
+// ── FILTER PANE ───────────────────────────────────────────────────────────
+function toggleFilterPane() {
+  document.getElementById('filter-pane').classList.toggle('open');
+  document.getElementById('filter-toggle').classList.toggle('active');
+}
+
+function clearFilterPane() {
+  document.querySelectorAll('#filter-pane .fp-section').forEach(section => {
+    const chips = section.querySelectorAll('.fp-chip');
+    chips.forEach(c => c.classList.remove('active'));
+    chips[0].classList.add('active');
+  });
+}
+
+document.querySelectorAll('#filter-pane .fp-chip').forEach(chip => {
+  chip.addEventListener('click', function() {
+    this.closest('.fp-section').querySelectorAll('.fp-chip').forEach(c => c.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+
+// ── INIT ──────────────────────────────────────────────────────────────────
+window.addEventListener('load', () => {
+  initCharts();
+
+  // Wire all selects (Page 2)
+  document.getElementById('yearSlicer').addEventListener('change',    applyRevFilters);
+  document.getElementById('countrySlicer').addEventListener('change', applyRevFilters);
+
+  // Wire all selects (Page 3)
+  document.getElementById('industrySlicer').addEventListener('change',      applyHealthFilters);
+  document.getElementById('healthCountrySlicer').addEventListener('change', applyHealthFilters);
+
+  // Run initial render
+  applyRevFilters();
+  applyHealthFilters();
+});
+
+window.addEventListener('resize', () => {
+  Object.values(charts).forEach(c => c.resize());
+});
+</script>
+</body>
+</html>
