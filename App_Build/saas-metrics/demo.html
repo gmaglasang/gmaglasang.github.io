@@ -127,6 +127,36 @@
   }
   .reset-btn:hover { border-color: var(--accent-blue); color: var(--accent-blue); }
 
+  /* ── ACRONYM TOOLTIP ── */
+  .kpi-info {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 13px; height: 13px; border-radius: 50%;
+    background: #E1DFDD; color: #605E5C;
+    font-size: 8px; font-weight: 700; font-style: normal;
+    cursor: help; margin-left: 4px; vertical-align: middle;
+    position: relative; flex-shrink: 0;
+  }
+  .kpi-info::after {
+    content: attr(data-tip);
+    position: absolute; bottom: calc(100% + 7px); left: 50%;
+    transform: translateX(-50%);
+    background: #1b1a19; color: #fff;
+    padding: 7px 10px; border-radius: 3px;
+    font-size: 11px; font-weight: 400; line-height: 1.5;
+    width: max-content; max-width: 230px; white-space: normal;
+    pointer-events: none; opacity: 0;
+    transition: opacity 0.15s 0.1s;
+    z-index: 200; box-shadow: 0 3px 10px rgba(0,0,0,0.25);
+  }
+  .kpi-info::before {
+    content: ''; position: absolute; bottom: calc(100% + 2px); left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent; border-top-color: #1b1a19;
+    pointer-events: none; opacity: 0; transition: opacity 0.15s 0.1s; z-index: 200;
+  }
+  .kpi-info:hover::after, .kpi-info:hover::before { opacity: 1; }
+  .kpi-label { display: flex; align-items: center; }
+
   /* ── KPI CARDS ── */
   .kpi-row { display: grid; gap: 8px; margin-bottom: 10px; }
   .kpi-row.cols-5 { grid-template-columns: repeat(5, 1fr); }
@@ -285,27 +315,27 @@
       <!-- KPI Row -->
       <div class="kpi-row cols-5">
         <div class="kpi-card" style="border-left-color:#0078D4">
-          <div class="kpi-label">MRR</div>
+          <div class="kpi-label">MRR <i class="kpi-info" data-tip="Monthly Recurring Revenue — total predictable subscription revenue collected each month.">i</i></div>
           <div class="kpi-value">$124,850</div>
           <div class="kpi-delta up">▲ +8.2% vs last month</div>
         </div>
         <div class="kpi-card" style="border-left-color:#00B294">
-          <div class="kpi-label">Active Customers</div>
+          <div class="kpi-label">Active Customers <i class="kpi-info" data-tip="Total number of customers with a paid, active subscription this month.">i</i></div>
           <div class="kpi-value">847</div>
           <div class="kpi-delta up">▲ +23 this month</div>
         </div>
         <div class="kpi-card" style="border-left-color:#107C10">
-          <div class="kpi-label">Churn Rate</div>
+          <div class="kpi-label">Churn Rate <i class="kpi-info" data-tip="Percentage of customers who cancelled their subscription this month. Lower is better.">i</i></div>
           <div class="kpi-value">2.4%</div>
           <div class="kpi-delta down">▼ −0.3% (improved)</div>
         </div>
         <div class="kpi-card" style="border-left-color:#F2C811">
-          <div class="kpi-label">ARPU</div>
+          <div class="kpi-label">ARPU <i class="kpi-info" data-tip="Average Revenue Per User — MRR divided by total active customers. Measures revenue efficiency per account.">i</i></div>
           <div class="kpi-value">$147.40</div>
           <div class="kpi-delta up">▲ +$4.20 vs last month</div>
         </div>
         <div class="kpi-card" style="border-left-color:#8764B8">
-          <div class="kpi-label">NRR</div>
+          <div class="kpi-label">NRR <i class="kpi-info" data-tip="Net Revenue Retention — revenue kept from existing customers including upgrades, downgrades, and cancellations. Above 100% means existing customers are generating more revenue over time.">i</i></div>
           <div class="kpi-value">108%</div>
           <div class="kpi-delta up">▲ +2% vs last month</div>
         </div>
@@ -381,18 +411,18 @@
       <!-- KPI Row -->
       <div class="kpi-row cols-3" style="margin-bottom:10px">
         <div class="kpi-card" style="border-left-color:#0078D4">
-          <div class="kpi-label">Total Revenue YTD</div>
-          <div class="kpi-value">$1,247,600</div>
-          <div class="kpi-delta up">▲ +12.4% vs prior year</div>
+          <div class="kpi-label">Total Revenue YTD <i class="kpi-info" data-tip="Year-to-Date Revenue — total subscription revenue collected from January 1st through the current month.">i</i></div>
+          <div class="kpi-value" id="p2-ytd">$1,247,600</div>
+          <div class="kpi-delta up" id="p2-ytd-delta">▲ +12.4% vs prior year</div>
         </div>
         <div class="kpi-card" style="border-left-color:#107C10">
-          <div class="kpi-label">MRR vs Target</div>
-          <div class="kpi-value">103.2%</div>
-          <div class="kpi-delta up">▲ +3.2% over target</div>
+          <div class="kpi-label">MRR vs Target <i class="kpi-info" data-tip="Current month MRR as a percentage of the planned revenue target. Above 100% means you beat the target.">i</i></div>
+          <div class="kpi-value" id="p2-mvt">103.2%</div>
+          <div class="kpi-delta up" id="p2-mvt-delta">▲ +3.2% over target</div>
         </div>
         <div class="kpi-card" style="border-left-color:#F2C811">
-          <div class="kpi-label">Net New MRR</div>
-          <div class="kpi-value">$18,770</div>
+          <div class="kpi-label">Net New MRR <i class="kpi-info" data-tip="Net change in MRR this month. Calculated as: New MRR + Expansion MRR − Contraction MRR − Churned MRR.">i</i></div>
+          <div class="kpi-value" id="p2-netmrr">$18,770</div>
           <div class="kpi-delta up">▲ +$2,140 vs last month</div>
         </div>
       </div>
@@ -410,9 +440,9 @@
         <div class="viz-card" style="display:flex;flex-direction:column">
           <div class="viz-title">MRR Growth Rate <span class="more-btn">⋯</span></div>
           <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 0">
-            <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px">Month-over-Month</div>
-            <div style="font-size:48px;font-weight:700;color:var(--text-primary);line-height:1">8.2%</div>
-            <div style="color:var(--green);font-size:13px;font-weight:600;margin:4px 0">▲ improving trend</div>
+            <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px">Month-over-Month <i class="kpi-info" data-tip="MRR Growth Rate — percentage change in Monthly Recurring Revenue compared to the previous month.">i</i></div>
+            <div id="growthRateNum" style="font-size:48px;font-weight:700;color:var(--text-primary);line-height:1">8.2%</div>
+            <div id="growthRateTrend" style="color:var(--green);font-size:13px;font-weight:600;margin:4px 0">▲ improving trend</div>
             <div style="width:100%;margin-top:8px"><canvas id="growthSparkline" height="50"></canvas></div>
           </div>
         </div>
@@ -485,28 +515,28 @@
       <!-- KPI Row -->
       <div class="kpi-row cols-5" style="margin-bottom:10px">
         <div class="kpi-card" style="border-left-color:#0078D4">
-          <div class="kpi-label">Active Customers</div>
-          <div class="kpi-value">847</div>
-          <div class="kpi-delta up">▲ +23 MTD</div>
+          <div class="kpi-label">Active Customers <i class="kpi-info" data-tip="Total customers with an active paid subscription. Updates based on your plan, industry, and country filters.">i</i></div>
+          <div class="kpi-value" id="p3-active">847</div>
+          <div class="kpi-delta up" id="p3-active-delta">▲ +23 MTD</div>
         </div>
         <div class="kpi-card" style="border-left-color:#107C10">
-          <div class="kpi-label">New Customers (MTD)</div>
-          <div class="kpi-value">31</div>
+          <div class="kpi-label">New Customers (MTD) <i class="kpi-info" data-tip="Month-to-Date new customers — accounts that started a paid subscription this calendar month.">i</i></div>
+          <div class="kpi-value" id="p3-new">31</div>
           <div class="kpi-delta up">▲ +4 vs last month</div>
         </div>
         <div class="kpi-card" style="border-left-color:#A4262C">
-          <div class="kpi-label">Churned (MTD)</div>
-          <div class="kpi-value">8</div>
+          <div class="kpi-label">Churned (MTD) <i class="kpi-info" data-tip="Month-to-Date churned customers — accounts that cancelled or did not renew their subscription this calendar month.">i</i></div>
+          <div class="kpi-value" id="p3-churned">8</div>
           <div class="kpi-delta down">▼ −2 vs last month</div>
         </div>
         <div class="kpi-card" style="border-left-color:#00B294">
-          <div class="kpi-label">Net Customer Growth</div>
-          <div class="kpi-value">+23</div>
+          <div class="kpi-label">Net Customer Growth <i class="kpi-info" data-tip="New customers minus churned customers this month. A positive number means your customer base is growing.">i</i></div>
+          <div class="kpi-value" id="p3-netgrowth">+23</div>
           <div class="kpi-delta up">▲ Best month YTD</div>
         </div>
         <div class="kpi-card" style="border-left-color:#F2C811">
-          <div class="kpi-label">Avg Contract Value</div>
-          <div class="kpi-value">$1,769</div>
+          <div class="kpi-label">Avg Contract Value <i class="kpi-info" data-tip="Average Annual Contract Value (ACV) per customer — calculated as average MRR × 12 months.">i</i></div>
+          <div class="kpi-value" id="p3-acv">$1,769</div>
           <div class="kpi-delta up">▲ +$84 vs last month</div>
         </div>
       </div>
@@ -827,7 +857,7 @@ function applyRevFilters() {
   const cMult      = countryMult(countryVal);
   const scale      = pMult * cMult;
 
-  // ── Line chart: year determines which months to show ──
+  // ── Which year data to show ──
   let yd;
   const yr = parseInt(yearVal);
   if (yearVal === 'All Years') {
@@ -839,12 +869,38 @@ function applyRevFilters() {
   } else {
     yd = RAW.monthly[yr] || RAW.monthly[2025];
   }
+
+  // ── Line chart: Monthly Revenue vs Target ──
   charts.revTarget.data.labels = yd.labels;
   charts.revTarget.data.datasets[0].data = yd.actual.map(v => Math.round(v * scale));
   charts.revTarget.data.datasets[1].data = yd.target.map(v => Math.round(v * scale));
   charts.revTarget.update();
 
-  // ── Country bar: scale by plan; highlight selected country ──
+  // ── MRR Growth Rate sparkline ──
+  const n = yd.actual.length;
+  const sparkRates = yd.actual.map((v, i) => {
+    if (i === 0) return 0;
+    const prev = yd.actual[i-1];
+    return prev > 0 ? +((v - prev) / prev * 100).toFixed(1) : 0;
+  }).slice(1);
+  charts.growthSpark.data.labels = yd.labels.slice(1);
+  charts.growthSpark.data.datasets[0].data = sparkRates;
+  charts.growthSpark.update();
+
+  // ── MRR Growth Rate big number ──
+  const lastA  = yd.actual[n - 1];
+  const prevA  = yd.actual[n - 2] || lastA;
+  const growthRate = prevA > 0 ? ((lastA - prevA) / prevA * 100).toFixed(1) : '0.0';
+  const grEl = document.getElementById('growthRateNum');
+  const grTrend = document.getElementById('growthRateTrend');
+  if (grEl) grEl.textContent = growthRate + '%';
+  if (grTrend) {
+    const isUp = parseFloat(growthRate) >= 0;
+    grTrend.textContent = isUp ? '▲ improving trend' : '▼ declining trend';
+    grTrend.style.color = isUp ? 'var(--green)' : 'var(--red)';
+  }
+
+  // ── Country bar ──
   const countries = ['USA','UK','Canada','Germany','Australia'];
   const baseColors = ['#0078D4','#00B294','#F2C811','#8764B8','#D83B01'];
   charts.countryBar.data.datasets[0].data = countries.map(c => Math.round(RAW.countryRevBase[c] * pMult));
@@ -853,7 +909,7 @@ function applyRevFilters() {
     : countries.map((c,i) => c === countryVal ? baseColors[i] : '#C8C6C4');
   charts.countryBar.update();
 
-  // ── Matrix table: filter rows by plan, scale by country ──
+  // ── Matrix table ──
   const matrixTbody = document.querySelector('#matrixTable tbody');
   const maxVal = 248300;
   matrixTbody.innerHTML = plans.map(p => {
@@ -874,19 +930,18 @@ function applyRevFilters() {
   // ── KPI cards ──
   const baseYd = RAW.monthly[yr] || RAW.monthly[2025];
   const ytd    = Math.round(baseYd.actual.reduce((a,b)=>a+b,0) * scale);
-  const lastA  = baseYd.actual[baseYd.actual.length-1];
+  const lastAB = baseYd.actual[baseYd.actual.length-1];
   const lastT  = baseYd.target[baseYd.target.length-1];
-  const prevA  = baseYd.actual[baseYd.actual.length-2] || lastA;
-  const pct    = ((lastA / lastT) * 100).toFixed(1);
-  const netNew = Math.round((lastA - prevA) * scale);
+  const prevAB = baseYd.actual[baseYd.actual.length-2] || lastAB;
+  const pct    = ((lastAB / lastT) * 100).toFixed(1);
+  const netNew = Math.round((lastAB - prevAB) * scale);
+  const overUnder = (+pct >= 100) ? '▲ +' + (+pct-100).toFixed(1) + '% over target' : '▼ ' + (100-+pct).toFixed(1) + '% below target';
 
-  const kpis = document.querySelectorAll('#page-2 .kpi-row .kpi-card');
-  kpis[0].querySelector('.kpi-value').textContent = '$' + ytd.toLocaleString();
-  kpis[1].querySelector('.kpi-value').textContent = pct + '%';
-  kpis[2].querySelector('.kpi-value').textContent = (netNew >= 0 ? '+$' : '-$') + Math.abs(netNew).toLocaleString();
-  const overUnder = (pct >= 100) ? '▲ +' + (pct-100).toFixed(1) + '% over target' : '▼ ' + (100-pct).toFixed(1) + '% below target';
-  kpis[1].querySelector('.kpi-delta').textContent = overUnder;
-  kpis[1].querySelector('.kpi-delta').className   = 'kpi-delta ' + (pct >= 100 ? 'up' : 'bad');
+  document.getElementById('p2-ytd').textContent     = '$' + ytd.toLocaleString();
+  document.getElementById('p2-mvt').textContent      = pct + '%';
+  document.getElementById('p2-mvt-delta').textContent= overUnder;
+  document.getElementById('p2-mvt-delta').className  = 'kpi-delta ' + (+pct >= 100 ? 'up' : 'bad');
+  document.getElementById('p2-netmrr').textContent   = (netNew >= 0 ? '+$' : '-$') + Math.abs(netNew).toLocaleString();
 }
 
 // ── PAGE 3: CUSTOMER HEALTH FILTERS ──────────────────────────────────────
@@ -937,20 +992,25 @@ function applyHealthFilters() {
   charts.churnPlan.options.scales.x.max = Math.ceil(maxChurn + 1);
   charts.churnPlan.update();
 
+  // ── Customer Count Trend: scale all 18 months by filter ratio ──
+  const ratio = RAW.customers.length > 0 ? filtered.length / RAW.customers.length : 1;
+  charts.custTrend.data.datasets[0].data = custActive.map(v  => Math.max(1, Math.round(v * ratio)));
+  charts.custTrend.data.datasets[1].data = custNew.map(v     => Math.max(0, Math.round(v * ratio)));
+  charts.custTrend.data.datasets[2].data = custChurned.map(v => Math.max(0, Math.round(v * ratio)));
+  charts.custTrend.update();
+
   // ── KPI cards ──
-  const total  = RAW.customers.length;
-  const ratio  = total > 0 ? filtered.length / total : 0;
   const active = Math.round(847 * ratio);
   const newC   = Math.round(31  * ratio);
   const churnC = Math.round(8   * ratio);
-  const avgCV  = filtered.length > 0 ? Math.round(filtered.reduce((s,c)=>s+c.mrr,0)/filtered.length*12) : 0;
+  const avgCV  = filtered.length > 0 ? Math.round(filtered.reduce((s,c)=>s+c.mrr,0) / filtered.length * 12) : 0;
+  const net    = newC - churnC;
 
-  const kpis = document.querySelectorAll('#page-3 .kpi-row .kpi-card');
-  kpis[0].querySelector('.kpi-value').textContent = active;
-  kpis[1].querySelector('.kpi-value').textContent = newC;
-  kpis[2].querySelector('.kpi-value').textContent = churnC;
-  kpis[3].querySelector('.kpi-value').textContent = '+' + (newC - churnC);
-  kpis[4].querySelector('.kpi-value').textContent = filtered.length > 0 ? '$' + avgCV.toLocaleString() : '—';
+  document.getElementById('p3-active').textContent    = active.toLocaleString();
+  document.getElementById('p3-new').textContent       = newC;
+  document.getElementById('p3-churned').textContent   = churnC;
+  document.getElementById('p3-netgrowth').textContent = (net >= 0 ? '+' : '') + net;
+  document.getElementById('p3-acv').textContent       = filtered.length > 0 ? '$' + avgCV.toLocaleString() : '—';
 }
 
 // ── RESET ─────────────────────────────────────────────────────────────────
