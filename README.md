@@ -1,6 +1,6 @@
 # Portfolio – Guilbert Maglasang
 
-Senior Business Intelligence Developer specializing in Power BI, DAX, SQL, and data storytelling. This portfolio showcases dashboards, analytics projects, and browser-based tools built to solve real problems.
+Senior Power BI Developer specializing in Power BI, DAX, SQL, and data storytelling. This portfolio showcases dashboards, analytics projects, and browser-based tools built to solve real problems.
 
 ---
 
@@ -72,7 +72,7 @@ The actual Power BI file behind the SaaS Metrics Dashboard — open it in Power 
 ---
 
 ### [Power BI DAX Showcase](https://github.com/gmaglasang/powerbi-dax-showcase)
-8 production DAX measures extracted directly from two real Power BI models — a SaaS Metrics Dashboard and a Vendor Quality Scorecard — each fully annotated with the pattern used, why it's non-trivial, and what DAX concept it demonstrates.
+8 DAX measures from two Power BI models — a SaaS Metrics Dashboard and a Vendor Quality Scorecard — each fully annotated with the pattern used, why it's non-trivial, and what DAX concept it demonstrates.
 
 **Patterns covered:** Filter context manipulation · Row context → filter context transition · `CALCULATETABLE` + `ADDCOLUMNS` · Volume-weighted aggregation · Point-in-time snapshots · Cohort analysis · Disconnected slicer with `ISINSCOPE`
 
@@ -84,13 +84,21 @@ The actual Power BI file behind the SaaS Metrics Dashboard — open it in Power 
 
 ## 📊 BI & Analytics Projects
 
-### Corteva Agriscience – Vendor Scorecard Dashboard
-Executive-level vendor performance dashboard tracking KPIs across supply chain operations.
-**Tools:** Power BI, DAX, SQL
+### Corteva Agriscience – Enterprise Labor & Budget Reporting
+End-to-end BI delivery for supply chain and workforce operations — semantic model design, build, UAT, deployment, and stakeholder training across production reporting solutions.
 
-### Sales Performance Analysis Dashboard
-End-to-end sales analytics dashboard with dynamic filtering, YoY trend analysis, and executive-level KPI tracking — migrated from Excel to Power BI.
-**Tools:** Power BI, Power Query, DAX, SQL
+**What it involved:** Executive dashboards tracking headcount, overtime, and spend vs. budget · Power BI Service governance (RLS, scheduled refresh, workspace permissions, app publishing) · Tableau-to-Power BI migration · Power Automate workflow ingesting Excel files from email into SharePoint for automated report sourcing · Snowflake data integration · DAX measures validated against SQL for accuracy
+
+**Tools:** Power BI, DAX, Power Query, SQL, Snowflake, Power Automate, SharePoint
+
+---
+
+### Microsoft – Regional Consolidation Dashboard
+Consolidated multiple regional reports into a single Power BI dashboard, standardizing KPI definitions and eliminating ~4 hours of manual monthly reporting effort.
+
+**What it involved:** DAX measures using iterators (SUMX, AVERAGEX) · SQL CTEs and window functions (LAG, ROW_NUMBER, RANK) for YoY growth and rolling metrics · Report migrated from Excel to Power BI · SQL validation checks prior to distribution
+
+**Tools:** Power BI, DAX, SQL Server, Power Query
 
 ---
 
