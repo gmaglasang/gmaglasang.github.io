@@ -16,6 +16,19 @@ Most Power BI portfolio pieces are screenshots. This is interactive. I wanted to
 
 ---
 
+## Screenshots
+
+**Executive Overview** — MRR trends, active customer count, churn rate KPIs, and revenue by plan and industry
+![Executive Overview](../../assets/saas-overview.png)
+
+**Revenue Breakdown** — Year-over-year MRR vs. target with growth rate trends and country-level distribution
+![Revenue Breakdown](../../assets/saas-revenue.png)
+
+**Customer Health** — Active customer trends, churn by plan, top customers by MRR, and at-risk account identification
+![Customer Health](../../assets/saas-health.png)
+
+---
+
 ## Dashboard Pages
 
 **Executive Overview**
