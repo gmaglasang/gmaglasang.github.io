@@ -17,6 +17,17 @@ A Power BI-style executive dashboard showcasing SaaS business metrics — MRR tr
 
 [**→ Open SaaS Metrics Dashboard**](https://gmaglasang.github.io/App_Build/saas-metrics/demo.html)
 
+#### Screenshots
+
+**Executive Overview** — MRR trends, active customer count, churn rate KPIs, and revenue by plan and industry
+![Executive Overview](assets/saas-overview.png)
+
+**Revenue Breakdown** — Year-over-year MRR vs. target with growth rate trends and country-level distribution
+![Revenue Breakdown](assets/saas-revenue.png)
+
+**Customer Health** — Active customer trends, churn by plan, top customers by MRR, and at-risk account identification
+![Customer Health](assets/saas-health.png)
+
 ---
 
 ### [LinkedIn Job Search CRM](https://gmaglasang.github.io/App_Build/linkedin-crm/demo.html) · *App Live Demo*
@@ -30,7 +41,7 @@ A fully functional, browser-based CRM built to manage a high-volume job search �
 
 [**→ Open LinkedIn Job Search CRM**](https://gmaglasang.github.io/App_Build/linkedin-crm/demo.html)
 
-#### Screenshots — LinkedIn CRM
+#### Screenshots
 
 **Messages Tab** — Track conversations with status tags (Hot, Interview, Replied, Ghosted) and one-click filtering
 ![Messages Tab](assets/crm-messages.png)
