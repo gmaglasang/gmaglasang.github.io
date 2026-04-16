@@ -109,12 +109,16 @@
     transition: border-color 0.15s;
   }
   .slicer-select:focus { outline: none; border-color: var(--accent-blue); }
-  .chip-group { display: flex; gap: 3px; }
+  .chip-group { display: flex; gap: 5px; }
   .chip {
-    padding: 3px 9px; border-radius: 2px; font-size: 11px; font-family: var(--font);
+    padding: 4px 12px; border-radius: 2px; font-size: 11px; font-family: var(--font);
     border: 1px solid var(--border); background: var(--canvas); cursor: pointer;
-    transition: all 0.12s; color: var(--text-primary);
+    transition: background 0.1s, color 0.1s, border-color 0.1s;
+    color: var(--text-primary); user-select: none; line-height: 1.4;
+    outline: none;
   }
+  .chip:hover:not(.active) { border-color: var(--accent-blue); color: var(--accent-blue); background: #f0f7ff; }
+  .chip:focus-visible { box-shadow: 0 0 0 2px rgba(0,120,212,0.3); }
   .chip.active { background: var(--accent-blue); color: #fff; border-color: var(--accent-blue); }
   .reset-btn {
     margin-left: auto; padding: 3px 10px; border-radius: 2px; font-size: 11px;
@@ -354,10 +358,10 @@
         <div class="slicer-group">
           <span class="slicer-label">Plan</span>
           <div class="chip-group" id="planChips">
-            <div class="chip active" onclick="toggleChip(this,'planChips')" data-val="all">All</div>
-            <div class="chip" onclick="toggleChip(this,'planChips')" data-val="basic">Basic</div>
-            <div class="chip" onclick="toggleChip(this,'planChips')" data-val="pro">Pro</div>
-            <div class="chip" onclick="toggleChip(this,'planChips')" data-val="enterprise">Enterprise</div>
+            <button type="button" class="chip active" data-val="all">All</button>
+            <button type="button" class="chip" data-val="basic">Basic</button>
+            <button type="button" class="chip" data-val="pro">Pro</button>
+            <button type="button" class="chip" data-val="enterprise">Enterprise</button>
           </div>
         </div>
         <div class="slicer-group">
@@ -458,10 +462,10 @@
         <div class="slicer-group">
           <span class="slicer-label">Plan</span>
           <div class="chip-group" id="healthPlanChips">
-            <div class="chip active" onclick="toggleChip(this,'healthPlanChips')" data-val="all">All</div>
-            <div class="chip" onclick="toggleChip(this,'healthPlanChips')" data-val="basic">Basic</div>
-            <div class="chip" onclick="toggleChip(this,'healthPlanChips')" data-val="pro">Pro</div>
-            <div class="chip" onclick="toggleChip(this,'healthPlanChips')" data-val="enterprise">Enterprise</div>
+            <button type="button" class="chip active" data-val="all">All</button>
+            <button type="button" class="chip" data-val="basic">Basic</button>
+            <button type="button" class="chip" data-val="pro">Pro</button>
+            <button type="button" class="chip" data-val="enterprise">Enterprise</button>
           </div>
         </div>
         <div class="slicer-group">
@@ -793,10 +797,12 @@ function initCharts() {
 function getActivePlans(chipGroupId) {
   const chips = [...document.querySelectorAll(`#${chipGroupId} .chip`)];
   const allChip = chips.find(c => c.dataset.val === 'all');
-  if (allChip && allChip.classList.contains('active')) return ['Enterprise','Pro','Basic'];
-  const sel = chips.filter(c => c.dataset.val !== 'all' && c.classList.contains('active'))
-                   .map(c => c.dataset.val.charAt(0).toUpperCase() + c.dataset.val.slice(1));
-  return sel.length ? sel : ['Enterprise','Pro','Basic'];
+  // If All is active (or nothing selected), return all three plans
+  if (!allChip || allChip.classList.contains('active')) return ['Enterprise','Pro','Basic'];
+  const active = chips.find(c => c.dataset.val !== 'all' && c.classList.contains('active'));
+  if (!active) return ['Enterprise','Pro','Basic'];
+  const v = active.dataset.val;
+  return [v.charAt(0).toUpperCase() + v.slice(1)];
 }
 
 function planMult(plans) {
@@ -964,22 +970,32 @@ function resetHealthFilters() {
   applyHealthFilters();
 }
 
-// ── CHIP TOGGLE (triggers the right filter after state change) ────────────
-function toggleChip(el, groupId) {
+// ── CHIP SELECT (single-select, like Power BI default slicer) ────────────
+function selectChip(el, groupId) {
   const group = document.getElementById(groupId);
-  const chips = group.querySelectorAll('.chip');
-  if (el.dataset.val === 'all') {
-    chips.forEach(c => c.classList.remove('active'));
-    el.classList.add('active');
+  const chips = [...group.querySelectorAll('.chip')];
+  const wasActive = el.classList.contains('active');
+
+  // Clear all first
+  chips.forEach(c => c.classList.remove('active'));
+
+  if (el.dataset.val === 'all' || wasActive) {
+    // Clicking All, or re-clicking the already-active chip → reset to All
+    group.querySelector('[data-val="all"]').classList.add('active');
   } else {
-    group.querySelector('[data-val="all"]').classList.remove('active');
-    el.classList.toggle('active');
-    const anyActive = [...chips].filter(c => c.dataset.val !== 'all' && c.classList.contains('active'));
-    if (anyActive.length === 0) group.querySelector('[data-val="all"]').classList.add('active');
+    // Select only this chip
+    el.classList.add('active');
   }
-  if (groupId === 'planChips')       applyRevFilters();
-  if (groupId === 'healthPlanChips') applyHealthFilters();
+
+  // Defer chart updates so chip visual state paints first
+  requestAnimationFrame(() => {
+    if (groupId === 'planChips')       applyRevFilters();
+    if (groupId === 'healthPlanChips') applyHealthFilters();
+  });
 }
+
+// Keep toggleChip as alias for any legacy calls
+function toggleChip(el, groupId) { selectChip(el, groupId); }
 
 // ── HELPERS ───────────────────────────────────────────────────────────────
 function fmt(v)  { return '$' + v.toLocaleString(); }
@@ -1019,15 +1035,25 @@ document.querySelectorAll('#filter-pane .fp-chip').forEach(chip => {
 window.addEventListener('load', () => {
   initCharts();
 
-  // Wire all selects (Page 2)
+  // Wire chip buttons — Page 2
+  document.querySelectorAll('#planChips .chip').forEach(btn => {
+    btn.addEventListener('click', () => selectChip(btn, 'planChips'));
+  });
+
+  // Wire chip buttons — Page 3
+  document.querySelectorAll('#healthPlanChips .chip').forEach(btn => {
+    btn.addEventListener('click', () => selectChip(btn, 'healthPlanChips'));
+  });
+
+  // Wire selects — Page 2
   document.getElementById('yearSlicer').addEventListener('change',    applyRevFilters);
   document.getElementById('countrySlicer').addEventListener('change', applyRevFilters);
 
-  // Wire all selects (Page 3)
+  // Wire selects — Page 3
   document.getElementById('industrySlicer').addEventListener('change',      applyHealthFilters);
   document.getElementById('healthCountrySlicer').addEventListener('change', applyHealthFilters);
 
-  // Run initial render
+  // Initial render
   applyRevFilters();
   applyHealthFilters();
 });
