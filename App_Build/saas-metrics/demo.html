@@ -9,21 +9,21 @@
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --canvas: #F3F2F1;
-    --header-bg: #252423;
-    --card-bg: #FFFFFF;
-    --border: #E1DFDD;
-    --text-primary: #252423;
-    --text-secondary: #605E5C;
-    --text-muted: #8A8886;
+    --canvas: #dedacf;
+    --header-bg: #15202f;
+    --card-bg: #f0eee7;
+    --border: #cfccc0;
+    --text-primary: #15202f;
+    --text-secondary: #46556a;
+    --text-muted: #8a93a3;
     --accent-yellow: #F2C811;
-    --accent-blue: #0078D4;
+    --accent-blue: #2563eb;
     --green: #107C10;
     --red: #A4262C;
     --amber: #D83B01;
-    --tab-active: #252423;
+    --tab-active: #15202f;
     --font: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
-    --chart-1: #0078D4;
+    --chart-1: #2563eb;
     --chart-2: #00B294;
     --chart-3: #F2C811;
     --chart-4: #D83B01;
@@ -50,14 +50,14 @@
   }
   #header .left { display: flex; align-items: center; gap: 10px; }
   #header .title { font-size: 13px; font-weight: 600; color: #fff; letter-spacing: 0.2px; }
-  #header .subtitle { font-size: 11px; color: #BFBCBA; }
+  #header .subtitle { font-size: 11px; color: #9fb0c8; }
   #header .right { display: flex; align-items: center; gap: 12px; }
   .pbi-logo { display: flex; align-items: center; gap: 6px; }
   .pbi-logo svg { width: 18px; height: 18px; }
-  .refresh-info { font-size: 11px; color: #BFBCBA; display: flex; align-items: center; gap: 5px; cursor: pointer; }
+  .refresh-info { font-size: 11px; color: #9fb0c8; display: flex; align-items: center; gap: 5px; cursor: pointer; }
   .refresh-info:hover { color: #fff; }
   .header-btn {
-    background: none; border: none; color: #C8C6C4; cursor: pointer;
+    background: none; border: none; color: #9aa6b8; cursor: pointer;
     padding: 4px 6px; border-radius: 2px; font-size: 14px;
     display: flex; align-items: center; gap: 4px;
     transition: background 0.1s, color 0.1s;
@@ -74,7 +74,7 @@
 
   /* ── FILTER PANE ── */
   #filter-pane {
-    width: 240px; background: #fff; border-left: 1px solid var(--border);
+    width: 240px; background: var(--card-bg); border-left: 1px solid var(--border);
     display: none; flex-direction: column;
     padding: 0; flex-shrink: 0; overflow-y: auto;
   }
@@ -95,7 +95,7 @@
 
   /* ── SLICER BAR ── */
   .slicer-bar {
-    background: #fff; border: 1px solid var(--border); border-radius: 2px;
+    background: var(--card-bg); border: 1px solid var(--border); border-radius: 2px;
     padding: 8px 12px; margin-bottom: 10px;
     display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
   }
@@ -117,7 +117,7 @@
     color: var(--text-primary); user-select: none; line-height: 1.4;
     outline: none;
   }
-  .chip:hover:not(.active) { border-color: var(--accent-blue); color: var(--accent-blue); background: #f0f7ff; }
+  .chip:hover:not(.active) { border-color: var(--accent-blue); color: var(--accent-blue); background: #e9effb; }
   .chip:focus-visible { box-shadow: 0 0 0 2px rgba(0,120,212,0.3); }
   .chip.active { background: var(--accent-blue); color: #fff; border-color: var(--accent-blue); }
   .reset-btn {
@@ -131,7 +131,7 @@
   .kpi-info {
     display: inline-flex; align-items: center; justify-content: center;
     width: 13px; height: 13px; border-radius: 50%;
-    background: #E1DFDD; color: #605E5C;
+    background: #cfccc0; color: #46556a;
     font-size: 8px; font-weight: 700; font-style: normal;
     cursor: help; margin-left: 4px; vertical-align: middle;
     position: relative; flex-shrink: 0;
@@ -140,7 +140,7 @@
     content: attr(data-tip);
     position: absolute; bottom: calc(100% + 7px); left: 50%;
     transform: translateX(-50%);
-    background: #1b1a19; color: #fff;
+    background: #15202f; color: #fff;
     padding: 7px 10px; border-radius: 3px;
     font-size: 11px; font-weight: 400; line-height: 1.5;
     width: max-content; max-width: 230px; white-space: normal;
@@ -151,7 +151,7 @@
   .kpi-info::before {
     content: ''; position: absolute; bottom: calc(100% + 2px); left: 50%;
     transform: translateX(-50%);
-    border: 5px solid transparent; border-top-color: #1b1a19;
+    border: 5px solid transparent; border-top-color: #15202f;
     pointer-events: none; opacity: 0; transition: opacity 0.15s 0.1s; z-index: 200;
   }
   .kpi-info:hover::after, .kpi-info:hover::before { opacity: 1; }
@@ -199,12 +199,12 @@
   /* ── TABLES ── */
   .data-table { width: 100%; border-collapse: collapse; font-size: 12px; }
   .data-table th {
-    background: #FAF9F8; font-weight: 600; font-size: 11px;
+    background: #e9e6dc; font-weight: 600; font-size: 11px;
     color: var(--text-secondary); padding: 6px 8px; text-align: left;
     border-bottom: 2px solid var(--border); white-space: nowrap;
   }
-  .data-table td { padding: 5px 8px; border-bottom: 1px solid #F3F2F1; vertical-align: middle; }
-  .data-table tr:hover td { background: #F0F9FF; }
+  .data-table td { padding: 5px 8px; border-bottom: 1px solid #e6e2d7; vertical-align: middle; }
+  .data-table tr:hover td { background: #e9effb; }
   .data-table tr:last-child td { border-bottom: none; }
   .badge {
     display: inline-flex; align-items: center; gap: 3px;
@@ -219,7 +219,7 @@
   /* ── MATRIX TABLE ── */
   .matrix-table { width: 100%; border-collapse: collapse; font-size: 12px; }
   .matrix-table th, .matrix-table td { padding: 5px 10px; border: 1px solid var(--border); text-align: right; }
-  .matrix-table th { background: #FAF9F8; font-weight: 600; font-size: 11px; color: var(--text-secondary); text-align: center; }
+  .matrix-table th { background: #e9e6dc; font-weight: 600; font-size: 11px; color: var(--text-secondary); text-align: center; }
   .matrix-table th:first-child { text-align: left; }
   .matrix-table td:first-child { font-weight: 600; color: var(--text-primary); text-align: left; }
 
@@ -234,7 +234,7 @@
 
   /* ── PAGE TABS (bottom) ── */
   #tab-bar {
-    background: #fff; border-top: 1px solid var(--border);
+    background: var(--card-bg); border-top: 1px solid var(--border);
     display: flex; align-items: stretch; padding: 0 8px;
     height: 32px; flex-shrink: 0; overflow-x: auto;
     scrollbar-width: none;
@@ -252,7 +252,7 @@
 
   /* ── STATUS BAR ── */
   #status-bar {
-    background: #FAF9F8; border-top: 1px solid var(--border);
+    background: #e9e6dc; border-top: 1px solid var(--border);
     display: flex; align-items: center; padding: 0 14px;
     height: 22px; flex-shrink: 0; gap: 16px;
   }
@@ -262,7 +262,7 @@
   /* scrollbar styling */
   .page::-webkit-scrollbar { width: 4px; }
   .page::-webkit-scrollbar-track { background: transparent; }
-  .page::-webkit-scrollbar-thumb { background: #C8C6C4; border-radius: 2px; }
+  .page::-webkit-scrollbar-thumb { background: #9aa6b8; border-radius: 2px; }
 
   /* waterfall */
   .waterfall-wrap { padding: 4px 0; }
@@ -314,7 +314,7 @@
 
       <!-- KPI Row -->
       <div class="kpi-row cols-5">
-        <div class="kpi-card" style="border-left-color:#0078D4">
+        <div class="kpi-card" style="border-left-color:#2563eb">
           <div class="kpi-label">MRR <i class="kpi-info" data-tip="Monthly Recurring Revenue — total predictable subscription revenue collected each month.">i</i></div>
           <div class="kpi-value">$124,850</div>
           <div class="kpi-delta up">▲ +8.2% vs last month</div>
@@ -410,7 +410,7 @@
 
       <!-- KPI Row -->
       <div class="kpi-row cols-3" style="margin-bottom:10px">
-        <div class="kpi-card" style="border-left-color:#0078D4">
+        <div class="kpi-card" style="border-left-color:#2563eb">
           <div class="kpi-label">Total Revenue YTD <i class="kpi-info" data-tip="Year-to-Date Revenue — total subscription revenue collected from January 1st through the current month.">i</i></div>
           <div class="kpi-value" id="p2-ytd">$1,247,600</div>
           <div class="kpi-delta up" id="p2-ytd-delta">▲ +12.4% vs prior year</div>
@@ -514,7 +514,7 @@
 
       <!-- KPI Row -->
       <div class="kpi-row cols-5" style="margin-bottom:10px">
-        <div class="kpi-card" style="border-left-color:#0078D4">
+        <div class="kpi-card" style="border-left-color:#2563eb">
           <div class="kpi-label">Active Customers <i class="kpi-info" data-tip="Total customers with an active paid subscription. Updates based on your plan, industry, and country filters.">i</i></div>
           <div class="kpi-value" id="p3-active">847</div>
           <div class="kpi-delta up" id="p3-active-delta">▲ +23 MTD</div>
@@ -649,7 +649,7 @@
     <div class="status-item"><span class="status-dot"></span> Live connection</div>
     <div class="status-item">847 active customers</div>
     <div class="status-item">MRR $124,850</div>
-    <div class="status-item" style="margin-left:auto;color:#605E5C;font-size:10px">
+    <div class="status-item" style="margin-left:auto;color:#46556a;font-size:10px">
       Built with ♥ by Guilbert Maglasang &nbsp;·&nbsp;
       <a href="https://github.com/gmaglasang" style="color:var(--accent-blue);text-decoration:none" target="_blank">github.com/gmaglasang</a>
     </div>
@@ -661,13 +661,13 @@
 // ── GLOBAL CHART DEFAULTS ─────────────────────────────────────────────────
 Chart.defaults.font.family = "'Segoe UI', -apple-system, sans-serif";
 Chart.defaults.font.size = 11;
-Chart.defaults.color = '#605E5C';
+Chart.defaults.color = '#46556a';
 Chart.defaults.plugins.legend.labels.boxWidth = 10;
 Chart.defaults.plugins.legend.labels.padding = 12;
-Chart.defaults.plugins.tooltip.backgroundColor = '#fff';
-Chart.defaults.plugins.tooltip.titleColor = '#252423';
-Chart.defaults.plugins.tooltip.bodyColor = '#605E5C';
-Chart.defaults.plugins.tooltip.borderColor = '#E1DFDD';
+Chart.defaults.plugins.tooltip.backgroundColor = '#f7f5ee';
+Chart.defaults.plugins.tooltip.titleColor = '#15202f';
+Chart.defaults.plugins.tooltip.bodyColor = '#46556a';
+Chart.defaults.plugins.tooltip.borderColor = '#cfccc0';
 Chart.defaults.plugins.tooltip.borderWidth = 1;
 Chart.defaults.plugins.tooltip.padding = 10;
 
@@ -741,17 +741,17 @@ function initCharts() {
   charts.mrrTrend = new Chart(document.getElementById('mrrTrendChart'), {
     type:'line',
     data:{ labels:months18, datasets:[
-      { label:'MRR',    data:mrrData,   borderColor:'#0078D4', backgroundColor:'rgba(0,120,212,0.08)', borderWidth:2, pointRadius:2, pointHoverRadius:4, fill:true, tension:0.3 },
+      { label:'MRR',    data:mrrData,   borderColor:'#2563eb', backgroundColor:'rgba(0,120,212,0.08)', borderWidth:2, pointRadius:2, pointHoverRadius:4, fill:true, tension:0.3 },
       { label:'Target', data:mrrTarget, borderColor:'#8764B8', borderDash:[5,4], borderWidth:1.5, pointRadius:0, fill:false, tension:0.3 }
     ]},
     options:{ responsive:true, maintainAspectRatio:false, interaction:{mode:'index',intersect:false},
       plugins:{legend:{position:'top',align:'end'}},
-      scales:{ y:{grid:{color:'#F3F2F1'},ticks:{callback:v=>'$'+Math.round(v/1000)+'K'}}, x:{grid:{display:false}} } }
+      scales:{ y:{grid:{color:'#e6e2d7'},ticks:{callback:v=>'$'+Math.round(v/1000)+'K'}}, x:{grid:{display:false}} } }
   });
 
   charts.planDonut = new Chart(document.getElementById('planDonutChart'), {
     type:'doughnut',
-    data:{ labels:['Enterprise','Pro','Basic'], datasets:[{ data:[45,35,20], backgroundColor:['#0078D4','#00B294','#F2C811'], borderColor:'#fff', borderWidth:2 }] },
+    data:{ labels:['Enterprise','Pro','Basic'], datasets:[{ data:[45,35,20], backgroundColor:['#2563eb','#00B294','#F2C811'], borderColor:'#fff', borderWidth:2 }] },
     options:{ responsive:true, maintainAspectRatio:false, cutout:'62%',
       plugins:{ legend:{position:'right'}, tooltip:{callbacks:{label:ctx=>ctx.label+': '+ctx.parsed+'%'}} } }
   });
@@ -760,32 +760,32 @@ function initCharts() {
     type:'bar',
     data:{ labels:['New MRR','Expansion','Contraction','Churned','Net New MRR'], datasets:[
       { label:'Base',     data:[0,18420,24760,22660,0],   backgroundColor:'transparent', borderColor:'transparent' },
-      { label:'Value',    data:[18420,6340,0,0,18770],    backgroundColor:['#107C10','#00B294','transparent','transparent','#0078D4'], borderColor:['#107C10','#00B294','transparent','transparent','#0078D4'], borderWidth:1 },
+      { label:'Value',    data:[18420,6340,0,0,18770],    backgroundColor:['#107C10','#00B294','transparent','transparent','#2563eb'], borderColor:['#107C10','#00B294','transparent','transparent','#2563eb'], borderWidth:1 },
       { label:'Negative', data:[0,0,-2100,-3890,0],       backgroundColor:['transparent','transparent','#A4262C','#D83B01','transparent'], borderColor:['transparent','transparent','#A4262C','#D83B01','transparent'], borderWidth:1 }
     ]},
     options:{ responsive:true, maintainAspectRatio:false, indexAxis:'y',
       plugins:{ legend:{display:false}, tooltip:{callbacks:{label:ctx=>{ const v=ctx.parsed.x; return (v>=0?'+':'')+fmt(v); }}} },
-      scales:{ x:{stacked:true,grid:{color:'#F3F2F1'},ticks:{callback:v=>'$'+Math.round(v/1000)+'K'}}, y:{stacked:true,grid:{display:false}} } }
+      scales:{ x:{stacked:true,grid:{color:'#e6e2d7'},ticks:{callback:v=>'$'+Math.round(v/1000)+'K'}}, y:{stacked:true,grid:{display:false}} } }
   });
 
   charts.industryBar = new Chart(document.getElementById('industryBarChart'), {
     type:'bar',
-    data:{ labels:['SaaS','Healthcare','Finance','Other','Retail'], datasets:[{ label:'MRR', data:[38000,28000,22000,19000,18000], backgroundColor:'#0078D4', borderRadius:2, borderSkipped:false }] },
+    data:{ labels:['SaaS','Healthcare','Finance','Other','Retail'], datasets:[{ label:'MRR', data:[38000,28000,22000,19000,18000], backgroundColor:'#2563eb', borderRadius:2, borderSkipped:false }] },
     options:{ responsive:true, maintainAspectRatio:false, indexAxis:'y',
       plugins:{legend:{display:false}},
-      scales:{ x:{grid:{color:'#F3F2F1'},ticks:{callback:v=>'$'+Math.round(v/1000)+'K'}}, y:{grid:{display:false}} } }
+      scales:{ x:{grid:{color:'#e6e2d7'},ticks:{callback:v=>'$'+Math.round(v/1000)+'K'}}, y:{grid:{display:false}} } }
   });
 
   // PAGE 2
   charts.revTarget = new Chart(document.getElementById('revTargetChart'), {
     type:'line',
     data:{ labels:[...RAW.monthly[2025].labels], datasets:[
-      { label:'Actual', data:[...RAW.monthly[2025].actual], borderColor:'#0078D4', backgroundColor:'rgba(0,120,212,0.07)', borderWidth:2, pointRadius:3, fill:true, tension:0.3 },
+      { label:'Actual', data:[...RAW.monthly[2025].actual], borderColor:'#2563eb', backgroundColor:'rgba(0,120,212,0.07)', borderWidth:2, pointRadius:3, fill:true, tension:0.3 },
       { label:'Target', data:[...RAW.monthly[2025].target], borderColor:'#D83B01', borderDash:[5,4], borderWidth:1.5, pointRadius:0, fill:false }
     ]},
     options:{ responsive:true, maintainAspectRatio:false, interaction:{mode:'index',intersect:false},
       plugins:{legend:{position:'top',align:'end'}},
-      scales:{ y:{grid:{color:'#F3F2F1'},ticks:{callback:v=>'$'+Math.round(v/1000)+'K'}}, x:{grid:{display:false}} } }
+      scales:{ y:{grid:{color:'#e6e2d7'},ticks:{callback:v=>'$'+Math.round(v/1000)+'K'}}, x:{grid:{display:false}} } }
   });
 
   charts.growthSpark = new Chart(document.getElementById('growthSparkline'), {
@@ -796,22 +796,22 @@ function initCharts() {
 
   charts.countryBar = new Chart(document.getElementById('countryBarChart'), {
     type:'bar',
-    data:{ labels:['USA','UK','Canada','Germany','Australia'], datasets:[{ label:'Revenue', data:[580000,280000,190000,120000,77000], backgroundColor:['#0078D4','#00B294','#F2C811','#8764B8','#D83B01'], borderRadius:2 }] },
+    data:{ labels:['USA','UK','Canada','Germany','Australia'], datasets:[{ label:'Revenue', data:[580000,280000,190000,120000,77000], backgroundColor:['#2563eb','#00B294','#F2C811','#8764B8','#D83B01'], borderRadius:2 }] },
     options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},
-      scales:{ y:{grid:{color:'#F3F2F1'},ticks:{callback:v=>'$'+Math.round(v/1000)+'K'}}, x:{grid:{display:false}} } }
+      scales:{ y:{grid:{color:'#e6e2d7'},ticks:{callback:v=>'$'+Math.round(v/1000)+'K'}}, x:{grid:{display:false}} } }
   });
 
   // PAGE 3
   charts.custTrend = new Chart(document.getElementById('custTrendChart'), {
     type:'line',
     data:{ labels:months18, datasets:[
-      { label:'Active',  data:custActive,  borderColor:'#0078D4', backgroundColor:'rgba(0,120,212,0.06)', borderWidth:2, pointRadius:2, fill:true,  tension:0.3 },
+      { label:'Active',  data:custActive,  borderColor:'#2563eb', backgroundColor:'rgba(0,120,212,0.06)', borderWidth:2, pointRadius:2, fill:true,  tension:0.3 },
       { label:'New',     data:custNew,     borderColor:'#107C10', borderWidth:1.5, pointRadius:2, fill:false, tension:0.3 },
       { label:'Churned', data:custChurned, borderColor:'#A4262C', borderWidth:1.5, pointRadius:2, fill:false, tension:0.3 }
     ]},
     options:{ responsive:true, maintainAspectRatio:false, interaction:{mode:'index',intersect:false},
       plugins:{legend:{position:'top',align:'end'}},
-      scales:{ y:{grid:{color:'#F3F2F1'}}, x:{grid:{display:false}} } }
+      scales:{ y:{grid:{color:'#e6e2d7'}}, x:{grid:{display:false}} } }
   });
 
   charts.churnPlan = new Chart(document.getElementById('churnByPlanChart'), {
@@ -819,7 +819,7 @@ function initCharts() {
     data:{ labels:['Enterprise','Pro','Basic'], datasets:[{ label:'Churn Rate', data:[0.8,2.1,4.2], backgroundColor:['#107C10','#F2C811','#A4262C'], borderRadius:3 }] },
     options:{ responsive:true, maintainAspectRatio:false, indexAxis:'y',
       plugins:{legend:{display:false}},
-      scales:{ x:{grid:{color:'#F3F2F1'},max:6,ticks:{callback:v=>v+'%'}}, y:{grid:{display:false}} } }
+      scales:{ x:{grid:{color:'#e6e2d7'},max:6,ticks:{callback:v=>v+'%'}}, y:{grid:{display:false}} } }
   });
 }
 
@@ -902,11 +902,11 @@ function applyRevFilters() {
 
   // ── Country bar ──
   const countries = ['USA','UK','Canada','Germany','Australia'];
-  const baseColors = ['#0078D4','#00B294','#F2C811','#8764B8','#D83B01'];
+  const baseColors = ['#2563eb','#00B294','#F2C811','#8764B8','#D83B01'];
   charts.countryBar.data.datasets[0].data = countries.map(c => Math.round(RAW.countryRevBase[c] * pMult));
   charts.countryBar.data.datasets[0].backgroundColor = countryVal.startsWith('All')
     ? baseColors
-    : countries.map((c,i) => c === countryVal ? baseColors[i] : '#C8C6C4');
+    : countries.map((c,i) => c === countryVal ? baseColors[i] : '#9aa6b8');
   charts.countryBar.update();
 
   // ── Matrix table ──
