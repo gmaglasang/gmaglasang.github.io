@@ -1,19 +1,429 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta http-equiv="refresh" content="0; url=https://github.com/gmaglasang/gmaglasang.github.io" />
-    <link rel="canonical" href="https://github.com/gmaglasang/gmaglasang.github.io" />
-    <title>Redirecting…</title>
-  </head>
-  <body>
-    <p>
-      Redirecting to portfolio…
-      <a href="https://github.com/gmaglasang/gmaglasang.github.io">Click here if not redirected</a>.
-    </p>
-    <script>
-      window.location.replace("https://github.com/gmaglasang/gmaglasang.github.io");
-    </script>
-  </body>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guilbert Maglasang — Senior Power BI Developer</title>
+<meta name="description" content="Senior Power BI Developer in Houston, TX. 20+ years in data and analytics — Power BI, DAX, SQL, Snowflake. Live dashboard demos, annotated DAX, and a downloadable .pbix.">
+<meta property="og:title" content="Guilbert Maglasang — Senior Power BI Developer">
+<meta property="og:description" content="20+ years turning raw data into decisions. Live demos, annotated DAX, downloadable .pbix.">
+<meta property="og:image" content="https://gmaglasang.github.io/assets/saas-overview.png">
+<meta property="og:url" content="https://gmaglasang.github.io/">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0e0d0a;
+  --bg2:#15130e;
+  --panel:#1a1812;
+  --line:rgba(242,200,17,.14);
+  --line2:rgba(255,255,255,.08);
+  --ink:#ece7da;
+  --ink-dim:#a39d8c;
+  --ink-faint:#6f6a5c;
+  --gold:#f2c811;
+  --gold-soft:rgba(242,200,17,.85);
+  --green:#3fb96a;
+  --serif:"Instrument Serif",Georgia,serif;
+  --sans:"Instrument Sans",sans-serif;
+  --mono:"IBM Plex Mono",monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:var(--sans);
+  font-size:17px;
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:
+    radial-gradient(1200px 600px at 80% -10%, rgba(242,200,17,.07), transparent 60%),
+    radial-gradient(900px 500px at -10% 40%, rgba(242,200,17,.04), transparent 55%);
+}
+body::after{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.5;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+}
+.wrap{max-width:1060px;margin:0 auto;padding:0 28px;position:relative;z-index:1}
+a{color:inherit}
+
+/* ---------- nav ---------- */
+nav{
+  position:sticky;top:0;z-index:50;
+  background:rgba(14,13,10,.82);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--line2);
+}
+nav .wrap{display:flex;align-items:center;justify-content:space-between;height:60px}
+.brand{font-family:var(--mono);font-size:13px;letter-spacing:.08em;text-decoration:none;color:var(--ink-dim)}
+.brand b{color:var(--gold);font-weight:600}
+.navlinks{display:flex;gap:26px}
+.navlinks a{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;text-decoration:none;color:var(--ink-dim);transition:color .2s}
+.navlinks a:hover{color:var(--gold)}
+@media(max-width:640px){.navlinks{display:none}}
+
+/* ---------- hero ---------- */
+header{padding:96px 0 72px;border-bottom:1px solid var(--line2)}
+.status{
+  display:inline-flex;align-items:center;gap:9px;
+  font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--green);border:1px solid rgba(63,185,106,.3);border-radius:999px;
+  padding:7px 16px;margin-bottom:34px;background:rgba(63,185,106,.06);
+}
+.status .dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 2.2s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(63,185,106,.5)}55%{box-shadow:0 0 0 7px rgba(63,185,106,0)}}
+h1{
+  font-family:var(--serif);font-weight:400;
+  font-size:clamp(44px,7.2vw,84px);line-height:1.02;letter-spacing:-.01em;
+}
+h1 em{font-style:italic;color:var(--gold)}
+.lede{
+  margin-top:28px;max-width:640px;font-size:20px;line-height:1.65;color:var(--ink-dim);
+}
+.lede strong{color:var(--ink);font-weight:600}
+.hero-cta{margin-top:38px;display:flex;gap:14px;flex-wrap:wrap}
+.btn{
+  font-family:var(--mono);font-size:13px;letter-spacing:.06em;text-decoration:none;
+  padding:13px 24px;border-radius:6px;transition:transform .15s,background .2s,color .2s;
+  display:inline-flex;align-items:center;gap:8px;
+}
+.btn:hover{transform:translateY(-2px)}
+.btn-gold{background:var(--gold);color:#16140c;font-weight:600}
+.btn-gold:hover{background:#ffd935}
+.btn-ghost{border:1px solid var(--line);color:var(--ink)}
+.btn-ghost:hover{border-color:var(--gold);color:var(--gold)}
+.logos{
+  margin-top:64px;display:flex;align-items:baseline;gap:14px 34px;flex-wrap:wrap;
+}
+.logos span:first-child{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint)}
+.logos b{font-family:var(--serif);font-style:italic;font-weight:400;font-size:21px;color:var(--ink-dim);white-space:nowrap}
+
+/* ---------- stats ---------- */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid var(--line2)}
+.stat{padding:40px 26px;border-left:1px solid var(--line2)}
+.stat:first-child{border-left:none}
+.stat .num{font-family:var(--serif);font-size:46px;line-height:1;color:var(--gold)}
+.stat .lbl{margin-top:10px;font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);line-height:1.7}
+@media(max-width:760px){.stats{grid-template-columns:repeat(2,1fr)}.stat:nth-child(3){border-left:none}}
+
+/* ---------- sections ---------- */
+section{padding:88px 0 0}
+.kicker{
+  font-family:var(--mono);font-size:12px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--gold);display:flex;align-items:center;gap:14px;margin-bottom:18px;
+}
+.kicker::before{content:"";width:34px;height:1px;background:var(--gold)}
+h2{font-family:var(--serif);font-weight:400;font-size:clamp(32px,4.4vw,46px);line-height:1.1;max-width:640px}
+.sec-note{margin-top:14px;color:var(--ink-dim);max-width:600px}
+
+/* ---------- project cards ---------- */
+.project{
+  margin-top:48px;border:1px solid var(--line2);border-radius:14px;overflow:hidden;
+  background:var(--bg2);
+  transition:border-color .25s;
+}
+.project:hover{border-color:var(--line)}
+.shot{display:block;position:relative;background:#0a0908;border-bottom:1px solid var(--line2)}
+.shot img{display:block;width:100%;height:auto}
+.shot .open-tag{
+  position:absolute;top:14px;right:14px;
+  font-family:var(--mono);font-size:11px;letter-spacing:.08em;
+  background:rgba(14,13,10,.85);border:1px solid var(--line);color:var(--gold);
+  padding:7px 13px;border-radius:6px;opacity:0;transform:translateY(-4px);
+  transition:opacity .2s,transform .2s;
+}
+.shot:hover .open-tag{opacity:1;transform:translateY(0)}
+.shot-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line2);border-bottom:1px solid var(--line2)}
+.shot-grid a{display:block;background:#0a0908}
+.shot-grid img{display:block;width:100%;height:100%;object-fit:cover;object-position:top}
+.pbody{padding:34px 36px 38px}
+@media(max-width:640px){.pbody{padding:26px 22px 30px}}
+.ptitle{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+.ptitle h3{font-family:var(--serif);font-weight:400;font-size:30px}
+.ptag{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);border:1px solid var(--line);padding:4px 10px;border-radius:999px}
+.pdesc{margin-top:14px;color:var(--ink-dim);max-width:680px}
+.pdesc strong{color:var(--ink);font-weight:600}
+.pmeta{margin-top:20px;display:flex;gap:8px 22px;flex-wrap:wrap}
+.pmeta span{font-family:var(--mono);font-size:12.5px;color:var(--ink-faint)}
+.pmeta span::before{content:"◆";color:var(--gold);font-size:8px;vertical-align:2px;margin-right:8px}
+.plinks{margin-top:26px;display:flex;gap:12px;flex-wrap:wrap}
+
+/* ---------- DAX ---------- */
+.dax-grid{margin-top:48px;display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start}
+@media(max-width:880px){.dax-grid{grid-template-columns:1fr}}
+.codecard{
+  border:1px solid var(--line2);border-radius:14px;background:#12100b;overflow:hidden;
+}
+.codecard .bar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:13px 18px;border-bottom:1px solid var(--line2);background:rgba(242,200,17,.04);
+}
+.codecard .bar span{font-family:var(--mono);font-size:12px;color:var(--ink-dim)}
+.codecard .bar em{font-family:var(--mono);font-style:normal;font-size:11px;color:var(--gold);letter-spacing:.08em}
+.codecard pre{
+  padding:20px 18px;overflow-x:auto;
+  font-family:var(--mono);font-size:12.5px;line-height:1.75;color:#cdc6b4;
+}
+.codecard pre b{color:var(--gold);font-weight:500}
+.codecard pre i{color:#7fbf8e;font-style:normal}
+.codecard pre u{color:#8f8a7a;text-decoration:none}
+.dax-side h3{font-family:var(--serif);font-weight:400;font-size:26px;margin-bottom:14px}
+.dax-side p{color:var(--ink-dim);margin-bottom:18px}
+.dax-list{list-style:none;margin-top:8px}
+.dax-list li{
+  padding:13px 0;border-top:1px solid var(--line2);
+  display:flex;gap:14px;align-items:baseline;color:var(--ink-dim);font-size:15.5px;
+}
+.dax-list li code{font-family:var(--mono);font-size:12.5px;color:var(--gold-soft);white-space:nowrap}
+
+/* ---------- experience ---------- */
+.xp{margin-top:46px;border-top:1px solid var(--line2)}
+.xp-row{
+  display:grid;grid-template-columns:190px 1fr;gap:24px;
+  padding:30px 0;border-bottom:1px solid var(--line2);
+}
+@media(max-width:640px){.xp-row{grid-template-columns:1fr;gap:6px}}
+.xp-row .co{font-family:var(--serif);font-style:italic;font-size:22px;color:var(--ink)}
+.xp-row .what{color:var(--ink-dim)}
+.xp-row .what b{color:var(--gold);font-weight:600}
+
+/* ---------- skills ---------- */
+.skills{margin-top:46px;display:grid;grid-template-columns:repeat(2,1fr);gap:22px}
+@media(max-width:700px){.skills{grid-template-columns:1fr}}
+.skill-card{border:1px solid var(--line2);border-radius:12px;padding:26px 28px;background:var(--bg2)}
+.skill-card h4{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:16px}
+.chips{display:flex;flex-wrap:wrap;gap:9px}
+.chips span{
+  font-family:var(--mono);font-size:12.5px;color:var(--ink-dim);
+  border:1px solid var(--line2);border-radius:6px;padding:6px 12px;
+}
+
+/* ---------- footer ---------- */
+footer{margin-top:100px;border-top:1px solid var(--line);background:var(--bg2)}
+.foot-inner{padding:80px 0 70px}
+.foot-inner h2{max-width:none}
+.foot-links{margin-top:34px;display:flex;gap:14px;flex-wrap:wrap}
+.fineprint{
+  padding:26px 0;border-top:1px solid var(--line2);
+  display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  font-family:var(--mono);font-size:12px;color:var(--ink-faint);
+}
+
+/* ---------- reveal ---------- */
+.reveal{opacity:0;transform:translateY(22px);transition:opacity .7s ease,transform .7s ease}
+.reveal.in{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <a class="brand" href="#"><b>GM</b> · senior power bi developer</a>
+    <div class="navlinks">
+      <a href="#work">Work</a>
+      <a href="#dax">DAX</a>
+      <a href="#experience">Experience</a>
+      <a href="#contact">Contact</a>
+    </div>
+  </div>
+</nav>
+
+<header>
+  <div class="wrap">
+    <div class="status"><span class="dot"></span>Open to work · Houston, TX · Remote preferred</div>
+    <h1>I turn raw data into<br><em>decisions leaders trust.</em></h1>
+    <p class="lede">I'm <strong>Guilbert Maglasang</strong> — a Senior Power BI Developer with <strong>20+ years in data and analytics</strong>. I build Power BI solutions business leaders actually use: semantic model design through deployment, governance, and adoption.</p>
+    <div class="hero-cta">
+      <a class="btn btn-gold" href="https://gmaglasang.github.io/App_Build/saas-metrics/demo.html">View live dashboard demo ↗</a>
+      <a class="btn btn-ghost" href="https://www.linkedin.com/in/guilbert-maglasang/">LinkedIn ↗</a>
+    </div>
+    <div class="logos">
+      <span>Enterprise experience</span>
+      <b>Microsoft</b><b>Corteva Agriscience</b><b>Anheuser-Busch</b><b>TC Energy</b>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="stats">
+    <div class="stat reveal"><div class="num">75%</div><div class="lbl">faster dataset refresh — model redesign at Anheuser-Busch</div></div>
+    <div class="stat reveal"><div class="num">$40K</div><div class="lbl">saved per month — license audit at TC Energy</div></div>
+    <div class="stat reveal"><div class="num">7→3</div><div class="lbl">weeks to hiring decision — HR capacity model in Power BI</div></div>
+    <div class="stat reveal"><div class="num">164</div><div class="lbl">DAX measures across the two portfolio models below</div></div>
+  </div>
+</div>
+
+<section id="work">
+  <div class="wrap">
+    <div class="kicker reveal">Featured work</div>
+    <h2 class="reveal">Don't take my word for it — open the dashboards.</h2>
+    <p class="sec-note reveal">Screenshots can't show how a report behaves. Every project here ships with a live, in-browser demo — and the Power BI project includes the actual <code style="font-family:var(--mono);font-size:14px;color:var(--gold-soft)">.pbix</code> so you can inspect the model yourself.</p>
+
+    <div class="project reveal">
+      <a class="shot" href="https://gmaglasang.github.io/App_Build/saas-metrics/demo.html">
+        <img src="assets/saas-overview.png" alt="SaaS Metrics Dashboard — executive overview with MRR trend, churn rate, and revenue breakdowns" loading="lazy">
+        <span class="open-tag">Open live demo ↗</span>
+      </a>
+      <div class="pbody">
+        <div class="ptitle"><h3>SaaS Metrics Dashboard</h3><span class="ptag">Live demo + .pbix</span></div>
+        <p class="pdesc">An executive SaaS analytics report — MRR trends, churn analysis, customer health, and revenue breakdowns across three interactive pages. Published both as a <strong>live browser demo</strong> and as the <strong>actual .pbix file</strong>, so hiring managers can open the star schema model and 41 DAX measures directly in Power BI Desktop.</p>
+        <div class="pmeta">
+          <span>3 report pages</span><span>4 dynamic filters</span><span>Star schema model</span><span>41 DAX measures</span><span>100% fictional data</span>
+        </div>
+        <div class="plinks">
+          <a class="btn btn-gold" href="https://gmaglasang.github.io/App_Build/saas-metrics/demo.html">Open live demo ↗</a>
+          <a class="btn btn-ghost" href="https://github.com/gmaglasang/powerbi-saas-metrics">Download .pbix ↗</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="project reveal">
+      <div class="shot-grid">
+        <a href="https://gmaglasang.github.io/App_Build/linkedin-crm/demo.html"><img src="assets/crm-messages.png" alt="LinkedIn Job Search CRM — messages tab with status tags" loading="lazy"></a>
+        <a href="https://gmaglasang.github.io/App_Build/linkedin-crm/demo.html"><img src="assets/crm-modal.png" alt="LinkedIn Job Search CRM — contact detail with AI follow-up assistant" loading="lazy"></a>
+      </div>
+      <div class="pbody">
+        <div class="ptitle"><h3>LinkedIn Job Search CRM</h3><span class="ptag">Live app demo</span></div>
+        <p class="pdesc">A fully functional, browser-based CRM I built to run my own job search at scale — <strong>392 recruiter conversations, 862 connections, and 200 applications</strong> tracked in a single HTML file with no backend. Built with AI-assisted development; all data stays 100% local.</p>
+        <div class="pmeta">
+          <span>Status pipeline: Hot / Interview / Replied / Ghosted</span><span>AI follow-up drafting</span><span>Excel export</span><span>Zero dependencies</span>
+        </div>
+        <div class="plinks">
+          <a class="btn btn-gold" href="https://gmaglasang.github.io/App_Build/linkedin-crm/demo.html">Open live demo ↗</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="dax">
+  <div class="wrap">
+    <div class="kicker reveal">DAX showcase</div>
+    <h2 class="reveal">Real measures, annotated — not tutorials.</h2>
+    <p class="sec-note reveal">Eight measures from two working models, each annotated with the pattern, the problem it solves, and why it's non-trivial.</p>
+
+    <div class="dax-grid">
+      <div class="codecard reveal">
+        <div class="bar"><span>Churned MRR.dax</span><em>FIRST-CHURN DETECTION</em></div>
+        <pre><b>Churned MRR</b> =
+<b>VAR</b> _curDate  = MAX(Fact_Subscriptions[Date])
+<b>VAR</b> _prevDate = EDATE(_curDate, -1)
+<b>VAR</b> _first_churn_month =
+    CALCULATETABLE(
+        ADDCOLUMNS(
+            VALUES(Fact_Subscriptions[Customer_Key]),
+            <i>"FirstChurn"</i>, CALCULATE(
+                MIN(Fact_Subscriptions[Date]),
+                Fact_Subscriptions[Status] = <i>"Churned"</i>,
+                ALL(Dim_Date))
+        ), ...
+    )
+<b>RETURN</b>
+SUMX(
+    FILTER(_first_churn_month,
+           [FirstChurn] = _curDate),
+    ...  <u>-- prior-month MRR lookup per customer</u>
+)</pre>
+      </div>
+      <div class="dax-side reveal">
+        <h3>Why this one matters</h3>
+        <p>A naive churn-MRR measure double-counts customers who churned in earlier months. This one tags each customer's <em style="color:var(--ink)">first</em> churn date, filters to first-time churns in the current period, then looks up their prior-month MRR — managing three filter contexts at once.</p>
+        <ul class="dax-list">
+          <li><code>Cohort Retention %</code> dual date contexts via ALL(Dim_Date)</li>
+          <li><code>Net Revenue Retention</code> point-in-time snapshots with EDATE</li>
+          <li><code>Defects per 1000</code> volume-weighted aggregation via SUMX</li>
+          <li><code>Projects Marker</code> disconnected slicer + ISINSCOPE</li>
+        </ul>
+        <div class="plinks">
+          <a class="btn btn-ghost" href="https://github.com/gmaglasang/powerbi-dax-showcase">View all 8 annotated measures ↗</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="experience">
+  <div class="wrap">
+    <div class="kicker reveal">Enterprise track record</div>
+    <h2 class="reveal">Twenty years of shipping BI that sticks.</h2>
+    <div class="xp">
+      <div class="xp-row reveal">
+        <div class="co">Corteva Agriscience</div>
+        <div class="what">End-to-end BI delivery for supply chain and workforce operations — semantic model design, UAT, deployment, and training. Executive dashboards for headcount, overtime, and spend vs. budget; Power BI Service governance (RLS, scheduled refresh, app publishing); Tableau-to-Power BI migration; Snowflake integration; Power Automate ingestion pipelines.</div>
+      </div>
+      <div class="xp-row reveal">
+        <div class="co">Anheuser-Busch</div>
+        <div class="what"><b>Cut dataset refresh time 75%</b> by redesigning model architecture with incremental refresh, aggregation tables, and optimized DAX/SQL.</div>
+      </div>
+      <div class="xp-row reveal">
+        <div class="co">TC Energy</div>
+        <div class="what"><b>Saved $40K/month</b> by identifying terminated resources still holding active paid licenses.</div>
+      </div>
+      <div class="xp-row reveal">
+        <div class="co">Microsoft</div>
+        <div class="what">Consolidated regional reports into a single Power BI dashboard — standardized KPI definitions, eliminated manual Excel refresh cycles, ~4 hours of monthly reporting effort removed. DAX iterators, SQL CTEs and window functions for YoY and rolling metrics.</div>
+      </div>
+      <div class="xp-row reveal">
+        <div class="co">Virtus Partners</div>
+        <div class="what"><b>Reduced hiring determination from 7 weeks to 3</b> with an HR capacity model built in Power BI.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="skills">
+  <div class="wrap">
+    <div class="kicker reveal">Toolkit</div>
+    <h2 class="reveal">What I work with.</h2>
+    <div class="skills">
+      <div class="skill-card reveal">
+        <h4>BI &amp; Reporting</h4>
+        <div class="chips"><span>Power BI Desktop / Service</span><span>DAX</span><span>Power Query (M)</span><span>Paginated Reports</span><span>RLS &amp; governance</span></div>
+      </div>
+      <div class="skill-card reveal">
+        <h4>Data &amp; Databases</h4>
+        <div class="chips"><span>SQL</span><span>Snowflake</span><span>SQL Server</span><span>Star schema modeling</span><span>Incremental refresh</span></div>
+      </div>
+      <div class="skill-card reveal">
+        <h4>Automation</h4>
+        <div class="chips"><span>Power Automate</span><span>SharePoint</span><span>Scheduled refresh pipelines</span></div>
+      </div>
+      <div class="skill-card reveal">
+        <h4>AI-Assisted Development</h4>
+        <div class="chips"><span>Browser-based tools shipped with AI coding assistance</span><span>Chart.js</span><span>Vanilla HTML/JS</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer id="contact">
+  <div class="wrap">
+    <div class="foot-inner">
+      <div class="kicker reveal">Contact</div>
+      <h2 class="reveal">Hiring a Senior BI Developer?<br><em style="color:var(--gold);font-style:italic">Let's talk.</em></h2>
+      <div class="foot-links reveal">
+        <a class="btn btn-gold" href="mailto:gmaglasang1@yahoo.com">gmaglasang1@yahoo.com</a>
+        <a class="btn btn-ghost" href="https://www.linkedin.com/in/guilbert-maglasang/">LinkedIn ↗</a>
+        <a class="btn btn-ghost" href="https://github.com/gmaglasang">GitHub ↗</a>
+      </div>
+    </div>
+    <div class="fineprint">
+      <span>© 2026 Guilbert Maglasang · Houston, TX</span>
+      <span>All demo data is fictional.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+const io = new IntersectionObserver(es => {
+  es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+}, { threshold: 0.12 });
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+</script>
+</body>
 </html>
- 
