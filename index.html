@@ -14,17 +14,16 @@
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#0e0d0a;
-  --bg2:#15130e;
-  --panel:#1a1812;
-  --line:rgba(242,200,17,.14);
-  --line2:rgba(255,255,255,.08);
-  --ink:#ece7da;
-  --ink-dim:#a39d8c;
-  --ink-faint:#6f6a5c;
-  --gold:#f2c811;
-  --gold-soft:rgba(242,200,17,.85);
-  --green:#3fb96a;
+  --bg:#f7f6f2;
+  --bg2:#ffffff;
+  --line:rgba(37,99,235,.22);
+  --line2:rgba(21,32,47,.11);
+  --ink:#15202f;
+  --ink-dim:#46556a;
+  --ink-faint:#8a93a3;
+  --accent:#2563eb;
+  --accent-soft:rgba(37,99,235,.9);
+  --green:#1f8a4c;
   --serif:"Instrument Serif",Georgia,serif;
   --sans:"Instrument Sans",sans-serif;
   --mono:"IBM Plex Mono",monospace;
@@ -42,12 +41,12 @@ body{
 body::before{
   content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
   background:
-    radial-gradient(1200px 600px at 80% -10%, rgba(242,200,17,.07), transparent 60%),
-    radial-gradient(900px 500px at -10% 40%, rgba(242,200,17,.04), transparent 55%);
+    radial-gradient(1200px 600px at 80% -10%, rgba(37,99,235,.06), transparent 60%),
+    radial-gradient(900px 500px at -10% 40%, rgba(37,99,235,.035), transparent 55%);
 }
 body::after{
-  content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.5;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.4;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
 }
 .wrap{max-width:1060px;margin:0 auto;padding:0 28px;position:relative;z-index:1}
 a{color:inherit}
@@ -55,15 +54,15 @@ a{color:inherit}
 /* ---------- nav ---------- */
 nav{
   position:sticky;top:0;z-index:50;
-  background:rgba(14,13,10,.82);backdrop-filter:blur(12px);
+  background:rgba(247,246,242,.85);backdrop-filter:blur(12px);
   border-bottom:1px solid var(--line2);
 }
 nav .wrap{display:flex;align-items:center;justify-content:space-between;height:60px}
 .brand{font-family:var(--mono);font-size:13px;letter-spacing:.08em;text-decoration:none;color:var(--ink-dim)}
-.brand b{color:var(--gold);font-weight:600}
+.brand b{color:var(--accent);font-weight:600}
 .navlinks{display:flex;gap:26px}
 .navlinks a{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;text-decoration:none;color:var(--ink-dim);transition:color .2s}
-.navlinks a:hover{color:var(--gold)}
+.navlinks a:hover{color:var(--accent)}
 @media(max-width:640px){.navlinks{display:none}}
 
 /* ---------- hero ---------- */
@@ -71,16 +70,16 @@ header{padding:96px 0 72px;border-bottom:1px solid var(--line2)}
 .status{
   display:inline-flex;align-items:center;gap:9px;
   font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;
-  color:var(--green);border:1px solid rgba(63,185,106,.3);border-radius:999px;
-  padding:7px 16px;margin-bottom:34px;background:rgba(63,185,106,.06);
+  color:var(--green);border:1px solid rgba(31,138,76,.35);border-radius:999px;
+  padding:7px 16px;margin-bottom:34px;background:rgba(31,138,76,.07);
 }
 .status .dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 2.2s infinite}
-@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(63,185,106,.5)}55%{box-shadow:0 0 0 7px rgba(63,185,106,0)}}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(31,138,76,.45)}55%{box-shadow:0 0 0 7px rgba(31,138,76,0)}}
 h1{
   font-family:var(--serif);font-weight:400;
   font-size:clamp(44px,7.2vw,84px);line-height:1.02;letter-spacing:-.01em;
 }
-h1 em{font-style:italic;color:var(--gold)}
+h1 em{font-style:italic;color:var(--accent)}
 .lede{
   margin-top:28px;max-width:640px;font-size:20px;line-height:1.65;color:var(--ink-dim);
 }
@@ -88,14 +87,14 @@ h1 em{font-style:italic;color:var(--gold)}
 .hero-cta{margin-top:38px;display:flex;gap:14px;flex-wrap:wrap}
 .btn{
   font-family:var(--mono);font-size:13px;letter-spacing:.06em;text-decoration:none;
-  padding:13px 24px;border-radius:6px;transition:transform .15s,background .2s,color .2s;
+  padding:13px 24px;border-radius:6px;transition:transform .15s,background .2s,color .2s,border-color .2s;
   display:inline-flex;align-items:center;gap:8px;
 }
 .btn:hover{transform:translateY(-2px)}
-.btn-gold{background:var(--gold);color:#16140c;font-weight:600}
-.btn-gold:hover{background:#ffd935}
-.btn-ghost{border:1px solid var(--line);color:var(--ink)}
-.btn-ghost:hover{border-color:var(--gold);color:var(--gold)}
+.btn-primary{background:var(--accent);color:#fff;font-weight:600;box-shadow:0 6px 18px rgba(37,99,235,.22)}
+.btn-primary:hover{background:#1d4fd7}
+.btn-ghost{border:1px solid var(--line);color:var(--ink);background:var(--bg2)}
+.btn-ghost:hover{border-color:var(--accent);color:var(--accent)}
 .logos{
   margin-top:64px;display:flex;align-items:baseline;gap:14px 34px;flex-wrap:wrap;
 }
@@ -106,7 +105,7 @@ h1 em{font-style:italic;color:var(--gold)}
 .stats{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid var(--line2)}
 .stat{padding:40px 26px;border-left:1px solid var(--line2)}
 .stat:first-child{border-left:none}
-.stat .num{font-family:var(--serif);font-size:46px;line-height:1;color:var(--gold)}
+.stat .num{font-family:var(--serif);font-size:46px;line-height:1;color:var(--accent)}
 .stat .lbl{margin-top:10px;font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);line-height:1.7}
 @media(max-width:760px){.stats{grid-template-columns:repeat(2,1fr)}.stat:nth-child(3){border-left:none}}
 
@@ -114,63 +113,64 @@ h1 em{font-style:italic;color:var(--gold)}
 section{padding:88px 0 0}
 .kicker{
   font-family:var(--mono);font-size:12px;letter-spacing:.18em;text-transform:uppercase;
-  color:var(--gold);display:flex;align-items:center;gap:14px;margin-bottom:18px;
+  color:var(--accent);display:flex;align-items:center;gap:14px;margin-bottom:18px;
 }
-.kicker::before{content:"";width:34px;height:1px;background:var(--gold)}
+.kicker::before{content:"";width:34px;height:1px;background:var(--accent)}
 h2{font-family:var(--serif);font-weight:400;font-size:clamp(32px,4.4vw,46px);line-height:1.1;max-width:640px}
 .sec-note{margin-top:14px;color:var(--ink-dim);max-width:600px}
 
 /* ---------- project cards ---------- */
 .project{
   margin-top:48px;border:1px solid var(--line2);border-radius:14px;overflow:hidden;
-  background:var(--bg2);
-  transition:border-color .25s;
+  background:var(--bg2);box-shadow:0 10px 30px rgba(21,32,47,.06);
+  transition:border-color .25s,box-shadow .25s;
 }
-.project:hover{border-color:var(--line)}
-.shot{display:block;position:relative;background:#0a0908;border-bottom:1px solid var(--line2)}
+.project:hover{border-color:var(--line);box-shadow:0 14px 40px rgba(21,32,47,.1)}
+.shot{display:block;position:relative;background:#eef0f4;border-bottom:1px solid var(--line2)}
 .shot img{display:block;width:100%;height:auto}
 .shot .open-tag{
   position:absolute;top:14px;right:14px;
   font-family:var(--mono);font-size:11px;letter-spacing:.08em;
-  background:rgba(14,13,10,.85);border:1px solid var(--line);color:var(--gold);
+  background:rgba(255,255,255,.94);border:1px solid var(--line);color:var(--accent);
   padding:7px 13px;border-radius:6px;opacity:0;transform:translateY(-4px);
   transition:opacity .2s,transform .2s;
 }
 .shot:hover .open-tag{opacity:1;transform:translateY(0)}
 .shot-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line2);border-bottom:1px solid var(--line2)}
-.shot-grid a{display:block;background:#0a0908}
+.shot-grid a{display:block;background:#eef0f4}
 .shot-grid img{display:block;width:100%;height:100%;object-fit:cover;object-position:top}
 .pbody{padding:34px 36px 38px}
 @media(max-width:640px){.pbody{padding:26px 22px 30px}}
 .ptitle{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
 .ptitle h3{font-family:var(--serif);font-weight:400;font-size:30px}
-.ptag{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);border:1px solid var(--line);padding:4px 10px;border-radius:999px}
+.ptag{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);border:1px solid var(--line);padding:4px 10px;border-radius:999px;background:rgba(37,99,235,.05)}
 .pdesc{margin-top:14px;color:var(--ink-dim);max-width:680px}
 .pdesc strong{color:var(--ink);font-weight:600}
 .pmeta{margin-top:20px;display:flex;gap:8px 22px;flex-wrap:wrap}
 .pmeta span{font-family:var(--mono);font-size:12.5px;color:var(--ink-faint)}
-.pmeta span::before{content:"◆";color:var(--gold);font-size:8px;vertical-align:2px;margin-right:8px}
+.pmeta span::before{content:"◆";color:var(--accent);font-size:8px;vertical-align:2px;margin-right:8px}
 .plinks{margin-top:26px;display:flex;gap:12px;flex-wrap:wrap}
 
 /* ---------- DAX ---------- */
 .dax-grid{margin-top:48px;display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start}
 @media(max-width:880px){.dax-grid{grid-template-columns:1fr}}
 .codecard{
-  border:1px solid var(--line2);border-radius:14px;background:#12100b;overflow:hidden;
+  border:1px solid var(--line2);border-radius:14px;background:#13233c;overflow:hidden;
+  box-shadow:0 14px 36px rgba(19,35,60,.22);
 }
 .codecard .bar{
   display:flex;align-items:center;justify-content:space-between;
-  padding:13px 18px;border-bottom:1px solid var(--line2);background:rgba(242,200,17,.04);
+  padding:13px 18px;border-bottom:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);
 }
-.codecard .bar span{font-family:var(--mono);font-size:12px;color:var(--ink-dim)}
-.codecard .bar em{font-family:var(--mono);font-style:normal;font-size:11px;color:var(--gold);letter-spacing:.08em}
+.codecard .bar span{font-family:var(--mono);font-size:12px;color:#9fb0c8}
+.codecard .bar em{font-family:var(--mono);font-style:normal;font-size:11px;color:#7fb0ff;letter-spacing:.08em}
 .codecard pre{
   padding:20px 18px;overflow-x:auto;
-  font-family:var(--mono);font-size:12.5px;line-height:1.75;color:#cdc6b4;
+  font-family:var(--mono);font-size:12.5px;line-height:1.75;color:#c9d4e6;
 }
-.codecard pre b{color:var(--gold);font-weight:500}
-.codecard pre i{color:#7fbf8e;font-style:normal}
-.codecard pre u{color:#8f8a7a;text-decoration:none}
+.codecard pre b{color:#7fb0ff;font-weight:500}
+.codecard pre i{color:#6fce8f;font-style:normal}
+.codecard pre u{color:#7b88a0;text-decoration:none}
 .dax-side h3{font-family:var(--serif);font-weight:400;font-size:26px;margin-bottom:14px}
 .dax-side p{color:var(--ink-dim);margin-bottom:18px}
 .dax-list{list-style:none;margin-top:8px}
@@ -178,7 +178,7 @@ h2{font-family:var(--serif);font-weight:400;font-size:clamp(32px,4.4vw,46px);lin
   padding:13px 0;border-top:1px solid var(--line2);
   display:flex;gap:14px;align-items:baseline;color:var(--ink-dim);font-size:15.5px;
 }
-.dax-list li code{font-family:var(--mono);font-size:12.5px;color:var(--gold-soft);white-space:nowrap}
+.dax-list li code{font-family:var(--mono);font-size:12.5px;color:var(--accent-soft);white-space:nowrap}
 
 /* ---------- experience ---------- */
 .xp{margin-top:46px;border-top:1px solid var(--line2)}
@@ -189,17 +189,17 @@ h2{font-family:var(--serif);font-weight:400;font-size:clamp(32px,4.4vw,46px);lin
 @media(max-width:640px){.xp-row{grid-template-columns:1fr;gap:6px}}
 .xp-row .co{font-family:var(--serif);font-style:italic;font-size:22px;color:var(--ink)}
 .xp-row .what{color:var(--ink-dim)}
-.xp-row .what b{color:var(--gold);font-weight:600}
+.xp-row .what b{color:var(--accent);font-weight:600}
 
 /* ---------- skills ---------- */
 .skills{margin-top:46px;display:grid;grid-template-columns:repeat(2,1fr);gap:22px}
 @media(max-width:700px){.skills{grid-template-columns:1fr}}
-.skill-card{border:1px solid var(--line2);border-radius:12px;padding:26px 28px;background:var(--bg2)}
-.skill-card h4{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:16px}
+.skill-card{border:1px solid var(--line2);border-radius:12px;padding:26px 28px;background:var(--bg2);box-shadow:0 6px 18px rgba(21,32,47,.05)}
+.skill-card h4{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:16px}
 .chips{display:flex;flex-wrap:wrap;gap:9px}
 .chips span{
   font-family:var(--mono);font-size:12.5px;color:var(--ink-dim);
-  border:1px solid var(--line2);border-radius:6px;padding:6px 12px;
+  border:1px solid var(--line2);border-radius:6px;padding:6px 12px;background:var(--bg);
 }
 
 /* ---------- footer ---------- */
@@ -239,7 +239,7 @@ footer{margin-top:100px;border-top:1px solid var(--line);background:var(--bg2)}
     <h1>I turn raw data into<br><em>decisions leaders trust.</em></h1>
     <p class="lede">I'm <strong>Guilbert Maglasang</strong> — a Senior Power BI Developer with <strong>20+ years in data and analytics</strong>. I build Power BI solutions business leaders actually use: semantic model design through deployment, governance, and adoption.</p>
     <div class="hero-cta">
-      <a class="btn btn-gold" href="https://gmaglasang.github.io/App_Build/saas-metrics/demo.html">View live dashboard demo ↗</a>
+      <a class="btn btn-primary" href="https://gmaglasang.github.io/App_Build/saas-metrics/demo.html">View live dashboard demo ↗</a>
       <a class="btn btn-ghost" href="https://www.linkedin.com/in/guilbert-maglasang/">LinkedIn ↗</a>
     </div>
     <div class="logos">
@@ -262,7 +262,7 @@ footer{margin-top:100px;border-top:1px solid var(--line);background:var(--bg2)}
   <div class="wrap">
     <div class="kicker reveal">Featured work</div>
     <h2 class="reveal">Don't take my word for it — open the dashboards.</h2>
-    <p class="sec-note reveal">Screenshots can't show how a report behaves. Every project here ships with a live, in-browser demo — and the Power BI project includes the actual <code style="font-family:var(--mono);font-size:14px;color:var(--gold-soft)">.pbix</code> so you can inspect the model yourself.</p>
+    <p class="sec-note reveal">Screenshots can't show how a report behaves. Every project here ships with a live, in-browser demo — and the Power BI project includes the actual <code style="font-family:var(--mono);font-size:14px;color:var(--accent-soft)">.pbix</code> so you can inspect the model yourself.</p>
 
     <div class="project reveal">
       <a class="shot" href="https://gmaglasang.github.io/App_Build/saas-metrics/demo.html">
@@ -276,7 +276,7 @@ footer{margin-top:100px;border-top:1px solid var(--line);background:var(--bg2)}
           <span>3 report pages</span><span>4 dynamic filters</span><span>Star schema model</span><span>41 DAX measures</span><span>100% fictional data</span>
         </div>
         <div class="plinks">
-          <a class="btn btn-gold" href="https://gmaglasang.github.io/App_Build/saas-metrics/demo.html">Open live demo ↗</a>
+          <a class="btn btn-primary" href="https://gmaglasang.github.io/App_Build/saas-metrics/demo.html">Open live demo ↗</a>
           <a class="btn btn-ghost" href="https://github.com/gmaglasang/powerbi-saas-metrics">Download .pbix ↗</a>
         </div>
       </div>
@@ -294,7 +294,7 @@ footer{margin-top:100px;border-top:1px solid var(--line);background:var(--bg2)}
           <span>Status pipeline: Hot / Interview / Replied / Ghosted</span><span>AI follow-up drafting</span><span>Excel export</span><span>Zero dependencies</span>
         </div>
         <div class="plinks">
-          <a class="btn btn-gold" href="https://gmaglasang.github.io/App_Build/linkedin-crm/demo.html">Open live demo ↗</a>
+          <a class="btn btn-primary" href="https://gmaglasang.github.io/App_Build/linkedin-crm/demo.html">Open live demo ↗</a>
         </div>
       </div>
     </div>
@@ -405,9 +405,9 @@ SUMX(
   <div class="wrap">
     <div class="foot-inner">
       <div class="kicker reveal">Contact</div>
-      <h2 class="reveal">Hiring a Senior BI Developer?<br><em style="color:var(--gold);font-style:italic">Let's talk.</em></h2>
+      <h2 class="reveal">Hiring a Senior BI Developer?<br><em style="color:var(--accent);font-style:italic">Let's talk.</em></h2>
       <div class="foot-links reveal">
-        <a class="btn btn-gold" href="mailto:gmaglasang1@yahoo.com">gmaglasang1@yahoo.com</a>
+        <a class="btn btn-primary" href="mailto:gmaglasang1@yahoo.com">gmaglasang1@yahoo.com</a>
         <a class="btn btn-ghost" href="https://www.linkedin.com/in/guilbert-maglasang/">LinkedIn ↗</a>
         <a class="btn btn-ghost" href="https://github.com/gmaglasang">GitHub ↗</a>
       </div>
